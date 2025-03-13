@@ -1,15 +1,15 @@
-import { HttpClient } from "@angular/common/http";
-import { Params } from "@angular/router";
-import { sort } from "moderndash";
-import { Observable, map, of } from "rxjs";
-import { z } from "zod";
-import { InferArrayType } from "../../utils/type-inference";
-import { Count, EntityExpand, EntitySet, Expand, Filter, ODataOptions, ODataResultSet, OrderBy, OrderedEntitySet, Select, Skip, Top, Value, expandToString, filterToString, orderByToString, selectToString, skipToString, topToString } from "../odata.util";
-import { ɵEntityAccessor } from "./accessor";
-import { ɵEntityExpand } from "./expand";
-import { ɵPrefixGenerator } from "./prefix-generator";
+import { JSONParser } from "@streamparser/json";
+import { Count, EntityAccessor, EntityExpand, EntitySet, EntitySetResponse, Expand, Filter, ODataOptions, ODataResultSet, OrderBy, OrderedEntitySet, QueryParams, Select, Skip, Top, Value, expandToString, filterToString, orderByToString, selectToString, skipToString, topToString } from "../../odata.util";
+import { AsyncQueue } from "../../utils/async-queue";
+import { HttpMethod } from "../../utils/http";
+import { toIterable, toPromise } from "../../utils/promise";
+import { InferArrayType, SafeAny } from "../../utils/types";
+import { HttpClientAdapter, HttpModelValidator } from "../client";
+import { PrefixGenerator } from "../prefix-generator";
+import { EntityAccessorImpl } from "./accessor";
+import { EntityExpandImpl } from "./expand";
 
-abstract class Base<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TEntity> {
+export class EntitySetImpl<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TEntity> {
 
   protected readonly worker: EntitySetWorker<TEntity>;
   protected readonly countValue?: Count;
@@ -20,7 +20,10 @@ abstract class Base<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TEn
   protected readonly skipValue?: Skip;
   protected readonly topValue?: Top;
 
-  constructor(worker: EntitySetWorker<TEntity>, options?: ODataOptions) {
+  constructor(
+    worker: EntitySetWorker<TEntity>,
+    options?: ODataOptions,
+  ) {
     this.worker = worker;
     this.countValue = options?.count;
     this.expandValue = options?.expand;
@@ -31,7 +34,9 @@ abstract class Base<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TEn
     this.topValue = options?.top;
   }
 
-  protected abstract new<TNewEntity = TEntity>(worker: EntitySetWorker<TNewEntity>, options?: ODataOptions): Base<TNewEntity>;
+  protected new<TNewEntity = TEntity>(worker: EntitySetWorker<TNewEntity>, options?: ODataOptions): EntitySetImpl<TNewEntity> {
+    return new EntitySetImpl(this.worker as unknown as EntitySetImpl<TNewEntity>, options);
+  }
 
   count(): EntitySet<TEntity> {
     const options = this.getOptions();
@@ -41,7 +46,7 @@ abstract class Base<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TEn
   }
 
   expand<TExpanded extends keyof TEntity & string>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySet<TEntity> {
-    let expander: EntityExpand<InferArrayType<TEntity[TExpanded]>> = new ɵEntityExpand.Implementation<InferArrayType<TEntity[TExpanded]>>(property);
+    let expander: EntityExpand<InferArrayType<TEntity[TExpanded]>> = new EntityExpandImpl<InferArrayType<TEntity[TExpanded]>>(property);
     if (builder) {
       expander = builder(expander);
     }
@@ -55,9 +60,9 @@ abstract class Base<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TEn
     return this.new<TEntity>(this.worker, options);
   }
 
-  filter(builder: (entity: InstanceType<typeof ɵEntityAccessor.Implementation<TEntity>>) => Value<boolean>): EntitySet<TEntity> {
-    const generator = new ɵPrefixGenerator.Implementation();
-    const accessor = new ɵEntityAccessor.Implementation<TEntity>(generator);
+  filter(builder: (entity: EntityAccessor<TEntity>) => Value<boolean>): EntitySet<TEntity> {
+    const generator = new PrefixGenerator;
+    const accessor = new EntityAccessorImpl<TEntity>(generator);
 
     const filter = builder(accessor);
     const newFilters = [...(this.filterValue ?? []), filter];
@@ -116,12 +121,12 @@ abstract class Base<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TEn
     };
   }
 
-  execute(): Observable<ODataResultSet<TEntity>> {
+  execute(): EntitySetResponse<TEntity> {
     return this.worker.execute(this.getOptions());
   }
 
-  getParams(): Params {
-    const params: Params = {};
+  getParams(): QueryParams {
+    const params: QueryParams = {};
 
     if (this.expandValue) {
       params['$expand'] = expandToString(this.expandValue);
@@ -151,59 +156,21 @@ abstract class Base<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TEn
   }
 }
 
-class Implementation<TEntity> extends Base<TEntity> {
-
-  private readonly $http: HttpClient;
-  private readonly url: string;
-  private readonly schema: z.ZodSchema<TEntity>;
-
-  constructor(
-    $http: HttpClient,
-    url: string,
-    schema: z.ZodSchema<TEntity>,
-    options?: ODataOptions,
-  ) {
-    super(new ConcreteEntitySetWorker($http, url, schema), options);
-    this.$http = $http;
-    this.url = url;
-    this.schema = schema;
-  }
-
-  protected override new<TNewEntity = TEntity>(worker: EntitySetWorker<TNewEntity>, options?: ODataOptions): Base<TNewEntity> {
-    return new Implementation(this.$http, this.url, this.schema as any, options);
-  }
+export interface EntitySetWorker<TEntity> {
+  execute(options: ODataOptions): EntitySetResponse<TEntity>;
 }
 
-class MockImplementation<TEntity> extends Base<TEntity> {
-
-  private getData: () => TEntity[];
-
-  constructor(getData: () => TEntity[], worker?: EntitySetWorker<TEntity>, options?: ODataOptions) {
-    super(worker ?? new MockEntitySetWorker(getData), options);
-    this.getData = getData;
-  }
-
-  protected override new<TNewEntity = TEntity>(worker: EntitySetWorker<TNewEntity>, options?: ODataOptions): Base<TNewEntity> {
-    return new MockImplementation<TNewEntity>(this.getData as unknown as () => TNewEntity[], worker, options);
-  }
-}
-
-abstract class EntitySetWorker<TEntity> {
-  abstract execute(options: ODataOptions): Observable<ODataResultSet<TEntity>>;
-}
-
-class MockEntitySetWorker<TEntity> extends EntitySetWorker<TEntity> {
+export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
 
   private getData: () => TEntity[];
 
   constructor(
     getData: () => TEntity[],
   ) {
-    super();
     this.getData = getData;
   }
 
-  override execute(options: ODataOptions): Observable<ODataResultSet<TEntity>> {
+  execute(options: ODataOptions): EntitySetResponse<TEntity> {
     const data: ODataResultSet<TEntity> = { value: this.getData() };
     data.value = this.applyFilters(data.value, options.filter ?? []);
     if (options.count) {
@@ -213,9 +180,11 @@ class MockEntitySetWorker<TEntity> extends EntitySetWorker<TEntity> {
     data.value = this.applySkipTop(data.value, options.skip ?? 0, options.top ?? 100);
     data.value = this.applySelect(data.value, options.select ?? []);
 
-    return of(data).pipe(
-      //delay(1000),
-    );
+    return {
+      count: toPromise(data["@odata.count"]!),
+      data: toPromise(data.value),
+      iterator: toIterable(data.value),
+    };
   }
 
   private applyFilters(data: TEntity[], filters: Filter[]): TEntity[] {
@@ -237,9 +206,34 @@ class MockEntitySetWorker<TEntity> extends EntitySetWorker<TEntity> {
         return value;
       }
     }));
-    const finalData = sort(data, ...rules);
+    const sortedData = [...data];
+    sortedData.sort((a, b) => {
+      for (const orderByProp of orderBy) {
+        const prop = orderByProp.property as keyof TEntity;
+        let aValue = a[prop];
+        let bValue = b[prop];
 
-    return finalData;
+        if (typeof aValue === "string") {
+          aValue = aValue.toLowerCase() as SafeAny;
+        }
+
+        if (typeof bValue === "string") {
+          bValue = bValue.toLowerCase() as SafeAny;
+        }
+
+        if (aValue < bValue) {
+          return orderByProp.direction === "asc" ? -1 : 1;
+        }
+
+        if (aValue > bValue) {
+          return orderByProp.direction === "asc" ? 1 : -1;
+        }
+      }
+
+      return 0;
+    });
+
+    return sortedData;
   }
 
   private applySkipTop(data: TEntity[], skip: Skip, top: Top) {
@@ -267,38 +261,103 @@ class MockEntitySetWorker<TEntity> extends EntitySetWorker<TEntity> {
   }
 }
 
-class ConcreteEntitySetWorker<TEntity> extends EntitySetWorker<TEntity> {
+export interface EntitySetWorkerImplOptions<TEntity> {
+  adapter: HttpClientAdapter;
+  method: HttpMethod;
+  url: string;
+  validator?: HttpModelValidator<TEntity>;
+}
 
-  private readonly $http: HttpClient;
-  private readonly url: string;
-  private readonly schema: z.ZodSchema<TEntity>;
+export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
+
+  private readonly options: EntitySetWorkerImplOptions<TEntity>;
 
   constructor(
-    $http: HttpClient,
-    url: string,
-    schema: z.ZodSchema<TEntity>,
+    options: EntitySetWorkerImplOptions<TEntity>,
   ) {
-    super();
-    this.$http = $http;
-    this.url = url;
-    this.schema = schema;
+    this.options = options;
   }
 
-  override execute(options: ODataOptions): Observable<ODataResultSet<TEntity>> {
+  execute(options: ODataOptions): EntitySetResponse<TEntity> {
     const params = this.getParams(options);
 
-    return this.$http.get(this.url, {
-      params: params
-    }).pipe(
-      map((data) => {
-        const schema = createODataResultSchema(this.schema as any, options);
-        return schema.parse(data) as ODataResultSet<TEntity>;
-      }),
-    );
+    const result = this.options.adapter.invoke({
+      method: this.options.method,
+      url: this.options.url,
+      headers: {},
+      query: params,
+    });
+
+    let resolveCount: (count: number) => void;
+    let rejectCount: (err: Error) => void;
+    const countPromise = new Promise<number>((resolve, reject) => {
+      resolveCount = resolve;
+      rejectCount = reject;
+    });
+
+    let resolveData: (data: TEntity[]) => void;
+    let rejectData: (err: Error) => void;
+    const dataPromise = new Promise<TEntity[]>((resolve, reject) => {
+      resolveData = resolve;
+      rejectData = reject;
+    });
+
+    const entities: TEntity[] = [];
+    const queue = new AsyncQueue<TEntity>();
+
+    const parser = new JSONParser();
+    
+    parser.onValue = ({ value, key, parent, stack }) => {
+      if (stack && stack.length === 1 && stack[0] && stack[0].key === "@odata.count") {
+        resolveCount(value as number);
+      }
+
+      if (stack && stack.length === 1 && stack[0] && stack[0].key === "value") {
+        if (this.options.validator) {
+          const parseResult = this.options.validator.validate(value);
+          if (!parseResult)
+            throw new Error("Model failed to validate; to get more detail, throw an exception from the validator");
+        }
+
+        queue.push(value as TEntity);
+        entities.push(value as TEntity);
+      }
+    };
+
+    parser.onError = (err) => {
+      rejectCount(err);
+      rejectData(err);
+      queue.fail(err);
+    };
+
+    parser.onEnd = () => {
+      resolveData(entities);
+      rejectCount(new Error("Count was not received from the server"));
+      queue.complete();
+    };
+
+    (async () => {
+      try {
+        const response = await result;
+        for await (const chunk of response.stream) {
+          parser.write(chunk);
+        }
+        parser.end();
+      } catch (err) {
+        parser.onError(err as Error);
+        parser.end();
+      }
+    })();
+
+    return {
+      count: countPromise,
+      data: dataPromise,
+      iterator: queue,
+    }
   }
 
-  getParams(options: ODataOptions): Params {
-    const params: Params = {};
+  getParams(options: ODataOptions): QueryParams {
+    const params: QueryParams = {};
 
     if (options.expand) {
       params['$expand'] = expandToString(options.expand);
@@ -327,29 +386,3 @@ class ConcreteEntitySetWorker<TEntity> extends EntitySetWorker<TEntity> {
     return params;
   }
 }
-
-function createODataResultSchema(
-  entitySchema: z.ZodObject<any>,
-  options: ODataOptions,
-) {
-  let adjustedSchema = entitySchema;
-  if (options.select && options.select.length > 0) {
-    const picked = options.select.reduce((acc, key) => {
-      acc[String(key)] = true;
-      return acc;
-    }, {} as Record<string, true>);
-
-    adjustedSchema = adjustedSchema.pick(picked);
-  }
-
-  return z.object({
-    "@odata.context": z.string().optional(),
-    "@odata.count": options.count ? z.number().int() : z.undefined(),
-    value: z.array(adjustedSchema),
-  });
-}
-
-export const ɵEntitySet = {
-  Implementation,
-  MockImplementation,
-};

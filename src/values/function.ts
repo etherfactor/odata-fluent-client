@@ -17,7 +17,7 @@ abstract class FunctionValue<TValue> implements Value<TValue> {
   abstract _eval(data?: unknown): TValue;
 }
 
-class ContainsFunctionValue extends FunctionValue<boolean> {
+export class ContainsFunctionValue extends FunctionValue<boolean> {
 
   constructor(string: Value<string>, contains: Value<string>) {
     super('contains', string, contains);
@@ -30,7 +30,7 @@ class ContainsFunctionValue extends FunctionValue<boolean> {
   }
 }
 
-class StartsWithFunctionValue extends FunctionValue<boolean> {
+export class StartsWithFunctionValue extends FunctionValue<boolean> {
 
   constructor(string: Value<string>, startsWith: Value<string>) {
     super('startswith', string, startsWith);
@@ -43,7 +43,7 @@ class StartsWithFunctionValue extends FunctionValue<boolean> {
   }
 }
 
-class EndsWithFunctionValue extends FunctionValue<boolean> {
+export class EndsWithFunctionValue extends FunctionValue<boolean> {
 
   constructor(string: Value<string>, endsWith: Value<string>) {
     super('endswith', string, endsWith);
@@ -56,7 +56,7 @@ class EndsWithFunctionValue extends FunctionValue<boolean> {
   }
 }
 
-class ConcatFunctionValue extends FunctionValue<string> {
+export class ConcatFunctionValue extends FunctionValue<string> {
 
   constructor(left: Value<string>, right: Value<string>) {
     super('concat', left, right);
@@ -69,7 +69,7 @@ class ConcatFunctionValue extends FunctionValue<string> {
   }
 }
 
-class IndexOfFunctionValue extends FunctionValue<number> {
+export class IndexOfFunctionValue extends FunctionValue<number> {
 
   constructor(string: Value<string>, indexOf: Value<string>) {
     super('indexof', string, indexOf);
@@ -82,7 +82,7 @@ class IndexOfFunctionValue extends FunctionValue<number> {
   }
 }
 
-class LengthFunctionValue extends FunctionValue<number> {
+export class LengthFunctionValue extends FunctionValue<number> {
 
   constructor(string: Value<string>) {
     super('length', string);
@@ -94,7 +94,7 @@ class LengthFunctionValue extends FunctionValue<number> {
   }
 }
 
-class SubstringFunctionValue extends FunctionValue<string> {
+export class SubstringFunctionValue extends FunctionValue<string> {
 
   constructor(value: Value<string>, start: Value<number>, finish?: Value<number>) {
     if (finish) {
@@ -112,7 +112,7 @@ class SubstringFunctionValue extends FunctionValue<string> {
   }
 }
 
-class ToLowerFunctionValue extends FunctionValue<string> {
+export class ToLowerFunctionValue extends FunctionValue<string> {
 
   constructor(value: Value<string>) {
     super('tolower', value);
@@ -124,7 +124,7 @@ class ToLowerFunctionValue extends FunctionValue<string> {
   }
 }
 
-class ToUpperFunctionValue extends FunctionValue<string> {
+export class ToUpperFunctionValue extends FunctionValue<string> {
 
   constructor(value: Value<string>) {
     super('toupper', value);
@@ -136,7 +136,7 @@ class ToUpperFunctionValue extends FunctionValue<string> {
   }
 }
 
-class TrimFunctionValue extends FunctionValue<string> {
+export class TrimFunctionValue extends FunctionValue<string> {
 
   constructor(value: Value<string>) {
     super('trim', value);
@@ -148,7 +148,7 @@ class TrimFunctionValue extends FunctionValue<string> {
   }
 }
 
-class CeilingFunctionValue extends FunctionValue<number> {
+export class CeilingFunctionValue extends FunctionValue<number> {
 
   constructor(value: Value<number>) {
     super('ceiling', value);
@@ -160,7 +160,7 @@ class CeilingFunctionValue extends FunctionValue<number> {
   }
 }
 
-class FloorFunctionValue extends FunctionValue<number> {
+export class FloorFunctionValue extends FunctionValue<number> {
 
   constructor(value: Value<number>) {
     super('floor', value);
@@ -172,7 +172,7 @@ class FloorFunctionValue extends FunctionValue<number> {
   }
 }
 
-class RoundFunctionValue extends FunctionValue<number> {
+export class RoundFunctionValue extends FunctionValue<number> {
 
   constructor(value: Value<number>) {
     super('round', value);
@@ -183,19 +183,3 @@ class RoundFunctionValue extends FunctionValue<number> {
     return Math.round(root);
   }
 }
-
-export const ɵFunction = {
-  ContainsFunctionValue,
-  StartsWithFunctionValue,
-  EndsWithFunctionValue,
-  ConcatFunctionValue,
-  IndexOfFunctionValue,
-  LengthFunctionValue,
-  SubstringFunctionValue,
-  ToLowerFunctionValue,
-  ToUpperFunctionValue,
-  TrimFunctionValue,
-  CeilingFunctionValue,
-  FloorFunctionValue,
-  RoundFunctionValue,
-};

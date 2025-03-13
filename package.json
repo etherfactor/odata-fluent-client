@@ -25,6 +25,7 @@
     "typescript": "^5.8.2"
   },
   "dependencies": {
+    "@streamparser/json": "^0.0.22",
     "uuid": "^11.1.0"
   }
 }

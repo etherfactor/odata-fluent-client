@@ -1,27 +1,30 @@
-import { HttpClient } from "@angular/common/http";
-import { Params } from "@angular/router";
-import { Observable, map } from "rxjs";
-import { z } from "zod";
-import { InferArrayType } from "../../utils/type-inference";
-import { EntityExpand, EntitySingle, Expand, ODataOptions, Select, expandToString, selectToString } from "../odata.util";
-import { ɵEntityExpand } from "./expand";
+import { EntityExpand, EntityResponse, EntitySingle, Expand, ODataOptions, QueryParams, Select, expandToString, selectToString } from "../../odata.util";
+import { HttpMethod } from "../../utils/http";
+import { InferArrayType } from "../../utils/types";
+import { HttpClientAdapter, HttpModelValidator } from "../client";
+import { EntityExpandImpl } from "./expand";
 
-abstract class Base<TEntity> implements EntitySingle<TEntity> {
+export class EntitySingleImpl<TEntity> implements EntitySingle<TEntity> {
 
-  private readonly worker: EntitySingleWorker<TEntity>;
+  protected readonly worker: EntitySingleWorker<TEntity>;
   private readonly expandValue?: Expand[];
   private readonly selectValue?: Select[];
 
-  constructor(worker: EntitySingleWorker<TEntity>, options?: ODataOptions) {
+  constructor(
+    worker: EntitySingleWorker<TEntity>,
+    options?: ODataOptions,
+  ) {
     this.worker = worker;
     this.expandValue = options?.expand;
     this.selectValue = options?.select;
   }
 
-  protected abstract new<TNewEntity = TEntity>(worker: EntitySingleWorker<TNewEntity>, options?: ODataOptions): Base<TNewEntity>;
+  protected new<TNewEntity = TEntity>(worker: EntitySingleWorker<TNewEntity>, options?: ODataOptions): EntitySingleImpl<TNewEntity> {
+    return new EntitySingleImpl(this.worker as unknown as EntitySingleWorkerImpl<TNewEntity>, options);
+  }
 
   expand<TExpanded extends keyof TEntity & string>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySingle<TEntity> {
-    let expander: EntityExpand<InferArrayType<TEntity[TExpanded]>> = new ɵEntityExpand.Implementation<InferArrayType<TEntity[TExpanded]>>(property);
+    let expander: EntityExpand<InferArrayType<TEntity[TExpanded]>> = new EntityExpandImpl<InferArrayType<TEntity[TExpanded]>>(property);
     if (builder) {
       expander = builder(expander);
     }
@@ -50,108 +53,68 @@ abstract class Base<TEntity> implements EntitySingle<TEntity> {
     };
   }
 
-  execute(): Observable<TEntity> {
+  execute(): EntityResponse<TEntity> {
     return this.worker.execute(this.getOptions());
   }
 }
 
-class Implementation<TEntity> extends Base<TEntity> {
-
-  private readonly $http: HttpClient;
-  private readonly method: "GET" | "POST" | "PATCH";
-  private readonly url: string;
-  private readonly data: Partial<TEntity> | undefined;
-  private readonly schema: z.ZodSchema<TEntity>;
-
-  constructor(
-    $http: HttpClient,
-    method: "GET" | "POST" | "PATCH",
-    url: string,
-    data: Partial<TEntity> | undefined,
-    schema: z.ZodSchema<TEntity>,
-    options?: ODataOptions,
-  ) {
-    super(new ConcreteEntitySingleWorker($http, method, url, data, schema), options);
-    this.$http = $http;
-    this.method = method;
-    this.url = url;
-    this.data = data;
-    this.schema = schema;
-  }
-
-  protected override new<TNewEntity = TEntity>(worker: EntitySingleWorker<TNewEntity>, options?: ODataOptions | undefined): Base<TNewEntity> {
-    return new Implementation(this.$http, this.method, this.url, this.data as TNewEntity, this.schema as any, options);
-  }
+export interface EntitySingleWorker<TEntity> {
+  execute(options: ODataOptions): EntityResponse<TEntity>;
 }
 
-abstract class EntitySingleWorker<TEntity> {
-  abstract execute(options: ODataOptions): Observable<TEntity>;
+export interface EntitySingleWorkerImplOptions<TEntity> {
+  adapter: HttpClientAdapter;
+  method: HttpMethod;
+  url: string;
+  validator?: HttpModelValidator<TEntity>;
 }
 
-class ConcreteEntitySingleWorker<TEntity> extends EntitySingleWorker<TEntity> {
+export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEntity> {
 
-  private readonly $http: HttpClient;
-  private readonly method: "GET" | "POST" | "PATCH";
-  private readonly url: string;
-  private readonly data: Partial<TEntity> | undefined;
-  private readonly schema: z.ZodSchema<TEntity>;
+  private readonly options: EntitySingleWorkerImplOptions<TEntity>;
 
   constructor(
-    $http: HttpClient,
-    method: "GET" | "POST" | "PATCH",
-    url: string,
-    data: Partial<TEntity> | undefined,
-    schema: z.ZodSchema<TEntity>,
+    options: EntitySingleWorkerImplOptions<TEntity>,
   ) {
-    super();
-    this.$http = $http;
-    this.method = method;
-    this.url = url;
-    this.data = data;
-    this.schema = schema;
+    this.options = options;
   }
 
-  override execute(options: ODataOptions): Observable<TEntity> {
+  execute(options: ODataOptions): EntityResponse<TEntity> {
     const params = this.getParams(options);
 
-    switch (this.method) {
-      case ("GET"):
-        return this.$http.get(this.url, {
-          params: params
-        }).pipe(
-          map((data) => {
-            const schema = this.schema;
-            return schema.parse(data) as TEntity;
-          }),
-        );
+    const response = this.options.adapter.invoke({
+      method: this.options.method,
+      url: this.options.url,
+      headers: {},
+      query: params,
+    });
 
-      case ("POST"):
-        return this.$http.post(this.url, this.data, {
-          params: params
-        }).pipe(
-          map((data) => {
-            const schema = this.schema;
-            return schema.parse(data) as TEntity;
-          }),
-        );
+    let resolveData!: (data: TEntity) => void;
+    let rejectData!: (err: Error) => void;
+    const dataPromise = new Promise<TEntity>((resolve, reject) => {
+      resolveData = resolve;
+      rejectData = reject;
+    });
 
-      case ("PATCH"):
-        return this.$http.patch(this.url, this.data, {
-          params: params
-        }).pipe(
-          map((data) => {
-            const schema = this.schema;
-            return schema.parse(data) as TEntity;
-          })
-        );
+    (async () => {
+      const result = await response;
+      const data = await result.data;
+      if (this.options.validator) {
+        const parseResult = this.options.validator.validate(data);
+        if (!parseResult)
+          throw new Error("Model failed to validate; to get more detail, throw an exception from the validator");
+      }
 
-      default:
-        throw new Error(`Invalid method ${this.method}`);
-    }
+      resolveData(data as TEntity);
+    })();
+
+    return {
+      data: dataPromise,
+    };
   }
 
-  getParams(options: ODataOptions): Params {
-    const params: Params = {};
+  getParams(options: ODataOptions): QueryParams {
+    const params: QueryParams = {};
 
     if (options.expand) {
       params['$expand'] = expandToString(options.expand);
@@ -164,8 +127,3 @@ class ConcreteEntitySingleWorker<TEntity> extends EntitySingleWorker<TEntity> {
     return params;
   }
 }
-
-export const ɵEntitySingle = {
-  Implementation,
-  //MockImplementation,
-};

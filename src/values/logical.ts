@@ -17,7 +17,7 @@ abstract class LogicalValue implements Value<boolean> {
   abstract _eval(data?: unknown): boolean;
 }
 
-class AndLogicalValue extends LogicalValue {
+export class AndLogicalValue extends LogicalValue {
 
   constructor(...conditions: Value<boolean>[]) {
     super('and', ...conditions);
@@ -29,7 +29,7 @@ class AndLogicalValue extends LogicalValue {
   }
 }
 
-class OrLogicalValue extends LogicalValue {
+export class OrLogicalValue extends LogicalValue {
 
   constructor(...conditions: Value<boolean>[]) {
     super('or', ...conditions);
@@ -41,7 +41,7 @@ class OrLogicalValue extends LogicalValue {
   }
 }
 
-class NotLogicalValue implements Value<boolean> {
+export class NotLogicalValue implements Value<boolean> {
   private readonly condition: Value<boolean>;
 
   constructor(condition: Value<boolean>) {
@@ -57,9 +57,3 @@ class NotLogicalValue implements Value<boolean> {
     return result;
   }
 }
-
-export const ɵLogical = {
-  AndLogicalValue,
-  OrLogicalValue,
-  NotLogicalValue,
-};

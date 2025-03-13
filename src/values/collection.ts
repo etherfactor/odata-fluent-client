@@ -21,7 +21,7 @@ abstract class CollectionValue implements Value<boolean> {
   abstract _eval(data?: unknown): boolean;
 }
 
-class AllCollectionValue extends CollectionValue {
+export class AllCollectionValue extends CollectionValue {
 
   constructor(property: string, path: string, value: Value<boolean>) {
     super(property, 'all', path, value);
@@ -41,7 +41,7 @@ class AllCollectionValue extends CollectionValue {
   }
 }
 
-class AnyCollectionValue extends CollectionValue {
+export class AnyCollectionValue extends CollectionValue {
 
   constructor(property: string, path: string, value: Value<boolean>) {
     super(property, 'any', path, value);
@@ -60,8 +60,3 @@ class AnyCollectionValue extends CollectionValue {
     return result;
   }
 }
-
-export const ɵCollection = {
-  AllCollectionValue,
-  AnyCollectionValue,
-};

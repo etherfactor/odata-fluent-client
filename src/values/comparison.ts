@@ -19,7 +19,7 @@ abstract class ComparisonValue<TValue> implements Value<boolean> {
   abstract _eval(data?: unknown): boolean;
 }
 
-class EqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
+export class EqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
 
   constructor(left: Value<TValue>, right: Value<TValue>) {
     super(left, 'eq', right);
@@ -38,7 +38,7 @@ class EqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
   }
 }
 
-class NotEqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
+export class NotEqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
 
   constructor(left: Value<TValue>, right: Value<TValue>) {
     super(left, 'ne', right);
@@ -57,7 +57,7 @@ class NotEqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
   }
 }
 
-class GreaterThanComparisonValue<TValue> extends ComparisonValue<TValue> {
+export class GreaterThanComparisonValue<TValue> extends ComparisonValue<TValue> {
 
   constructor(left: Value<TValue>, right: Value<TValue>) {
     super(left, 'gt', right);
@@ -76,7 +76,7 @@ class GreaterThanComparisonValue<TValue> extends ComparisonValue<TValue> {
   }
 }
 
-class GreaterThanOrEqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
+export class GreaterThanOrEqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
 
   constructor(left: Value<TValue>, right: Value<TValue>) {
     super(left, 'ge', right);
@@ -95,7 +95,7 @@ class GreaterThanOrEqualsComparisonValue<TValue> extends ComparisonValue<TValue>
   }
 }
 
-class LessThanComparisonValue<TValue> extends ComparisonValue<TValue> {
+export class LessThanComparisonValue<TValue> extends ComparisonValue<TValue> {
 
   constructor(left: Value<TValue>, right: Value<TValue>) {
     super(left, 'lt', right);
@@ -114,7 +114,7 @@ class LessThanComparisonValue<TValue> extends ComparisonValue<TValue> {
   }
 }
 
-class LessThanOrEqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
+export class LessThanOrEqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
 
   constructor(left: Value<TValue>, right: Value<TValue>) {
     super(left, 'le', right);
@@ -132,12 +132,3 @@ class LessThanOrEqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
     return left <= right;
   }
 }
-
-export const ɵComparison = {
-  EqualsComparisonValue,
-  NotEqualsComparisonValue,
-  GreaterThanComparisonValue,
-  GreaterThanOrEqualsComparisonValue,
-  LessThanComparisonValue,
-  LessThanOrEqualsComparisonValue,
-};

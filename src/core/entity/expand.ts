@@ -1,9 +1,9 @@
-import { InferArrayType } from "../../utils/type-inference";
-import { Count, EntityExpand, Expand, Filter, ODataOptions, OrderBy, OrderedEntityExpand, Select, Skip, Top, Value, expandToString, filterToString, orderByToString, selectToString, skipToString, topToString } from "../odata.util";
-import { ɵEntityAccessor } from "./accessor";
-import { ɵPrefixGenerator } from "./prefix-generator";
+import { Count, EntityAccessor, EntityExpand, Expand, expandToString, Filter, filterToString, ODataOptions, OrderBy, orderByToString, OrderedEntityExpand, Select, selectToString, Skip, skipToString, Top, topToString, Value } from "../../odata.util";
+import { InferArrayType } from "../../utils/types";
+import { PrefixGenerator } from "../prefix-generator";
+import { EntityAccessorImpl } from "./accessor";
 
-class Implementation<TEntity> implements EntityExpand<TEntity>, OrderedEntityExpand<TEntity> {
+export class EntityExpandImpl<TEntity> implements EntityExpand<TEntity>, OrderedEntityExpand<TEntity> {
 
   private readonly property: string;
 
@@ -31,11 +31,11 @@ class Implementation<TEntity> implements EntityExpand<TEntity>, OrderedEntityExp
     const options = this.getOptions();
     options.count = true;
 
-    return new Implementation<TEntity>(this.property, options);
+    return new EntityExpandImpl<TEntity>(this.property, options);
   }
 
   expand<TExpanded extends keyof TEntity & string>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntityExpand<TEntity> {
-    let expander: EntityExpand<InferArrayType<TEntity[TExpanded]>> = new ɵEntityExpand.Implementation<InferArrayType<TEntity[TExpanded]>>(property);
+    let expander: EntityExpand<InferArrayType<TEntity[TExpanded]>> = new EntityExpandImpl<InferArrayType<TEntity[TExpanded]>>(property);
     if (builder) {
       expander = builder(expander);
     }
@@ -46,12 +46,12 @@ class Implementation<TEntity> implements EntityExpand<TEntity>, OrderedEntityExp
     const options = this.getOptions();
     options.expand = newExpand;
 
-    return new Implementation<TEntity>(property, options);
+    return new EntityExpandImpl<TEntity>(property, options);
   }
 
-  filter(builder: (entity: InstanceType<typeof ɵEntityAccessor.Implementation<TEntity>>) => Value<boolean>): EntityExpand<TEntity> {
-    const generator = new ɵPrefixGenerator.Implementation();
-    const accessor = new ɵEntityAccessor.Implementation<TEntity>(generator);
+  filter(builder: (entity: EntityAccessor<TEntity>) => Value<boolean>): EntityExpand<TEntity> {
+    const generator = new PrefixGenerator();
+    const accessor = new EntityAccessorImpl<TEntity>(generator);
 
     const filter = builder(accessor);
     const newFilters = [...(this.filterValue ?? []), filter];
@@ -59,21 +59,21 @@ class Implementation<TEntity> implements EntityExpand<TEntity>, OrderedEntityExp
     const options = this.getOptions();
     options.filter = newFilters;
 
-    return new Implementation<TEntity>(this.property, options);
+    return new EntityExpandImpl<TEntity>(this.property, options);
   }
 
   orderBy(property: keyof TEntity & string, direction?: 'asc' | 'desc'): OrderedEntityExpand<TEntity> {
     const options = this.getOptions();
     options.orderBy = [{ property, direction: direction ?? 'asc' }];
 
-    return new Implementation<TEntity>(this.property, options);
+    return new EntityExpandImpl<TEntity>(this.property, options);
   }
 
   thenBy(property: keyof TEntity & string, direction?: 'asc' | 'desc'): OrderedEntityExpand<TEntity> {
     const options = this.getOptions();
     options.orderBy?.push({ property, direction: direction ?? 'asc' });
 
-    return new Implementation<TEntity>(this.property, options);
+    return new EntityExpandImpl<TEntity>(this.property, options);
   }
 
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntityExpand<Pick<TEntity, TSelected>> {
@@ -81,21 +81,21 @@ class Implementation<TEntity> implements EntityExpand<TEntity>, OrderedEntityExp
     options.select ??= [];
     options.select = [...options.select, ...properties];
 
-    return new Implementation<Pick<TEntity, TSelected>>(this.property, options);
+    return new EntityExpandImpl<Pick<TEntity, TSelected>>(this.property, options);
   }
 
   skip(count: number): EntityExpand<TEntity> {
     const options = this.getOptions();
     options.skip = count;
 
-    return new Implementation<TEntity>(this.property, options);
+    return new EntityExpandImpl<TEntity>(this.property, options);
   }
 
   top(count: number): EntityExpand<TEntity> {
     const options = this.getOptions();
     options.top = count;
 
-    return new Implementation<TEntity>(this.property, options);
+    return new EntityExpandImpl<TEntity>(this.property, options);
   }
 
   private getOptions(): ODataOptions {
@@ -147,7 +147,3 @@ class Implementation<TEntity> implements EntityExpand<TEntity>, OrderedEntityExp
     return result;
   }
 }
-
-export const ɵEntityExpand = {
-  Implementation,
-};

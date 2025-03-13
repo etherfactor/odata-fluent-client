@@ -1,4 +1,4 @@
-class Implementation {
+export class PrefixGenerator {
 
   private index: number;
 
@@ -11,7 +11,3 @@ class Implementation {
     return `e${useIndex}`;
   }
 }
-
-export const ɵPrefixGenerator = {
-  Implementation,
-};

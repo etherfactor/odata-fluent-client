@@ -1,6 +1,6 @@
-import { DateTime, Interval } from "luxon";
-import { Guid } from "../../../types/guid/guid";
 import { Value } from "../odata.util";
+import { Guid } from "../types/guid";
+import { padLeft } from "../utils/string";
 
 abstract class ConstantValue<TValue> implements Value<TValue> {
 
@@ -10,7 +10,7 @@ abstract class ConstantValue<TValue> implements Value<TValue> {
   abstract _eval(): TValue;
 }
 
-class BooleanConstantValue extends ConstantValue<boolean> {
+export class BooleanConstantValue extends ConstantValue<boolean> {
 
   protected readonly value: boolean;
 
@@ -28,43 +28,43 @@ class BooleanConstantValue extends ConstantValue<boolean> {
   }
 }
 
-class DateConstantValue extends ConstantValue<DateTime> {
+export class DateConstantValue extends ConstantValue<Date> {
 
-  private readonly value: DateTime;
+  private readonly value: Date;
 
-  constructor(value: DateTime) {
+  constructor(value: Date) {
     super();
     this.value = value;
   }
 
   override toString(): string {
-    return this.value.toISODate()!;
+    return this.value.toISOString().split("T")[0];
   }
 
-  override _eval(): DateTime {
+  override _eval(): Date {
     return this.value;
   }
 }
 
-class DateTimeConstantValue extends ConstantValue<DateTime> {
+export class DateTimeConstantValue extends ConstantValue<Date> {
 
-  private readonly value: DateTime;
+  private readonly value: Date;
 
-  constructor(value: DateTime) {
+  constructor(value: Date) {
     super();
     this.value = value;
   }
 
   override toString(): string {
-    return this.value.toISO()!;
+    return this.value.toISOString();
   }
 
-  override _eval(): DateTime {
+  override _eval(): Date {
     return this.value;
   }
 }
 
-class GuidConstantValue extends ConstantValue<Guid> {
+export class GuidConstantValue extends ConstantValue<Guid> {
 
   private readonly value: Guid;
 
@@ -82,7 +82,7 @@ class GuidConstantValue extends ConstantValue<Guid> {
   }
 }
 
-class IntegerConstantValue extends ConstantValue<number> {
+export class IntegerConstantValue extends ConstantValue<number> {
 
   private readonly value: number;
 
@@ -100,7 +100,7 @@ class IntegerConstantValue extends ConstantValue<number> {
   }
 }
 
-class NullConstantValue extends ConstantValue<any> {
+export class NullConstantValue extends ConstantValue<any> {
 
   override toString() {
     return 'null';
@@ -111,7 +111,7 @@ class NullConstantValue extends ConstantValue<any> {
   }
 }
 
-class StringConstantValue extends ConstantValue<string> {
+export class StringConstantValue extends ConstantValue<string> {
 
   private readonly value: string;
 
@@ -129,32 +129,20 @@ class StringConstantValue extends ConstantValue<string> {
   }
 }
 
-class TimeConstantValue extends ConstantValue<Interval> {
+export class TimeConstantValue extends ConstantValue<Date> {
 
-  private readonly value: Interval;
+  private readonly value: Date;
 
-  constructor(value: Interval) {
+  constructor(value: Date) {
     super();
     this.value = value;
   }
 
   override toString(): string {
-    return this.value.toISOTime()!;
+    return this.value.toISOString().split("T")[1].replace("Z", "");
   }
 
-  override _eval(): Interval {
+  override _eval(): Date {
     return this.value;
   }
 }
-
-
-export const ɵConstant = {
-  BooleanConstantValue,
-  DateConstantValue,
-  DateTimeConstantValue,
-  GuidConstantValue,
-  IntegerConstantValue,
-  NullConstantValue,
-  StringConstantValue,
-  TimeConstantValue,
-};

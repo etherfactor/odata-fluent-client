@@ -21,7 +21,7 @@ abstract class PropertyValue<TEntity, TKey extends keyof TEntity> implements Val
   abstract _eval(data?: unknown): TEntity[TKey];
 }
 
-class EntityPropertyValue<TEntity, TKey extends keyof TEntity> extends PropertyValue<TEntity, TKey> {
+export class EntityPropertyValue<TEntity, TKey extends keyof TEntity> extends PropertyValue<TEntity, TKey> {
 
   constructor(path: string | undefined, property: TKey) {
     super(path, property);
@@ -38,7 +38,3 @@ class EntityPropertyValue<TEntity, TKey extends keyof TEntity> extends PropertyV
     return property;
   }
 }
-
-export const ɵProperty = {
-  EntityPropertyValue,
-};

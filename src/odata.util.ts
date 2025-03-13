@@ -1,11 +1,10 @@
-import { ɵEntityAccessor } from "./internal/entity-accessor";
 import { Guid } from "./types/guid";
-import { InferArrayType } from "./utils/type-inference";
-import { ɵComparison } from "./values/comparison";
-import { ɵConstant } from "./values/constant";
-import { ɵFunction } from "./values/function";
-import { ɵLogical } from "./values/logical";
-import { ɵOperator } from "./values/operator";
+import { AnyArray, InferArrayType } from "./utils/types";
+import { EqualsComparisonValue, GreaterThanComparisonValue, GreaterThanOrEqualsComparisonValue, LessThanComparisonValue, LessThanOrEqualsComparisonValue, NotEqualsComparisonValue } from "./values/comparison";
+import { BooleanConstantValue, DateConstantValue, DateTimeConstantValue, GuidConstantValue, IntegerConstantValue, NullConstantValue, StringConstantValue, TimeConstantValue } from "./values/constant";
+import { CeilingFunctionValue, ConcatFunctionValue, ContainsFunctionValue, EndsWithFunctionValue, FloorFunctionValue, IndexOfFunctionValue, LengthFunctionValue, RoundFunctionValue, StartsWithFunctionValue, SubstringFunctionValue, ToLowerFunctionValue, ToUpperFunctionValue, TrimFunctionValue } from "./values/function";
+import { AndLogicalValue, NotLogicalValue, OrLogicalValue } from "./values/logical";
+import { AddOperatorValue, DivideOperatorValue, ModuloOperatorValue, MultiplyOperatorValue, SubtractOperatorValue } from "./values/operator";
 
 export interface Value<TValue> {
 
@@ -101,18 +100,38 @@ export interface ODataResponse<TEntity> extends AsyncIterable<TEntity> {
   toArray(): Promise<TEntity[]>;
 }
 
+export interface EntityAccessor<TEntity> {
+  prop<TKey extends keyof TEntity & string>(property: TKey): Value<TEntity[TKey]>;
+  all<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<InferArrayType<TEntity[TKey]>>) => Value<boolean>): Value<boolean>;
+  any<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<InferArrayType<TEntity[TKey]>>) => Value<boolean>): Value<boolean>;
+}
+
+export type EntityResponse<TEntity> = {
+  data: Promise<TEntity>;
+}
+
+export type EntitySetResponse<TEntity> = {
+  count: Promise<number>;
+  data: Promise<TEntity[]>;
+  iterator: AsyncIterable<TEntity>;
+}
+
+export interface QueryParams {
+  [key: string]: string
+}
+
 export interface EntitySet<TEntity> {
   count(): EntitySet<TEntity>;
-  execute(): Observable<ODataResultSet<TEntity>>;
+  execute(): EntitySetResponse<TEntity>;
   expand<TExpanded extends keyof TEntity & string>(
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
     builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySet<TEntity>;
-  filter(builder: (entity: InstanceType<typeof ɵEntityAccessor.Implementation<TEntity>>) => Value<boolean>): EntitySet<TEntity>;
+  filter(builder: (entity: EntityAccessor<TEntity>) => Value<boolean>): EntitySet<TEntity>;
   orderBy(property: keyof TEntity & string, direction?: Direction): OrderedEntitySet<TEntity>;
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySet<Pick<TEntity, TSelected>>;
   skip(count: number): EntitySet<TEntity>;
   top(count: number): EntitySet<TEntity>;
-  getParams(): Params;
+  getParams(): QueryParams;
 }
 
 export interface OrderedEntitySet<TEntity> extends EntitySet<TEntity> {
@@ -120,7 +139,7 @@ export interface OrderedEntitySet<TEntity> extends EntitySet<TEntity> {
 }
 
 export interface EntitySingle<TEntity> {
-  execute(): Observable<TEntity>;
+  execute(): EntityResponse<TEntity>;
   expand<TExpanded extends keyof TEntity & string>(
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
     builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySingle<TEntity>;
@@ -132,7 +151,7 @@ export interface EntityExpand<TEntity> {
   expand<TExpanded extends keyof TEntity & string>(
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
     builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntityExpand<TEntity>;
-  filter(builder: (entity: InstanceType<typeof ɵEntityAccessor.Implementation<TEntity>>) => Value<boolean>): EntityExpand<TEntity>;
+  filter(builder: (entity: EntityAccessor<TEntity>) => Value<boolean>): EntityExpand<TEntity>;
   orderBy(property: keyof TEntity & string, direction?: Direction): OrderedEntityExpand<TEntity>;
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntityExpand<Pick<TEntity, TSelected>>;
   skip(count: number): EntityExpand<TEntity>;
@@ -150,195 +169,185 @@ export class o {
 
   //(... and ...)
   static and(...conditions: Value<boolean>[]): Value<boolean> {
-    return new ɵLogical.AndLogicalValue(...conditions);
+    return new AndLogicalValue(...conditions);
   }
 
   //(... or ...)
   static or(...conditions: Value<boolean>[]): Value<boolean> {
-    return new ɵLogical.OrLogicalValue(...conditions);
+    return new OrLogicalValue(...conditions);
   }
 
   //not (...)
   static not(condition: Value<boolean>): Value<boolean> {
-    return new ɵLogical.NotLogicalValue(condition);
+    return new NotLogicalValue(condition);
   }
 
   //Comparison operators
 
   //... eq ...
   static eq<TValue>(left: Value<TValue>, right: Value<TValue>): Value<boolean> {
-    return new ɵComparison.EqualsComparisonValue(left, right);
+    return new EqualsComparisonValue(left, right);
   }
 
   //... ne ...
   static ne<TValue>(left: Value<TValue>, right: Value<TValue>): Value<boolean> {
-    return new ɵComparison.NotEqualsComparisonValue(left, right);
+    return new NotEqualsComparisonValue(left, right);
   }
 
   //... lt ...
   static lt<TValue>(left: Value<TValue>, right: Value<TValue>): Value<boolean> {
-    return new ɵComparison.LessThanComparisonValue(left, right);
+    return new LessThanComparisonValue(left, right);
   }
 
   //... le ...
   static le<TValue>(left: Value<TValue>, right: Value<TValue>): Value<boolean> {
-    return new ɵComparison.LessThanOrEqualsComparisonValue(left, right);
+    return new LessThanOrEqualsComparisonValue(left, right);
   }
 
   //... gt ...
   static gt<TValue>(left: Value<TValue>, right: Value<TValue>): Value<boolean> {
-    return new ɵComparison.GreaterThanComparisonValue(left, right);
+    return new GreaterThanComparisonValue(left, right);
   }
 
   //... ge ...
   static ge<TValue>(left: Value<TValue>, right: Value<TValue>): Value<boolean> {
-    return new ɵComparison.GreaterThanOrEqualsComparisonValue(left, right);
+    return new GreaterThanOrEqualsComparisonValue(left, right);
   }
 
   //String operators
 
   //contains(..., ...)
   static contains(string: Value<string>, contains: Value<string>): Value<boolean> {
-    return new ɵFunction.ContainsFunctionValue(string, contains);
+    return new ContainsFunctionValue(string, contains);
   }
 
   //startswith(..., ...)
   static startsWith(string: Value<string>, startsWith: Value<string>): Value<boolean> {
-    return new ɵFunction.StartsWithFunctionValue(string, startsWith);
+    return new StartsWithFunctionValue(string, startsWith);
   }
 
   //endswith(..., ...)
   static endsWith(string: Value<string>, endsWith: Value<string>): Value<boolean> {
-    return new ɵFunction.EndsWithFunctionValue(string, endsWith);
+    return new EndsWithFunctionValue(string, endsWith);
   }
 
   //concat(..., ...)
   static concat(left: Value<string>, right: Value<string>): Value<string> {
-    return new ɵFunction.ConcatFunctionValue(left, right);
+    return new ConcatFunctionValue(left, right);
   }
 
   //indexof(..., ...)
   static indexOf(string: Value<string>, indexOf: Value<string>): Value<number> {
-    return new ɵFunction.IndexOfFunctionValue(string, indexOf);
+    return new IndexOfFunctionValue(string, indexOf);
   }
 
   //length(...)
   static lengthOf(value: Value<string>): Value<number> {
-    return new ɵFunction.LengthFunctionValue(value);
+    return new LengthFunctionValue(value);
   }
 
   //substring(..., ...)
   //substring(..., ..., ...)
   static substring(value: Value<string>, start: Value<number>, finish?: Value<number>) {
-    return new ɵFunction.SubstringFunctionValue(value, start, finish);
+    return new SubstringFunctionValue(value, start, finish);
   }
 
   //tolower(...)
   static toLower(value: Value<string>): Value<string> {
-    return new ɵFunction.ToLowerFunctionValue(value);
+    return new ToLowerFunctionValue(value);
   }
 
   //toupper(...)
   static toUpper(value: Value<string>): Value<string> {
-    return new ɵFunction.ToUpperFunctionValue(value);
+    return new ToUpperFunctionValue(value);
   }
 
   //trim(...)
   static trim(value: Value<string>): Value<string> {
-    return new ɵFunction.TrimFunctionValue(value);
+    return new TrimFunctionValue(value);
   }
 
   //Arithmetic operators
 
   //(... add ...)
   static add(left: Value<number>, right: Value<number>): Value<number> {
-    return new ɵOperator.AddOperatorValue(left, right);
+    return new AddOperatorValue(left, right);
   }
 
   //(... sub ...)
   static subtract(left: Value<number>, right: Value<number>): Value<number> {
-    return new ɵOperator.SubtractOperatorValue(left, right);
+    return new SubtractOperatorValue(left, right);
   }
 
   //(... mul ...)
   static multiply(left: Value<number>, right: Value<number>): Value<number> {
-    return new ɵOperator.MultiplyOperatorValue(left, right);
+    return new MultiplyOperatorValue(left, right);
   }
 
   //(... div ...)
   static divide(left: Value<number>, right: Value<number>): Value<number> {
-    return new ɵOperator.DivideOperatorValue(left, right);
+    return new DivideOperatorValue(left, right);
   }
 
   //(... mod ...)
   static modulo(left: Value<number>, right: Value<number>): Value<number> {
-    return new ɵOperator.ModuloOperatorValue(left, right);
+    return new ModuloOperatorValue(left, right);
   }
 
   //ceiling(...)
   static ceiling(value: Value<number>): Value<number> {
-    return new ɵFunction.CeilingFunctionValue(value);
+    return new CeilingFunctionValue(value);
   }
 
   //floor(...)
   static floor(value: Value<number>): Value<number> {
-    return new ɵFunction.FloorFunctionValue(value);
+    return new FloorFunctionValue(value);
   }
 
   //round(...)
   static round(value: Value<number>): Value<number> {
-    return new ɵFunction.RoundFunctionValue(value);
+    return new RoundFunctionValue(value);
   }
 
   //Constant values
 
   //null
   static null() {
-    return new ɵConstant.NullConstantValue();
+    return new NullConstantValue();
   }
 
   //'...'
   static string(value: string): Value<string> {
-    return new ɵConstant.StringConstantValue(value);
+    return new StringConstantValue(value);
   }
 
   //...
   static bool(value: boolean): Value<boolean> {
-    return new ɵConstant.BooleanConstantValue(value);
+    return new BooleanConstantValue(value);
   }
 
   //...
   static int(value: number): Value<number> {
-    return new ɵConstant.IntegerConstantValue(value);
+    return new IntegerConstantValue(value);
   }
 
   //...
   static guid(value: Guid): Value<Guid> {
-    return new ɵConstant.GuidConstantValue(value);
+    return new GuidConstantValue(value);
   }
 
   //...
-  static date(value: Date | DateTime): Value<DateTime> {
-    if (DateTime.isDateTime(value)) {
-      return new ɵConstant.DateConstantValue(value);
-    } else {
-      const asLuxon = DateTime.fromJSDate(value);
-      return new ɵConstant.DateConstantValue(asLuxon);
-    }
+  static date(value: Date): Value<Date> {
+    return new DateConstantValue(value);
   }
 
   //...
-  static dateTime(value: Date | DateTime): Value<DateTime> {
-    if (DateTime.isDateTime(value)) {
-      return new ɵConstant.DateTimeConstantValue(value);
-    } else {
-      const asLuxon = DateTime.fromJSDate(value);
-      return new ɵConstant.DateTimeConstantValue(asLuxon);
-    }
+  static dateTime(value: Date): Value<Date> {
+    return new DateTimeConstantValue(value);
   }
 
   //...
-  static time(value: Interval): Value<Interval> {
-    return new ɵConstant.TimeConstantValue(value);
+  static time(value: Date): Value<Date> {
+    return new TimeConstantValue(value);
   }
 }

@@ -1,6 +1,6 @@
 import { ODataResponse } from "../odata.util";
 
-class Implementation<TEntity> implements ODataResponse<TEntity> {
+export class ODataResponseImpl<TEntity> implements ODataResponse<TEntity> {
 
   private readonly stream: AsyncIterable<TEntity>;
   readonly count: Promise<number>;
@@ -26,7 +26,3 @@ class Implementation<TEntity> implements ODataResponse<TEntity> {
     return results;
   }
 }
-
-export const ɵODataResponse = {
-  Implementation,
-};

@@ -19,7 +19,7 @@ abstract class OperatorValue implements Value<number> {
   abstract _eval(data?: unknown): number;
 }
 
-class AddOperatorValue extends OperatorValue {
+export class AddOperatorValue extends OperatorValue {
 
   constructor(left: Value<number>, right: Value<number>) {
     super(left, 'add', right);
@@ -32,7 +32,7 @@ class AddOperatorValue extends OperatorValue {
   }
 }
 
-class SubtractOperatorValue extends OperatorValue {
+export class SubtractOperatorValue extends OperatorValue {
 
   constructor(left: Value<number>, right: Value<number>) {
     super(left, 'sub', right);
@@ -45,7 +45,7 @@ class SubtractOperatorValue extends OperatorValue {
   }
 }
 
-class MultiplyOperatorValue extends OperatorValue {
+export class MultiplyOperatorValue extends OperatorValue {
 
   constructor(left: Value<number>, right: Value<number>) {
     super(left, 'mul', right);
@@ -58,7 +58,7 @@ class MultiplyOperatorValue extends OperatorValue {
   }
 }
 
-class DivideOperatorValue extends OperatorValue {
+export class DivideOperatorValue extends OperatorValue {
 
   constructor(left: Value<number>, right: Value<number>) {
     super(left, 'div', right);
@@ -71,7 +71,7 @@ class DivideOperatorValue extends OperatorValue {
   }
 }
 
-class ModuloOperatorValue extends OperatorValue {
+export class ModuloOperatorValue extends OperatorValue {
 
   constructor(left: Value<number>, right: Value<number>) {
     super(left, 'mod', right);
@@ -83,11 +83,3 @@ class ModuloOperatorValue extends OperatorValue {
     return left % right;
   }
 }
-
-export const ɵOperator = {
-  AddOperatorValue,
-  SubtractOperatorValue,
-  MultiplyOperatorValue,
-  DivideOperatorValue,
-  ModuloOperatorValue,
-};
