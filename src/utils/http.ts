@@ -19,6 +19,11 @@ export function extendUrl(initialUrl: string, ...segments: string[]): string {
     pathSegments.push(trimmedSegment);
   }
 
+  const last = initialUrl[initialUrl.length - 1];
+  if (last !== "/" && last !== "\\") {
+    initialUrl += "/";
+  }
+
   const path = segments.join("/");
   return new URL(path, initialUrl).href;
 }

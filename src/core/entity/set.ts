@@ -22,7 +22,6 @@ export interface EntitySet<TEntity> {
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySet<Pick<TEntity, TSelected>>;
   skip(count: number): EntitySet<TEntity>;
   top(count: number): EntitySet<TEntity>;
-  getParams(): QueryParams;
 }
 
 export interface OrderedEntitySet<TEntity> extends EntitySet<TEntity> {
@@ -44,6 +43,7 @@ export class EntitySetImpl<TEntity> implements EntitySet<TEntity>, OrderedEntity
     worker: EntitySetWorker<TEntity>,
     options?: ODataOptions,
   ) {
+    console.log("new set; options", options);
     this.worker = worker;
     this.countValue = options?.count;
     this.expandValue = options?.expand;
@@ -144,36 +144,6 @@ export class EntitySetImpl<TEntity> implements EntitySet<TEntity>, OrderedEntity
   execute(): EntitySetResponse<TEntity> {
     return this.worker.execute(this.getOptions());
   }
-
-  getParams(): QueryParams {
-    const params: QueryParams = {};
-
-    if (this.expandValue) {
-      params['$expand'] = expandToString(this.expandValue);
-    }
-
-    if (this.filterValue) {
-      params['$filter'] = filterToString(this.filterValue);
-    }
-
-    if (this.orderByValue) {
-      params['$orderby'] = orderByToString(this.orderByValue);
-    }
-
-    if (this.selectValue) {
-      params['$select'] = selectToString(this.selectValue);
-    }
-
-    if (this.skipValue) {
-      params['$skip'] = skipToString(this.skipValue);
-    }
-
-    if (this.topValue) {
-      params['$top'] = topToString(this.topValue);
-    }
-
-    return params;
-  }
 }
 
 export interface EntitySetWorker<TEntity> {
@@ -221,15 +191,6 @@ export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
   }
   
   private applyOrderBy(data: TEntity[], orderBy: OrderBy[]): TEntity[] {
-    const rules = orderBy.map(order => ({
-      order: order.direction, by: (entity: TEntity) => {
-        let value = entity[order.property as keyof TEntity] as string;
-        if (typeof value === "string") {
-          value = value.toLowerCase();
-        }
-        return value;
-      }
-    }));
     const sortedData = [...data];
     sortedData.sort((a, b) => {
       for (const orderByProp of orderBy) {
@@ -332,43 +293,63 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
     const parser = new JSONParser();
     
     parser.onValue = ({ value, key, parent, stack }) => {
-      if (stack && stack.length === 1 && stack[0] && stack[0].key === "@odata.count") {
+      if (stack && stack.length === 1 && key === "@odata.count") {
+        console.log("received count", value);
         resolveCount(value as number);
       }
 
-      if (stack && stack.length === 1 && stack[0] && stack[0].key === "value") {
+      if (stack && stack.length === 2 && stack[1].key === "value") {
         if (this.options.validator) {
           const parseResult = this.options.validator.validate(value);
           if (!parseResult)
             throw new Error("Model failed to validate; to get more detail, throw an exception from the validator");
         }
 
+        console.log("received entity", value);
+
         queue.push(value as TEntity);
         entities.push(value as TEntity);
       }
     };
 
-    parser.onError = (err) => {
+    const onError = (err: Error): void => {
       rejectCount(err);
       rejectData(err);
       queue.fail(err);
     };
 
-    parser.onEnd = () => {
+    parser.onError = onError;
+
+    const onEnd = (): void => {
       resolveData(entities);
       rejectCount(new Error("Count was not received from the server"));
       queue.complete();
-    };
+    }
+
+    parser.onEnd = onEnd;
 
     (async () => {
       try {
         const response = await result;
-        for await (const chunk of response.stream) {
-          parser.write(chunk);
+        if (response.data instanceof Promise) {
+          const data = await response.data as SafeAny;
+          for (const value of data["value"]) {
+            if (this.options.validator) {
+              const parseResult = this.options.validator.validate(value);
+              if (!parseResult)
+                throw new Error("Model failed to validate; to get more detail, throw an exception from the validator");
+            }
+
+            entities.push(value);
+          }
+        } else {
+          for await (const chunk of response.data) {
+            parser.write(chunk);
+          }
+          parser.end();
         }
-        parser.end();
       } catch (err) {
-        parser.onError(err as Error);
+        onError(err as Error);
         parser.end();
       }
     })();
@@ -383,28 +364,32 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
   getParams(options: ODataOptions): QueryParams {
     const params: QueryParams = {};
 
+    if (options.count) {
+      params["$count"] = "true";
+    }
+
     if (options.expand) {
-      params['$expand'] = expandToString(options.expand);
+      params["$expand"] = expandToString(options.expand);
     }
 
     if (options.filter) {
-      params['$filter'] = filterToString(options.filter);
+      params["$filter"] = filterToString(options.filter);
     }
 
     if (options.orderBy) {
-      params['$orderby'] = orderByToString(options.orderBy);
+      params["$orderby"] = orderByToString(options.orderBy);
     }
 
     if (options.select) {
-      params['$select'] = selectToString(options.select);
+      params["$select"] = selectToString(options.select);
     }
 
     if (options.skip) {
-      params['$skip'] = skipToString(options.skip);
+      params["$skip"] = skipToString(options.skip);
     }
 
     if (options.top) {
-      params['$top'] = topToString(options.top);
+      params["$top"] = topToString(options.top);
     }
 
     return params;

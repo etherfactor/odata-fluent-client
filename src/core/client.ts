@@ -58,14 +58,23 @@ export interface HttpRequestData {
 
 export interface HttpResponseData {
   status: number;
-  data: Promise<unknown>;
-  stream: AsyncIterable<string>;
+  data: Promise<unknown> | AsyncIterable<string>;
 }
 
 const DefaultHttpClientAdapter: HttpClientAdapter = {
   invoke: async function (config: HttpRequestData): Promise<HttpResponseData> {
+    console.log(config);
+    let urlAndQuery = config.url;
+    if (config.query && Object.keys(config.query).length > 0) {
+      const query = Object.keys(config.query)
+        .map(key => `${key}=${encodeURIComponent(config.query[key])}`)
+        .join("&");
+
+      urlAndQuery = `${config.url}?${query}`;
+    }
+
     const result = await fetch(
-      config.url,
+      urlAndQuery,
       {
         method: config.method,
         headers: config.headers,
@@ -87,8 +96,7 @@ const DefaultHttpClientAdapter: HttpClientAdapter = {
 
     return {
       status: result.status,
-      data: result.json(),
-      stream: iterable,
+      data: iterable,
     };
   }
 }
