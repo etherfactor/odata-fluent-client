@@ -1,9 +1,25 @@
 import { InferArrayType } from "../../utils/types";
 import { Value } from "../../values/base";
-import { Count, Expand, expandToString, Filter, filterToString, ODataOptions, OrderBy, orderByToString, Select, selectToString, Skip, skipToString, Top, topToString } from "../params";
+import { Count, Expand, expandToString, Filter, filterToString, ODataOptions, OrderBy, orderByToString, Select, selectToString, Skip, skipToString, SortDirection, Top, topToString } from "../params";
 import { PrefixGenerator } from "../prefix-generator";
 import { EntityAccessor, EntityAccessorImpl } from "./accessor";
-import { EntityExpand, OrderedEntityExpand } from "./single";
+
+export interface EntityExpand<TEntity> {
+  count(): EntityExpand<TEntity>;
+  expand<TExpanded extends keyof TEntity & string>(
+    property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
+    builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntityExpand<TEntity>;
+  filter(builder: (entity: EntityAccessor<TEntity>) => Value<boolean>): EntityExpand<TEntity>;
+  orderBy(property: keyof TEntity & string, direction?: SortDirection): OrderedEntityExpand<TEntity>;
+  select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntityExpand<Pick<TEntity, TSelected>>;
+  skip(count: number): EntityExpand<TEntity>;
+  top(count: number): EntityExpand<TEntity>;
+  toString(): string;
+}
+
+export interface OrderedEntityExpand<TEntity> extends EntityExpand<TEntity> {
+  thenBy(property: keyof TEntity & string, direction?: SortDirection): OrderedEntityExpand<TEntity>;
+}
 
 export class EntityExpandImpl<TEntity> implements EntityExpand<TEntity>, OrderedEntityExpand<TEntity> {
 

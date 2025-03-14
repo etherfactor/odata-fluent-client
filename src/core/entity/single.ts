@@ -1,11 +1,9 @@
 import { HttpMethod } from "../../utils/http";
 import { InferArrayType } from "../../utils/types";
-import { Value } from "../../values/base";
 import { HttpClientAdapter, HttpModelValidator } from "../client";
-import { Expand, expandToString, ODataOptions, QueryParams, Select, selectToString, SortDirection } from "../params";
-import { EntityAccessor } from "./accessor";
-import { EntityResponse } from "./client";
-import { EntityExpandImpl } from "./expand";
+import { Expand, expandToString, ODataOptions, QueryParams, Select, selectToString } from "../params";
+import { EntityExpand, EntityExpandImpl } from "./expand";
+import { EntityResponse } from "./response";
 
 export interface EntitySingle<TEntity> {
   execute(): EntityResponse<TEntity>;
@@ -13,23 +11,6 @@ export interface EntitySingle<TEntity> {
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
     builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySingle<TEntity>;
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySingle<Pick<TEntity, TSelected>>;
-}
-
-export interface EntityExpand<TEntity> {
-  count(): EntityExpand<TEntity>;
-  expand<TExpanded extends keyof TEntity & string>(
-    property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
-    builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntityExpand<TEntity>;
-  filter(builder: (entity: EntityAccessor<TEntity>) => Value<boolean>): EntityExpand<TEntity>;
-  orderBy(property: keyof TEntity & string, direction?: SortDirection): OrderedEntityExpand<TEntity>;
-  select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntityExpand<Pick<TEntity, TSelected>>;
-  skip(count: number): EntityExpand<TEntity>;
-  top(count: number): EntityExpand<TEntity>;
-  toString(): string;
-}
-
-export interface OrderedEntityExpand<TEntity> extends EntityExpand<TEntity> {
-  thenBy(property: keyof TEntity & string, direction?: SortDirection): OrderedEntityExpand<TEntity>;
 }
 
 export class EntitySingleImpl<TEntity> implements EntitySingle<TEntity> {

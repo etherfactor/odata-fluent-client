@@ -1,5 +1,6 @@
-import { EntityExpand, o } from "../odata.util";
 import { Value } from "../values/base";
+import { AndLogicalValue } from "../values/logical";
+import { EntityExpand } from "./entity/expand";
 
 export interface QueryParams {
   [key: string]: string
@@ -30,7 +31,7 @@ export type Filter = Value<boolean>;
 export function filterToString(filter: Filter[]): string {
   let useValue: string;
   if (filter.length > 1) {
-    useValue = o.and(...filter).toString();
+    useValue = new AndLogicalValue(...filter).toString();
   } else {
     useValue = filter[0].toString();
   }

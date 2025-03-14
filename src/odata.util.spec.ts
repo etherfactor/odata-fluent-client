@@ -1,6 +1,6 @@
 import { Guid } from "../../types/guid/guid";
+import { EntitySet, o } from "./experiment";
 import { ɵEntitySet } from "./internal/entity-set";
-import { EntitySet, o } from "./odata.util";
 
 interface Model {
   id: Guid;

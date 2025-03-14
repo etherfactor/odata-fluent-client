@@ -8,9 +8,8 @@ import { HttpClientAdapter, HttpModelValidator } from "../client";
 import { Count, Expand, Filter, ODataOptions, OrderBy, QueryParams, Select, Skip, SortDirection, Top, expandToString, filterToString, orderByToString, selectToString, skipToString, topToString } from "../params";
 import { PrefixGenerator } from "../prefix-generator";
 import { EntityAccessor, EntityAccessorImpl } from "./accessor";
-import { EntitySetResponse } from "./client";
-import { EntityExpandImpl } from "./expand";
-import { EntityExpand } from "./single";
+import { EntityExpand, EntityExpandImpl } from "./expand";
+import { EntitySetResponse } from "./response";
 
 export interface EntitySet<TEntity> {
   count(): EntitySet<TEntity>;
