@@ -1,4 +1,4 @@
-import { Value } from "../odata.util";
+import { Value } from "./base";
 
 abstract class ComparisonValue<TValue> implements Value<boolean> {
 
@@ -16,7 +16,7 @@ abstract class ComparisonValue<TValue> implements Value<boolean> {
     return `${this.left.toString()} ${this.comparator} ${this.right.toString()}`;
   }
 
-  abstract _eval(data?: unknown): boolean;
+  abstract eval(data?: unknown): boolean;
 }
 
 export class EqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
@@ -25,12 +25,12 @@ export class EqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
     super(left, 'eq', right);
   }
 
-  _eval(data?: unknown): boolean {
-    let left = this.left._eval(data);
+  eval(data?: unknown): boolean {
+    let left = this.left.eval(data);
     if (typeof left === 'string')
       left = left.toLowerCase() as TValue;
 
-    let right = this.right._eval(data);
+    let right = this.right.eval(data);
     if (typeof right === 'string')
       right = right.toLowerCase() as TValue;
 
@@ -44,12 +44,12 @@ export class NotEqualsComparisonValue<TValue> extends ComparisonValue<TValue> {
     super(left, 'ne', right);
   }
 
-  _eval(data?: unknown): boolean {
-    let left = this.left._eval(data);
+  eval(data?: unknown): boolean {
+    let left = this.left.eval(data);
     if (typeof left === 'string')
       left = left.toLowerCase() as TValue;
 
-    let right = this.right._eval(data);
+    let right = this.right.eval(data);
     if (typeof right === 'string')
       right = right.toLowerCase() as TValue;
 
@@ -63,12 +63,12 @@ export class GreaterThanComparisonValue<TValue> extends ComparisonValue<TValue> 
     super(left, 'gt', right);
   }
 
-  _eval(data?: unknown): boolean {
-    let left = this.left._eval(data);
+  eval(data?: unknown): boolean {
+    let left = this.left.eval(data);
     if (typeof left === 'string')
       left = left.toLowerCase() as TValue;
 
-    let right = this.right._eval(data);
+    let right = this.right.eval(data);
     if (typeof right === 'string')
       right = right.toLowerCase() as TValue;
 
@@ -82,12 +82,12 @@ export class GreaterThanOrEqualsComparisonValue<TValue> extends ComparisonValue<
     super(left, 'ge', right);
   }
 
-  _eval(data?: unknown): boolean {
-    let left = this.left._eval(data);
+  eval(data?: unknown): boolean {
+    let left = this.left.eval(data);
     if (typeof left === 'string')
       left = left.toLowerCase() as TValue;
 
-    let right = this.right._eval(data);
+    let right = this.right.eval(data);
     if (typeof right === 'string')
       right = right.toLowerCase() as TValue;
 
@@ -101,12 +101,12 @@ export class LessThanComparisonValue<TValue> extends ComparisonValue<TValue> {
     super(left, 'lt', right);
   }
 
-  _eval(data?: unknown): boolean {
-    let left = this.left._eval(data);
+  eval(data?: unknown): boolean {
+    let left = this.left.eval(data);
     if (typeof left === 'string')
       left = left.toLowerCase() as TValue;
 
-    let right = this.right._eval(data);
+    let right = this.right.eval(data);
     if (typeof right === 'string')
       right = right.toLowerCase() as TValue;
 
@@ -120,12 +120,12 @@ export class LessThanOrEqualsComparisonValue<TValue> extends ComparisonValue<TVa
     super(left, 'le', right);
   }
 
-  _eval(data?: unknown): boolean {
-    let left = this.left._eval(data);
+  eval(data?: unknown): boolean {
+    let left = this.left.eval(data);
     if (typeof left === 'string')
       left = left.toLowerCase() as TValue;
 
-    let right = this.right._eval(data);
+    let right = this.right.eval(data);
     if (typeof right === 'string')
       right = right.toLowerCase() as TValue;
 

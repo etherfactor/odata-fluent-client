@@ -1,4 +1,4 @@
-import { Value } from "../odata.util";
+import { Value } from "./base";
 
 abstract class OperatorValue implements Value<number> {
 
@@ -16,7 +16,7 @@ abstract class OperatorValue implements Value<number> {
     return `(${this.left.toString()} ${this.operator} ${this.right.toString()})`;
   }
 
-  abstract _eval(data?: unknown): number;
+  abstract eval(data?: unknown): number;
 }
 
 export class AddOperatorValue extends OperatorValue {
@@ -25,9 +25,9 @@ export class AddOperatorValue extends OperatorValue {
     super(left, 'add', right);
   }
 
-  _eval(data?: unknown): number {
-    const left = this.left._eval(data);
-    const right = this.right._eval(data);
+  eval(data?: unknown): number {
+    const left = this.left.eval(data);
+    const right = this.right.eval(data);
     return left + right;
   }
 }
@@ -38,9 +38,9 @@ export class SubtractOperatorValue extends OperatorValue {
     super(left, 'sub', right);
   }
 
-  _eval(data?: unknown): number {
-    const left = this.left._eval(data);
-    const right = this.right._eval(data);
+  eval(data?: unknown): number {
+    const left = this.left.eval(data);
+    const right = this.right.eval(data);
     return left - right;
   }
 }
@@ -51,9 +51,9 @@ export class MultiplyOperatorValue extends OperatorValue {
     super(left, 'mul', right);
   }
 
-  _eval(data?: unknown): number {
-    const left = this.left._eval(data);
-    const right = this.right._eval(data);
+  eval(data?: unknown): number {
+    const left = this.left.eval(data);
+    const right = this.right.eval(data);
     return left * right;
   }
 }
@@ -64,9 +64,9 @@ export class DivideOperatorValue extends OperatorValue {
     super(left, 'div', right);
   }
 
-  _eval(data?: unknown): number {
-    const left = this.left._eval(data);
-    const right = this.right._eval(data);
+  eval(data?: unknown): number {
+    const left = this.left.eval(data);
+    const right = this.right.eval(data);
     return left / right;
   }
 }
@@ -77,9 +77,9 @@ export class ModuloOperatorValue extends OperatorValue {
     super(left, 'mod', right);
   }
 
-  _eval(data?: unknown): number {
-    const left = this.left._eval(data);
-    const right = this.right._eval(data);
+  eval(data?: unknown): number {
+    const left = this.left.eval(data);
+    const right = this.right.eval(data);
     return left % right;
   }
 }

@@ -1,4 +1,4 @@
-import { Value } from "../odata.util";
+import { Value } from "./base";
 
 abstract class FunctionValue<TValue> implements Value<TValue> {
 
@@ -14,7 +14,7 @@ abstract class FunctionValue<TValue> implements Value<TValue> {
     return `${this.name}(${this.args.map(item => item.toString()).join(', ')})`;
   }
 
-  abstract _eval(data?: unknown): TValue;
+  abstract eval(data?: unknown): TValue;
 }
 
 export class ContainsFunctionValue extends FunctionValue<boolean> {
@@ -23,9 +23,9 @@ export class ContainsFunctionValue extends FunctionValue<boolean> {
     super('contains', string, contains);
   }
 
-  override _eval(data?: unknown): boolean {
-    const root = (this.args[0] as Value<string>)._eval(data).toLowerCase();
-    const arg1 = (this.args[1] as Value<string>)._eval(data).toLowerCase();
+  override eval(data?: unknown): boolean {
+    const root = (this.args[0] as Value<string>).eval(data).toLowerCase();
+    const arg1 = (this.args[1] as Value<string>).eval(data).toLowerCase();
     return root.includes(arg1);
   }
 }
@@ -36,9 +36,9 @@ export class StartsWithFunctionValue extends FunctionValue<boolean> {
     super('startswith', string, startsWith);
   }
 
-  override _eval(data?: unknown): boolean {
-    const root = (this.args[0] as Value<string>)._eval(data).toLowerCase();
-    const arg1 = (this.args[1] as Value<string>)._eval(data).toLowerCase();
+  override eval(data?: unknown): boolean {
+    const root = (this.args[0] as Value<string>).eval(data).toLowerCase();
+    const arg1 = (this.args[1] as Value<string>).eval(data).toLowerCase();
     return root.startsWith(arg1);
   }
 }
@@ -49,9 +49,9 @@ export class EndsWithFunctionValue extends FunctionValue<boolean> {
     super('endswith', string, endsWith);
   }
 
-  override _eval(data?: unknown): boolean {
-    const root = (this.args[0] as Value<string>)._eval(data).toLowerCase();
-    const arg1 = (this.args[1] as Value<string>)._eval(data).toLowerCase();
+  override eval(data?: unknown): boolean {
+    const root = (this.args[0] as Value<string>).eval(data).toLowerCase();
+    const arg1 = (this.args[1] as Value<string>).eval(data).toLowerCase();
     return root.endsWith(arg1);
   }
 }
@@ -62,9 +62,9 @@ export class ConcatFunctionValue extends FunctionValue<string> {
     super('concat', left, right);
   }
 
-  override _eval(data?: unknown): string {
-    const root = (this.args[0] as Value<string>)._eval(data);
-    const arg1 = (this.args[1] as Value<string>)._eval(data);
+  override eval(data?: unknown): string {
+    const root = (this.args[0] as Value<string>).eval(data);
+    const arg1 = (this.args[1] as Value<string>).eval(data);
     return root.concat(arg1);
   }
 }
@@ -75,9 +75,9 @@ export class IndexOfFunctionValue extends FunctionValue<number> {
     super('indexof', string, indexOf);
   }
 
-  override _eval(data?: unknown): number {
-    const root = (this.args[0] as Value<string>)._eval(data).toLowerCase();
-    const arg1 = (this.args[1] as Value<string>)._eval(data).toLowerCase();
+  override eval(data?: unknown): number {
+    const root = (this.args[0] as Value<string>).eval(data).toLowerCase();
+    const arg1 = (this.args[1] as Value<string>).eval(data).toLowerCase();
     return root.indexOf(arg1);
   }
 }
@@ -88,8 +88,8 @@ export class LengthFunctionValue extends FunctionValue<number> {
     super('length', string);
   }
 
-  override _eval(data?: unknown): number {
-    const root = (this.args[0] as Value<string>)._eval(data);
+  override eval(data?: unknown): number {
+    const root = (this.args[0] as Value<string>).eval(data);
     return root.length;
   }
 }
@@ -104,10 +104,10 @@ export class SubstringFunctionValue extends FunctionValue<string> {
     }
   }
 
-  override _eval(data?: unknown): string {
-    const root = (this.args[0] as Value<string>)._eval(data);
-    const arg1 = (this.args[1] as Value<number>)._eval(data);
-    const arg2 = (this.args[2] as Value<number>)._eval(data);
+  override eval(data?: unknown): string {
+    const root = (this.args[0] as Value<string>).eval(data);
+    const arg1 = (this.args[1] as Value<number>).eval(data);
+    const arg2 = (this.args[2] as Value<number>).eval(data);
     return root.substring(arg1, arg2);
   }
 }
@@ -118,8 +118,8 @@ export class ToLowerFunctionValue extends FunctionValue<string> {
     super('tolower', value);
   }
 
-  override _eval(data?: unknown): string {
-    const root = (this.args[0] as Value<string>)._eval(data);
+  override eval(data?: unknown): string {
+    const root = (this.args[0] as Value<string>).eval(data);
     return root.toLowerCase();
   }
 }
@@ -130,8 +130,8 @@ export class ToUpperFunctionValue extends FunctionValue<string> {
     super('toupper', value);
   }
 
-  override _eval(data?: unknown): string {
-    const root = (this.args[0] as Value<string>)._eval(data);
+  override eval(data?: unknown): string {
+    const root = (this.args[0] as Value<string>).eval(data);
     return root.toUpperCase();
   }
 }
@@ -142,8 +142,8 @@ export class TrimFunctionValue extends FunctionValue<string> {
     super('trim', value);
   }
 
-  override _eval(data?: unknown): string {
-    const root = (this.args[0] as Value<string>)._eval(data);
+  override eval(data?: unknown): string {
+    const root = (this.args[0] as Value<string>).eval(data);
     return root.trim();
   }
 }
@@ -154,8 +154,8 @@ export class CeilingFunctionValue extends FunctionValue<number> {
     super('ceiling', value);
   }
 
-  override _eval(data?: unknown): number {
-    const root = (this.args[0] as Value<number>)._eval(data);
+  override eval(data?: unknown): number {
+    const root = (this.args[0] as Value<number>).eval(data);
     return Math.ceil(root);
   }
 }
@@ -166,8 +166,8 @@ export class FloorFunctionValue extends FunctionValue<number> {
     super('floor', value);
   }
 
-  override _eval(data?: unknown): number {
-    const root = (this.args[0] as Value<number>)._eval(data);
+  override eval(data?: unknown): number {
+    const root = (this.args[0] as Value<number>).eval(data);
     return Math.floor(root);
   }
 }
@@ -178,8 +178,8 @@ export class RoundFunctionValue extends FunctionValue<number> {
     super('round', value);
   }
 
-  override _eval(data?: unknown): number {
-    const root = (this.args[0] as Value<number>)._eval(data);
+  override eval(data?: unknown): number {
+    const root = (this.args[0] as Value<number>).eval(data);
     return Math.round(root);
   }
 }

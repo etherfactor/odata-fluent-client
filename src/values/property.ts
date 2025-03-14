@@ -1,4 +1,4 @@
-import { Value } from "../odata.util";
+import { Value } from "./base";
 
 abstract class PropertyValue<TEntity, TKey extends keyof TEntity> implements Value<TEntity[TKey]> {
 
@@ -18,7 +18,7 @@ abstract class PropertyValue<TEntity, TKey extends keyof TEntity> implements Val
     }
   }
 
-  abstract _eval(data?: unknown): TEntity[TKey];
+  abstract eval(data?: unknown): TEntity[TKey];
 }
 
 export class EntityPropertyValue<TEntity, TKey extends keyof TEntity> extends PropertyValue<TEntity, TKey> {
@@ -27,7 +27,7 @@ export class EntityPropertyValue<TEntity, TKey extends keyof TEntity> extends Pr
     super(path, property);
   }
 
-  _eval(data?: unknown): TEntity[TKey] {
+  eval(data?: unknown): TEntity[TKey] {
     if (!data)
       return undefined as TEntity[TKey];
 

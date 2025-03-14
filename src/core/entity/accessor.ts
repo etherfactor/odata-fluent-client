@@ -1,8 +1,14 @@
-import { EntityAccessor, Value } from "../../odata.util";
 import { AnyArray, InferArrayType } from "../../utils/types";
+import { Value } from "../../values/base";
 import { AllCollectionValue, AnyCollectionValue } from "../../values/collection";
 import { EntityPropertyValue } from "../../values/property";
 import { PrefixGenerator } from "../prefix-generator";
+
+export interface EntityAccessor<TEntity> {
+  prop<TKey extends keyof TEntity & string>(property: TKey): Value<TEntity[TKey]>;
+  all<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<InferArrayType<TEntity[TKey]>>) => Value<boolean>): Value<boolean>;
+  any<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<InferArrayType<TEntity[TKey]>>) => Value<boolean>): Value<boolean>;
+}
 
 export class EntityAccessorImpl<TEntity> {
 
@@ -19,7 +25,6 @@ export class EntityAccessorImpl<TEntity> {
     return new EntityPropertyValue<TEntity, TKey>(this.path, property);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   all<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<InferArrayType<TEntity[TKey]>>) => Value<boolean>): Value < boolean > {
     const generator = this.generator;
     const path = generator.getPath();
@@ -29,7 +34,6 @@ export class EntityAccessorImpl<TEntity> {
     return new AllCollectionValue(property, path, value);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<InferArrayType<TEntity[TKey]>>) => Value<boolean>): Value<boolean> {
     const generator = this.generator;
     const path = generator.getPath();

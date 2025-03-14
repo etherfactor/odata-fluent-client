@@ -1,4 +1,4 @@
-import { Value } from "../odata.util";
+import { Value } from "./base";
 
 abstract class CollectionValue implements Value<boolean> {
 
@@ -18,7 +18,7 @@ abstract class CollectionValue implements Value<boolean> {
     return `${this.property}/${this.operand}(${this.path}: ${this.value.toString()})`;
   }
 
-  abstract _eval(data?: unknown): boolean;
+  abstract eval(data?: unknown): boolean;
 }
 
 export class AllCollectionValue extends CollectionValue {
@@ -27,7 +27,7 @@ export class AllCollectionValue extends CollectionValue {
     super(property, 'all', path, value);
   }
 
-  _eval(data?: unknown): boolean {
+  eval(data?: unknown): boolean {
     if (!data)
       return false;
 
@@ -35,7 +35,7 @@ export class AllCollectionValue extends CollectionValue {
       return false;
 
     const array = data[this.property as keyof typeof data] as object[];
-    const result = array.reduce((prev, curr) => prev && this.value._eval(curr), true);
+    const result = array.reduce((prev, curr) => prev && this.value.eval(curr), true);
 
     return result;
   }
@@ -47,7 +47,7 @@ export class AnyCollectionValue extends CollectionValue {
     super(property, 'any', path, value);
   }
 
-  _eval(data?: unknown): boolean {
+  eval(data?: unknown): boolean {
     if (!data)
       return false;
 
@@ -55,7 +55,7 @@ export class AnyCollectionValue extends CollectionValue {
       return false;
 
     const array = data[this.property as keyof typeof data] as object[];
-    const result = array.reduce((prev, curr) => prev || this.value._eval(curr), false);
+    const result = array.reduce((prev, curr) => prev || this.value.eval(curr), false);
 
     return result;
   }

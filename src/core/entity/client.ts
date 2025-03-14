@@ -1,8 +1,7 @@
-import { EntitySet, EntitySingle } from "../../odata.util";
 import { extendUrl, HttpMethod } from "../../utils/http";
 import { HttpClientAdapter, RoutingType } from "../client";
-import { EntitySetImpl, EntitySetWorker, EntitySetWorkerImpl } from "./set";
-import { EntitySingleImpl, EntitySingleWorker, EntitySingleWorkerImpl } from "./single";
+import { EntitySet, EntitySetImpl, EntitySetWorker, EntitySetWorkerImpl } from "./set";
+import { EntitySingle, EntitySingleImpl, EntitySingleWorker, EntitySingleWorkerImpl } from "./single";
 
 export interface ResourceOptions {
   entitySet: string;
@@ -11,6 +10,16 @@ export interface ResourceOptions {
   create?: HttpMethod;
   update?: HttpMethod;
   delete?: HttpMethod;
+}
+
+export type EntityResponse<TEntity> = {
+  data: Promise<TEntity>;
+}
+
+export type EntitySetResponse<TEntity> = {
+  count: Promise<number>;
+  data: Promise<TEntity[]>;
+  iterator: AsyncIterable<TEntity>;
 }
 
 interface EntityClientFull<TEntity> {

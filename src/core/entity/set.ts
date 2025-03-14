@@ -1,13 +1,34 @@
 import { JSONParser } from "@streamparser/json";
-import { Count, EntityAccessor, EntityExpand, EntitySet, EntitySetResponse, Expand, Filter, ODataOptions, ODataResultSet, OrderBy, OrderedEntitySet, QueryParams, Select, Skip, Top, Value, expandToString, filterToString, orderByToString, selectToString, skipToString, topToString } from "../../odata.util";
 import { AsyncQueue } from "../../utils/async-queue";
 import { HttpMethod } from "../../utils/http";
 import { toIterable, toPromise } from "../../utils/promise";
 import { InferArrayType, SafeAny } from "../../utils/types";
+import { Value } from "../../values/base";
 import { HttpClientAdapter, HttpModelValidator } from "../client";
+import { Count, Expand, Filter, ODataOptions, OrderBy, QueryParams, Select, Skip, SortDirection, Top, expandToString, filterToString, orderByToString, selectToString, skipToString, topToString } from "../params";
 import { PrefixGenerator } from "../prefix-generator";
-import { EntityAccessorImpl } from "./accessor";
+import { EntityAccessor, EntityAccessorImpl } from "./accessor";
+import { EntitySetResponse } from "./client";
 import { EntityExpandImpl } from "./expand";
+import { EntityExpand } from "./single";
+
+export interface EntitySet<TEntity> {
+  count(): EntitySet<TEntity>;
+  execute(): EntitySetResponse<TEntity>;
+  expand<TExpanded extends keyof TEntity & string>(
+    property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
+    builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySet<TEntity>;
+  filter(builder: (entity: EntityAccessor<TEntity>) => Value<boolean>): EntitySet<TEntity>;
+  orderBy(property: keyof TEntity & string, direction?: SortDirection): OrderedEntitySet<TEntity>;
+  select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySet<Pick<TEntity, TSelected>>;
+  skip(count: number): EntitySet<TEntity>;
+  top(count: number): EntitySet<TEntity>;
+  getParams(): QueryParams;
+}
+
+export interface OrderedEntitySet<TEntity> extends EntitySet<TEntity> {
+  thenBy(property: keyof TEntity & string, direction?: SortDirection): EntitySet<TEntity>;
+}
 
 export class EntitySetImpl<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TEntity> {
 
@@ -171,7 +192,11 @@ export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
   }
 
   execute(options: ODataOptions): EntitySetResponse<TEntity> {
-    const data: ODataResultSet<TEntity> = { value: this.getData() };
+    const data = {
+      "@odata.count": undefined as number | undefined,
+      value: this.getData()
+    };
+    
     data.value = this.applyFilters(data.value, options.filter ?? []);
     if (options.count) {
       data["@odata.count"] = data.value.length;
@@ -190,7 +215,7 @@ export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
   private applyFilters(data: TEntity[], filters: Filter[]): TEntity[] {
     let finalData = data;
     for (const filter of filters) {
-      finalData = finalData.filter(datum => filter._eval(datum));
+      finalData = finalData.filter(datum => filter.eval(datum));
     }
 
     return finalData;

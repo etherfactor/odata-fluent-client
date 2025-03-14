@@ -1,7 +1,9 @@
-import { Count, EntityAccessor, EntityExpand, Expand, expandToString, Filter, filterToString, ODataOptions, OrderBy, orderByToString, OrderedEntityExpand, Select, selectToString, Skip, skipToString, Top, topToString, Value } from "../../odata.util";
 import { InferArrayType } from "../../utils/types";
+import { Value } from "../../values/base";
+import { Count, Expand, expandToString, Filter, filterToString, ODataOptions, OrderBy, orderByToString, Select, selectToString, Skip, skipToString, Top, topToString } from "../params";
 import { PrefixGenerator } from "../prefix-generator";
-import { EntityAccessorImpl } from "./accessor";
+import { EntityAccessor, EntityAccessorImpl } from "./accessor";
+import { EntityExpand, OrderedEntityExpand } from "./single";
 
 export class EntityExpandImpl<TEntity> implements EntityExpand<TEntity>, OrderedEntityExpand<TEntity> {
 

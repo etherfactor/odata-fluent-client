@@ -1,13 +1,12 @@
-import { Value } from "../odata.util";
 import { Guid } from "../types/guid";
-import { padLeft } from "../utils/string";
+import { Value } from "./base";
 
 abstract class ConstantValue<TValue> implements Value<TValue> {
 
   constructor() {
   }
 
-  abstract _eval(): TValue;
+  abstract eval(): TValue;
 }
 
 export class BooleanConstantValue extends ConstantValue<boolean> {
@@ -23,7 +22,7 @@ export class BooleanConstantValue extends ConstantValue<boolean> {
     return this.value.toString();
   }
 
-  override _eval(): boolean {
+  override eval(): boolean {
     return this.value;
   }
 }
@@ -41,7 +40,7 @@ export class DateConstantValue extends ConstantValue<Date> {
     return this.value.toISOString().split("T")[0];
   }
 
-  override _eval(): Date {
+  override eval(): Date {
     return this.value;
   }
 }
@@ -59,7 +58,7 @@ export class DateTimeConstantValue extends ConstantValue<Date> {
     return this.value.toISOString();
   }
 
-  override _eval(): Date {
+  override eval(): Date {
     return this.value;
   }
 }
@@ -77,7 +76,7 @@ export class GuidConstantValue extends ConstantValue<Guid> {
     return this.value;
   }
 
-  override _eval(): Guid {
+  override eval(): Guid {
     return this.value;
   }
 }
@@ -95,7 +94,7 @@ export class IntegerConstantValue extends ConstantValue<number> {
     return this.value.toString();
   }
 
-  override _eval(): number {
+  override eval(): number {
     return this.value;
   }
 }
@@ -106,7 +105,7 @@ export class NullConstantValue extends ConstantValue<any> {
     return 'null';
   }
 
-  override _eval(): any {
+  override eval(): any {
     return null;
   }
 }
@@ -124,7 +123,7 @@ export class StringConstantValue extends ConstantValue<string> {
     return `'${this.value.replace("'", "''")}'`;
   }
 
-  override _eval(): string {
+  override eval(): string {
     return this.value;
   }
 }
@@ -142,7 +141,7 @@ export class TimeConstantValue extends ConstantValue<Date> {
     return this.value.toISOString().split("T")[1].replace("Z", "");
   }
 
-  override _eval(): Date {
+  override eval(): Date {
     return this.value;
   }
 }

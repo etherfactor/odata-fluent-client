@@ -1,4 +1,4 @@
-import { Value } from "../odata.util";
+import { Value } from "./base";
 
 abstract class LogicalValue implements Value<boolean> {
 
@@ -14,7 +14,7 @@ abstract class LogicalValue implements Value<boolean> {
     return `(${this.conditions.map(item => item.toString()).join(` ${this.operand} `)})`;
   }
 
-  abstract _eval(data?: unknown): boolean;
+  abstract eval(data?: unknown): boolean;
 }
 
 export class AndLogicalValue extends LogicalValue {
@@ -23,8 +23,8 @@ export class AndLogicalValue extends LogicalValue {
     super('and', ...conditions);
   }
 
-  override _eval(data?: unknown): boolean {
-    const result = this.conditions.reduce((prev, curr) => prev && curr._eval(data), true);
+  override eval(data?: unknown): boolean {
+    const result = this.conditions.reduce((prev, curr) => prev && curr.eval(data), true);
     return result;
   }
 }
@@ -35,8 +35,8 @@ export class OrLogicalValue extends LogicalValue {
     super('or', ...conditions);
   }
 
-  override _eval(data?: unknown): boolean {
-    const result = this.conditions.reduce((prev, curr) => prev || curr._eval(data), false);
+  override eval(data?: unknown): boolean {
+    const result = this.conditions.reduce((prev, curr) => prev || curr.eval(data), false);
     return result;
   }
 }
@@ -52,8 +52,8 @@ export class NotLogicalValue implements Value<boolean> {
     return `not ${this.condition.toString()}`;
   }
 
-  _eval(data?: unknown): boolean {
-    const result = !this.condition._eval(data);
+  eval(data?: unknown): boolean {
+    const result = !this.condition.eval(data);
     return result;
   }
 }
