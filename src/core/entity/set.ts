@@ -250,6 +250,7 @@ export interface EntitySetWorkerImplOptions<TEntity> {
   adapter: HttpClientAdapter;
   method: HttpMethod;
   url: string;
+  payload?: Partial<TEntity>;
   validator?: HttpModelValidator<TEntity>;
 }
 
@@ -331,6 +332,7 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
     (async () => {
       try {
         const response = await result;
+
         if (response.data instanceof Promise) {
           const data = await response.data as SafeAny;
           for (const value of data["value"]) {
@@ -344,13 +346,14 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
           }
         } else {
           for await (const chunk of response.data) {
-            parser.write(chunk);
+            if (/\S/.test(chunk)) {
+              console.log("chunk: >>", chunk, "<<");
+              parser.write(chunk.trim());
+            }
           }
-          parser.end();
         }
       } catch (err) {
         onError(err as Error);
-        parser.end();
       }
     })();
 

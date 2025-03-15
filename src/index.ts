@@ -8,3 +8,5 @@ export { EntitySingle } from "./core/entity/single";
 
 export { Count, Expand, Filter, ODataOptions, OrderBy, QueryParams, Select, Skip, SortDirection, Top } from "./core/params";
 
+export { createOperatorFactory } from "./values/base";
+

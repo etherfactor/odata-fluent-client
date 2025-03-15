@@ -1,4 +1,6 @@
-import { EntityClient, EntityClientImpl, ResourceOptions } from "./entity/client";
+import { AnyArray } from "../utils/types";
+import { Value } from "../values/base";
+import { EntityClient, EntityClientImpl, EntityKey, ResourceOptions } from "./entity/client";
 
 export interface ODataClientConfig {
   http: ODataClientHttpRawOptions | ODataClientHttpClientOptions;
@@ -15,10 +17,9 @@ export class ODataClient {
     this.config = config;
   }
 
-  createEntityClient<TEntity, TOptions extends ResourceOptions>(
-    entity: Partial<TEntity>,
+  createEntityClient<TEntity, TKey extends EntityKey, TOptions extends ResourceOptions<TEntity, TKey>>(
     options: TOptions,
-  ): EntityClient<TEntity, TOptions> {
+  ): EntityClient<TEntity, TKey, TOptions> {
     let adapter: HttpClientAdapter;
     if ("adapter" in this.config.http) {
       adapter = this.config.http.adapter;
