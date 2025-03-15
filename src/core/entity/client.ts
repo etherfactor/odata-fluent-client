@@ -1,29 +1,21 @@
 import { extendUrl, HttpMethod } from "../../utils/http";
-import { AnyArray } from "../../utils/types";
-import { Value } from "../../values/base";
-import { HttpClientAdapter, RoutingType } from "../client";
+import { EntityKey, HttpClientAdapter, RoutingType } from "../client";
 import { EntitySet, EntitySetImpl, EntitySetWorker, EntitySetWorkerImpl } from "./set";
 import { EntitySingle, EntitySingleImpl, EntitySingleWorker, EntitySingleWorkerImpl } from "./single";
 
-type EntityKeyType = string | number | boolean;
-export type EntityKey = EntityKeyType | [EntityKeyType, ...EntityKeyType[]];
-
-type EntityKeyValue<TKey> = TKey extends AnyArray
-  ? { [K in keyof TKey]: (value: TKey[K]) => Value<TKey[K]> | undefined }
-  : (value: TKey) => Value<TKey>;
-
-export interface ResourceOptions<TEntity, TKey extends EntityKey> {
+export interface ResourceOptions {
   entitySet: string;
   readSet?: HttpMethod;
-  readEntity?: HttpMethod;
+  read?: HttpMethod;
   create?: HttpMethod;
   update?: HttpMethod;
   delete?: HttpMethod;
-  keySelector: (entity: TEntity) => TKey,
-  valueBuilder?: EntityKeyValue<TKey>,
 }
 
-interface EntityClientFull<TEntity, TKey extends EntityKey> {
+interface EntityClientFull<
+  TEntity,
+  TKey extends EntityKey
+> {
   get set(): EntitySet<TEntity>;
   read(key: TKey): EntitySingle<TEntity>;
   create(entity: Partial<TEntity>): EntitySingle<TEntity>;
@@ -31,21 +23,29 @@ interface EntityClientFull<TEntity, TKey extends EntityKey> {
   delete(key: TKey): Promise<void>;
 }
 
-export type EntityClient<TEntity, TKey extends EntityKey, TOptions extends ResourceOptions<TEntity, TKey>> =
-  (TOptions["readSet"] extends string ? Pick<EntityClientFull<TEntity, TKey>, "set"> : {}) &
-  (TOptions["readEntity"] extends string ? Pick<EntityClientFull<TEntity, TKey>, "read"> : {}) &
-  (TOptions["create"] extends string ? Pick<EntityClientFull<TEntity, TKey>, "create"> : {}) &
-  (TOptions["update"] extends string ? Pick<EntityClientFull<TEntity, TKey>, "update"> : {}) &
-  (TOptions["delete"] extends string ? Pick<EntityClientFull<TEntity, TKey>, "delete"> : {});
+export type EntityClient<
+  TEntity,
+  TKey extends EntityKey,
+  TReadSet extends HttpMethod | undefined = undefined,
+  TRead extends HttpMethod | undefined = undefined,
+  TCreate extends HttpMethod | undefined = undefined,
+  TUpdate extends HttpMethod | undefined = undefined,
+  TDelete extends HttpMethod | undefined = undefined,
+> =
+  (TReadSet extends string ? Pick<EntityClientFull<TEntity, TKey>, "set"> : {}) &
+  (TRead extends string ? Pick<EntityClientFull<TEntity, TKey>, "read"> : {}) &
+  (TCreate extends string ? Pick<EntityClientFull<TEntity, TKey>, "create"> : {}) &
+  (TUpdate extends string ? Pick<EntityClientFull<TEntity, TKey>, "update"> : {}) &
+  (TDelete extends string ? Pick<EntityClientFull<TEntity, TKey>, "delete"> : {});
 
-export class EntityClientImpl<TEntity, TKey extends EntityKey, TOptions extends ResourceOptions<TEntity, TKey>> implements EntityClientFull<TEntity, TKey> {
+export class EntityClientImpl<TEntity, TKey extends EntityKey> implements EntityClientFull<TEntity, TKey> {
   
   private readonly entitySetUrl: string;
   private readonly adapter: HttpClientAdapter;
-  private readonly options: TOptions;
+  private readonly options: ResourceOptions;
 
   constructor(
-    options: TOptions,
+    options: ResourceOptions,
     adapter: HttpClientAdapter,
     serviceUrl: string,
     routingType: RoutingType,
@@ -92,11 +92,11 @@ export class EntityClientImpl<TEntity, TKey extends EntityKey, TOptions extends 
   }
 
   read(key: TKey): EntitySingle<TEntity> {
-    if (!this.options.readEntity)
+    if (!this.options.read)
       throw new Error("This resource does not support reading entities");
 
     const url = `${this.entitySetUrl}(${key})`;
-    const worker = this.createSingleWorker(this.options.readEntity, url);
+    const worker = this.createSingleWorker(this.options.read, url);
     return new EntitySingleImpl(worker);
   }
 

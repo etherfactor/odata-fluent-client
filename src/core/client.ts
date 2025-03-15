@@ -1,6 +1,7 @@
-import { AnyArray } from "../utils/types";
+import { HttpMethod } from "../utils/http";
+import { AnyArray, SafeAny } from "../utils/types";
 import { Value } from "../values/base";
-import { EntityClient, EntityClientImpl, EntityKey, ResourceOptions } from "./entity/client";
+import { EntityClient, EntityClientImpl, ResourceOptions } from "./entity/client";
 
 export interface ODataClientConfig {
   http: ODataClientHttpRawOptions | ODataClientHttpClientOptions;
@@ -17,9 +18,139 @@ export class ODataClient {
     this.config = config;
   }
 
-  createEntityClient<TEntity, TKey extends EntityKey, TOptions extends ResourceOptions<TEntity, TKey>>(
-    options: TOptions,
-  ): EntityClient<TEntity, TKey, TOptions> {
+  entitySet<TEntity>(name: string): EntitySetBuilderAddKey<TEntity> {
+    return new EntitySetBuilderImpl(this.config, name);
+  }
+
+  // createEntityClient<
+  //   TOptions extends ResourceOptions,
+  //   TEntity = TOptions extends ResourceOptions ? TEntity : never,
+  //   TKey = TOptions extends ResourceOptions ? (TKey extends EntityKey ? TKey : never) : never
+  // >(
+  //   options: TOptions,
+  // ): EntityClient<
+  //   TEntity,
+  //   TKey,
+  //   TOptions
+  // > {
+  //   let adapter: HttpClientAdapter;
+  //   if ("adapter" in this.config.http) {
+  //     adapter = this.config.http.adapter;
+  //   } else {
+  //     adapter = DefaultHttpClientAdapter;
+  //   }
+
+  //   return new EntityClientImpl(options, adapter, this.config.serviceUrl, this.config.routingType);
+  // }
+}
+
+interface EntitySetBuilderAddKey<TEntity> {
+  withKeySelector<TKey extends EntityKey>(selector: (entity: TEntity) => TKey) : EntitySetBuilderAddValue<TEntity, TKey>;
+}
+
+interface EntitySetBuilderAddValue<TEntity, TKey extends EntityKey> {
+  withValueBuilder(builder: EntityKeyValue<TKey>): EntitySetBuilderAddMethod<TEntity, TKey>;
+}
+
+interface EntitySetBuilderAddMethodFull<
+  TEntity,
+  TKey extends EntityKey,
+  TReadSet extends HttpMethod | undefined = undefined,
+  TRead extends HttpMethod | undefined = undefined,
+  TCreate extends HttpMethod | undefined = undefined,
+  TUpdate extends HttpMethod | undefined = undefined,
+  TDelete extends HttpMethod | undefined = undefined,
+> {
+  withReadSet<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TMethod, TRead, TCreate, TUpdate, TDelete>;
+  withRead<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TMethod, TCreate, TUpdate, TDelete>;
+  withCreate<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TMethod, TUpdate, TDelete>;
+  withUpdate<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TMethod, TDelete>;
+  withDelete<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TMethod>;
+  build(): EntityClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>;
+}
+
+type EntitySetBuilderAddMethod<
+  TEntity,
+  TKey extends EntityKey,
+  TReadSet extends HttpMethod | undefined = undefined,
+  TRead extends HttpMethod | undefined = undefined,
+  TCreate extends HttpMethod | undefined = undefined,
+  TUpdate extends HttpMethod | undefined = undefined,
+  TDelete extends HttpMethod | undefined = undefined,
+> =
+  (TReadSet extends string ? {} : Pick<EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>, "withReadSet">) &
+  (TRead extends string ? {} : Pick<EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>, "withRead">) &
+  (TCreate extends string ? {} : Pick<EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>, "withCreate">) &
+  (TUpdate extends string ? {} : Pick<EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>, "withUpdate">) &
+  (TDelete extends string ? {} : Pick<EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>, "withDelete">) &
+  Pick<EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>, "build">;
+
+class EntitySetBuilderImpl<
+  TEntity,
+  TKey extends EntityKey,
+  TReadSet extends HttpMethod | undefined = undefined,
+  TRead extends HttpMethod | undefined = undefined,
+  TCreate extends HttpMethod | undefined = undefined,
+  TUpdate extends HttpMethod | undefined = undefined,
+  TDelete extends HttpMethod | undefined = undefined,
+> implements EntitySetBuilderAddKey<TEntity>,
+  EntitySetBuilderAddValue<TEntity, TKey>,
+  EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>
+{
+  private readonly config: ODataClientConfig;
+  private readonly entitySet: string;
+
+  constructor(
+    config: ODataClientConfig,
+    entitySet: string,
+  ) {
+    this.config = config;
+    this.entitySet = entitySet;
+  }
+
+  private selector!: (entity: TEntity) => TKey;
+  withKeySelector<TKey extends EntityKey>(selector: (entity: TEntity) => TKey): EntitySetBuilderAddValue<TEntity, TKey> {
+    this.selector = selector as SafeAny;
+    return this as SafeAny;
+  }
+
+  private builder!: EntityKeyValue<TKey>;
+  withValueBuilder(builder: EntityKeyValue<TKey>): EntitySetBuilderAddMethod<TEntity, TKey, undefined, undefined, undefined, undefined, undefined> {
+    this.builder = builder;
+    return this as SafeAny;
+  }
+
+  private readSet?: HttpMethod;
+  withReadSet<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TMethod, TRead, TCreate, TUpdate, TDelete> {
+    this.readSet = method;
+    return this as SafeAny;
+  }
+
+  private read?: HttpMethod;
+  withRead<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TMethod, TCreate, TUpdate, TDelete> {
+    this.read = method;
+    return this as SafeAny;
+  }
+
+  private create?: HttpMethod;
+  withCreate<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TMethod, TUpdate, TDelete> {
+    this.create = method;
+    return this as SafeAny;
+  }
+
+  private update?: HttpMethod;
+  withUpdate<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TMethod, TDelete> {
+    this.update = method;
+    return this as SafeAny;
+  }
+
+  private delete?: HttpMethod;
+  withDelete<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TMethod> {
+    this.delete = method;
+    return this as SafeAny;
+  }
+
+  build(): EntityClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete> {
     let adapter: HttpClientAdapter;
     if ("adapter" in this.config.http) {
       adapter = this.config.http.adapter;
@@ -27,9 +158,25 @@ export class ODataClient {
       adapter = DefaultHttpClientAdapter;
     }
 
-    return new EntityClientImpl(options, adapter, this.config.serviceUrl, this.config.routingType);
+    const options: ResourceOptions = {
+      entitySet: this.entitySet,
+      readSet: this.readSet,
+      read: this.read,
+      create: this.create,
+      update: this.update,
+      delete: this.delete,
+    };
+
+    return new EntityClientImpl<TEntity, TKey>(options, adapter, this.config.serviceUrl, this.config.routingType);
   }
 }
+
+type EntityKeyType = string | number | boolean;
+export type EntityKey = EntityKeyType | [EntityKeyType, ...EntityKeyType[]];
+
+type EntityKeyValue<TKey> = TKey extends AnyArray
+  ? { [K in keyof TKey]: (value: TKey[K]) => Value<TKey[K]> | undefined }
+  : (value: TKey) => Value<TKey>;
 
 export interface HttpModelValidator<TEntity> {
   validate(data: unknown): data is TEntity;
