@@ -21,27 +21,6 @@ export class ODataClient {
   entitySet<TEntity>(name: string): EntitySetBuilderAddKey<TEntity> {
     return new EntitySetBuilderImpl(this.config, name);
   }
-
-  // createEntityClient<
-  //   TOptions extends ResourceOptions,
-  //   TEntity = TOptions extends ResourceOptions ? TEntity : never,
-  //   TKey = TOptions extends ResourceOptions ? (TKey extends EntityKey ? TKey : never) : never
-  // >(
-  //   options: TOptions,
-  // ): EntityClient<
-  //   TEntity,
-  //   TKey,
-  //   TOptions
-  // > {
-  //   let adapter: HttpClientAdapter;
-  //   if ("adapter" in this.config.http) {
-  //     adapter = this.config.http.adapter;
-  //   } else {
-  //     adapter = DefaultHttpClientAdapter;
-  //   }
-
-  //   return new EntityClientImpl(options, adapter, this.config.serviceUrl, this.config.routingType);
-  // }
 }
 
 interface EntitySetBuilderAddKey<TEntity> {
@@ -160,6 +139,7 @@ class EntitySetBuilderImpl<
 
     const options: ResourceOptions = {
       entitySet: this.entitySet,
+      valueBuilder: this.builder as SafeAny,
       readSet: this.readSet,
       read: this.read,
       create: this.create,
@@ -175,7 +155,7 @@ type EntityKeyType = string | number | boolean;
 export type EntityKey = EntityKeyType | [EntityKeyType, ...EntityKeyType[]];
 
 type EntityKeyValue<TKey> = TKey extends AnyArray
-  ? { [K in keyof TKey]: (value: TKey[K]) => Value<TKey[K]> | undefined }
+  ? { [K in keyof TKey]: ((value: TKey[K]) => Value<TKey[K]>) | undefined }
   : (value: TKey) => Value<TKey>;
 
 export interface HttpModelValidator<TEntity> {

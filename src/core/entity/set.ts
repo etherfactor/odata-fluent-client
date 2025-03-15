@@ -272,6 +272,7 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
       url: this.options.url,
       headers: {},
       query: params,
+      body: this.options.payload,
     });
 
     let resolveCount: (count: number) => void;

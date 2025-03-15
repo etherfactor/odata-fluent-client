@@ -1,10 +1,12 @@
 import { extendUrl, HttpMethod } from "../../utils/http";
+import { Value } from "../../values/base";
 import { EntityKey, HttpClientAdapter, RoutingType } from "../client";
 import { EntitySet, EntitySetImpl, EntitySetWorker, EntitySetWorkerImpl } from "./set";
 import { EntitySingle, EntitySingleImpl, EntitySingleWorker, EntitySingleWorkerImpl } from "./single";
 
 export interface ResourceOptions {
   entitySet: string;
+  valueBuilder: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[];
   readSet?: HttpMethod;
   read?: HttpMethod;
   create?: HttpMethod;
@@ -40,9 +42,10 @@ export type EntityClient<
 
 export class EntityClientImpl<TEntity, TKey extends EntityKey> implements EntityClientFull<TEntity, TKey> {
   
+  private readonly options: ResourceOptions;
   private readonly entitySetUrl: string;
   private readonly adapter: HttpClientAdapter;
-  private readonly options: ResourceOptions;
+  private readonly routingType: RoutingType;
 
   constructor(
     options: ResourceOptions,
@@ -52,6 +55,7 @@ export class EntityClientImpl<TEntity, TKey extends EntityKey> implements Entity
   ) {
     this.options = options;
     this.adapter = adapter;
+    this.routingType = routingType;
 
     this.entitySetUrl = extendUrl(serviceUrl, this.options.entitySet);
   }
@@ -113,7 +117,7 @@ export class EntityClientImpl<TEntity, TKey extends EntityKey> implements Entity
     if (!this.options.update)
       throw new Error("This resource does not support updating entities");
 
-    const url = this.entitySetUrl;
+    const url = extendEntityUrl(this.entitySetUrl, this.routingType, key, this.options.valueBuilder);
     const worker = this.createSingleWorker(this.options.update, url, entity);
     return new EntitySingleImpl(worker);
   }
@@ -122,6 +126,24 @@ export class EntityClientImpl<TEntity, TKey extends EntityKey> implements Entity
     if (!this.options.update)
       throw new Error("This resource does not support deleting entities");
 
+    const url = extendEntityUrl(this.entitySetUrl, this.routingType, key, this.options.valueBuilder);
     //TODO Add this
+  }
+}
+
+function extendEntityUrl(url: string, routingType: RoutingType, id: EntityKey, builder: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[]) {
+  let useId: string;
+  if (Array.isArray(id) && Array.isArray(builder)) {
+    useId = id.map((item, i) => builder[i](item).toString()).join(",");
+  } else if (!Array.isArray(id) && !Array.isArray(builder)) {
+    useId = builder(id).toString();
+  } else {
+    throw new Error("The ids and value builders must both be arrays or non-arrays");
+  }
+
+  if (routingType === "slash") {
+    return `${url}/${useId}`;
+  } else {
+    return `${url}(${useId})`;
   }
 }

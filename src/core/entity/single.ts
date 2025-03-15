@@ -98,6 +98,7 @@ export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEnti
       url: this.options.url,
       headers: {},
       query: params,
+      body: this.options.payload,
     });
 
     let resolveData!: (data: TEntity) => void;
