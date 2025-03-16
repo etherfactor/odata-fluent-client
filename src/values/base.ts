@@ -18,13 +18,15 @@ export interface Value<TValue> {
 export type ValueFactory<TArgs extends SafeAny[] = SafeAny[], TOutput = SafeAny> =
   (...args: TArgs) => Value<TOutput>;
 
+export function createOperatorFactory(): OperatorFactory;
+export function createOperatorFactory<TOperators extends Record<string, ValueFactory>>(customOperators: TOperators) : ExtendedOperatorFactory<TOperators>;
 export function createOperatorFactory<TOperators extends Record<string, ValueFactory>>(
   customOperators?: TOperators
-) {
+): ExtendedOperatorFactory<TOperators> {
   const finalFactory = {
     ...defaultOperatorFactory,
     ...customOperators,
-  } as unknown as Omit<OperatorFactory, keyof TOperators> & TOperators;
+  } as unknown as ExtendedOperatorFactory<TOperators>;
 
   return finalFactory;
 }
@@ -136,6 +138,11 @@ const defaultOperatorFactory: OperatorFactory = {
     return new TrimFunctionValue(value);
   },
 };
+
+export type ExtendedOperatorFactory<TOperators extends Record<string, ValueFactory>> =
+  TOperators extends object
+    ? Omit<OperatorFactory, keyof TOperators> & TOperators
+    : OperatorFactory;
 
 export interface OperatorFactory {
 

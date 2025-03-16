@@ -24,16 +24,16 @@ export class ODataClient {
 }
 
 interface EntitySetBuilderAddKey<TEntity> {
-  withKeySelector<TKey extends EntityKey>(selector: (entity: TEntity) => TKey) : EntitySetBuilderAddValue<TEntity, TKey>;
+  withKey<TKey extends EntityKey<TEntity>>(key: TKey) : EntitySetBuilderAddValue<TEntity, TKey>;
 }
 
-interface EntitySetBuilderAddValue<TEntity, TKey extends EntityKey> {
-  withValueBuilder(builder: EntityKeyValue<TKey>): EntitySetBuilderAddMethod<TEntity, TKey>;
+interface EntitySetBuilderAddValue<TEntity, TKey extends EntityKey<TEntity>> {
+  withKeyType(builder: EntityKeyValue<EntityPropertyType<TEntity, TKey>>): EntitySetBuilderAddMethod<TEntity, TKey>;
 }
 
 interface EntitySetBuilderAddMethodFull<
   TEntity,
-  TKey extends EntityKey,
+  TKey extends EntityKey<TEntity>,
   TReadSet extends HttpMethod | undefined = undefined,
   TRead extends HttpMethod | undefined = undefined,
   TCreate extends HttpMethod | undefined = undefined,
@@ -50,7 +50,7 @@ interface EntitySetBuilderAddMethodFull<
 
 type EntitySetBuilderAddMethod<
   TEntity,
-  TKey extends EntityKey,
+  TKey extends EntityKey<TEntity>,
   TReadSet extends HttpMethod | undefined = undefined,
   TRead extends HttpMethod | undefined = undefined,
   TCreate extends HttpMethod | undefined = undefined,
@@ -66,7 +66,7 @@ type EntitySetBuilderAddMethod<
 
 class EntitySetBuilderImpl<
   TEntity,
-  TKey extends EntityKey,
+  TKey extends EntityKey<TEntity>,
   TReadSet extends HttpMethod | undefined = undefined,
   TRead extends HttpMethod | undefined = undefined,
   TCreate extends HttpMethod | undefined = undefined,
@@ -87,15 +87,15 @@ class EntitySetBuilderImpl<
     this.entitySet = entitySet;
   }
 
-  private selector!: (entity: TEntity) => TKey;
-  withKeySelector<TKey extends EntityKey>(selector: (entity: TEntity) => TKey): EntitySetBuilderAddValue<TEntity, TKey> {
-    this.selector = selector as SafeAny;
+  private key!: TKey;
+  withKey<TKey extends EntityKey<TEntity>>(key: TKey): EntitySetBuilderAddValue<TEntity, TKey> {
+    this.key = key as SafeAny;
     return this as SafeAny;
   }
 
-  private builder!: EntityKeyValue<TKey>;
-  withValueBuilder(builder: EntityKeyValue<TKey>): EntitySetBuilderAddMethod<TEntity, TKey, undefined, undefined, undefined, undefined, undefined> {
-    this.builder = builder;
+  private keyType?: EntityKeyValue<EntityPropertyType<TEntity, TKey>>;
+  withKeyType(builder: EntityKeyValue<EntityPropertyType<TEntity, TKey>>): EntitySetBuilderAddMethod<TEntity, TKey, undefined, undefined, undefined, undefined, undefined> {
+    this.keyType = builder as SafeAny;
     return this as SafeAny;
   }
 
@@ -139,7 +139,8 @@ class EntitySetBuilderImpl<
 
     const options: ResourceOptions = {
       entitySet: this.entitySet,
-      valueBuilder: this.builder as SafeAny,
+      key: this.key,
+      keyType: this.keyType as ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[],
       readSet: this.readSet,
       read: this.read,
       create: this.create,
@@ -151,12 +152,19 @@ class EntitySetBuilderImpl<
   }
 }
 
-type EntityKeyType = string | number | boolean;
-export type EntityKey = EntityKeyType | [EntityKeyType, ...EntityKeyType[]];
+export type EntityKey<TEntity> = keyof TEntity | [keyof TEntity, ...(keyof TEntity)[]];
 
-type EntityKeyValue<TKey> = TKey extends AnyArray
-  ? { [K in keyof TKey]: ((value: TKey[K]) => Value<TKey[K]>) | undefined }
-  : (value: TKey) => Value<TKey>;
+export type EntityPropertyType<TEntity, TKey> =
+  TKey extends (keyof TEntity)[]
+    ? { [K in keyof TKey]: TKey[K] extends keyof TEntity ? TEntity[TKey[K]] : never }
+    : TKey extends keyof TEntity
+    ? TEntity[TKey]
+    : never;
+
+type EntityKeyValue<TKey> =
+  TKey extends AnyArray
+    ? { [K in keyof TKey]: (value: TKey[K]) => Value<TKey[K]> }
+    : (value: TKey) => Value<TKey>;
 
 export interface HttpModelValidator<TEntity> {
   validate(data: unknown): data is TEntity;

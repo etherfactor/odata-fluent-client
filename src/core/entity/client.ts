@@ -1,12 +1,13 @@
 import { extendUrl, HttpMethod } from "../../utils/http";
 import { Value } from "../../values/base";
-import { EntityKey, HttpClientAdapter, RoutingType } from "../client";
+import { EntityKey, EntityPropertyType, HttpClientAdapter, RoutingType } from "../client";
 import { EntitySet, EntitySetImpl, EntitySetWorker, EntitySetWorkerImpl } from "./set";
 import { EntitySingle, EntitySingleImpl, EntitySingleWorker, EntitySingleWorkerImpl } from "./single";
 
 export interface ResourceOptions {
   entitySet: string;
-  valueBuilder: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[];
+  key: unknown | unknown[];
+  keyType: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[];
   readSet?: HttpMethod;
   read?: HttpMethod;
   create?: HttpMethod;
@@ -16,18 +17,18 @@ export interface ResourceOptions {
 
 interface EntityClientFull<
   TEntity,
-  TKey extends EntityKey
+  TKey extends EntityKey<TEntity>
 > {
   get set(): EntitySet<TEntity>;
-  read(key: TKey): EntitySingle<TEntity>;
+  read(key: EntityPropertyType<TEntity, TKey>): EntitySingle<TEntity>;
   create(entity: Partial<TEntity>): EntitySingle<TEntity>;
-  update(key: TKey, entity: Partial<TEntity>): EntitySingle<TEntity>;
-  delete(key: TKey): Promise<void>;
+  update(key: EntityPropertyType<TEntity, TKey>, entity: Partial<TEntity>): EntitySingle<TEntity>;
+  delete(key: EntityPropertyType<TEntity, TKey>): Promise<void>;
 }
 
 export type EntityClient<
   TEntity,
-  TKey extends EntityKey,
+  TKey extends EntityKey<TEntity>,
   TReadSet extends HttpMethod | undefined = undefined,
   TRead extends HttpMethod | undefined = undefined,
   TCreate extends HttpMethod | undefined = undefined,
@@ -40,7 +41,7 @@ export type EntityClient<
   (TUpdate extends string ? Pick<EntityClientFull<TEntity, TKey>, "update"> : {}) &
   (TDelete extends string ? Pick<EntityClientFull<TEntity, TKey>, "delete"> : {});
 
-export class EntityClientImpl<TEntity, TKey extends EntityKey> implements EntityClientFull<TEntity, TKey> {
+export class EntityClientImpl<TEntity, TKey extends EntityKey<TEntity>> implements EntityClientFull<TEntity, TKey> {
   
   private readonly options: ResourceOptions;
   private readonly entitySetUrl: string;
@@ -95,11 +96,11 @@ export class EntityClientImpl<TEntity, TKey extends EntityKey> implements Entity
     return new EntitySetImpl(worker);
   }
 
-  read(key: TKey): EntitySingle<TEntity> {
+  read(key: EntityPropertyType<TEntity, TKey>): EntitySingle<TEntity> {
     if (!this.options.read)
       throw new Error("This resource does not support reading entities");
 
-    const url = `${this.entitySetUrl}(${key})`;
+    const url = extendEntityUrl(this.entitySetUrl, this.routingType, this.options.key, key, this.options.keyType);
     const worker = this.createSingleWorker(this.options.read, url);
     return new EntitySingleImpl(worker);
   }
@@ -113,30 +114,34 @@ export class EntityClientImpl<TEntity, TKey extends EntityKey> implements Entity
     return new EntitySingleImpl(worker);
   }
 
-  update(key: TKey, entity: Partial<TEntity>): EntitySingle<TEntity> {
+  update(key: EntityPropertyType<TEntity, TKey>, entity: Partial<TEntity>): EntitySingle<TEntity> {
     if (!this.options.update)
       throw new Error("This resource does not support updating entities");
 
-    const url = extendEntityUrl(this.entitySetUrl, this.routingType, key, this.options.valueBuilder);
+    const url = extendEntityUrl(this.entitySetUrl, this.routingType, this.options.key, key, this.options.keyType);
     const worker = this.createSingleWorker(this.options.update, url, entity);
     return new EntitySingleImpl(worker);
   }
 
-  async delete(key: TKey): Promise<void> {
+  async delete(key: EntityPropertyType<TEntity, TKey>): Promise<void> {
     if (!this.options.update)
       throw new Error("This resource does not support deleting entities");
 
-    const url = extendEntityUrl(this.entitySetUrl, this.routingType, key, this.options.valueBuilder);
+    const url = extendEntityUrl(this.entitySetUrl, this.routingType, this.options.key, key, this.options.keyType);
     //TODO Add this
   }
 }
 
-function extendEntityUrl(url: string, routingType: RoutingType, id: EntityKey, builder: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[]) {
+function extendEntityUrl(url: string, routingType: RoutingType, keyName: unknown | unknown[], key: unknown | unknown[], keyType: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[]) {
   let useId: string;
-  if (Array.isArray(id) && Array.isArray(builder)) {
-    useId = id.map((item, i) => builder[i](item).toString()).join(",");
-  } else if (!Array.isArray(id) && !Array.isArray(builder)) {
-    useId = builder(id).toString();
+  if (Array.isArray(keyName) && Array.isArray(key) && Array.isArray(keyType)) {
+    useId = key.map((item, i) => {
+      const origKeyName = keyName[i] as string;
+      const useKeyName = origKeyName.substring(0, 1).toUpperCase() + origKeyName.substring(1);
+      return `${useKeyName}=${keyType[i](item).toString()}`;
+    }).join(",");
+  } else if (!Array.isArray(keyName) && !Array.isArray(key) && !Array.isArray(keyType)) {
+    useId = keyType(key).toString();
   } else {
     throw new Error("The ids and value builders must both be arrays or non-arrays");
   }
