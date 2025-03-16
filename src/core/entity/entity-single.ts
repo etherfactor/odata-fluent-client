@@ -2,9 +2,10 @@ import { JSONParser } from "@streamparser/json";
 import { HttpMethod } from "../../utils/http";
 import { InferArrayType, SafeAny } from "../../utils/types";
 import { HttpClientAdapter } from "../http-client-adapter";
-import { Expand, expandToString, ODataOptions, QueryParams, Select, selectToString } from "../params";
+import { Expand, expandToString, ODataOptions, QueryParams, Select, selectExpandToObject, selectToString } from "../params";
 import { EntityExpand, EntityExpandImpl } from "./entity-expand";
 import { EntityResponse } from "./entity-response";
+import { EntitySelectExpand } from "./entity-select-expand";
 
 export interface EntitySingle<TEntity> {
   execute(): EntityResponse<TEntity>;
@@ -77,7 +78,7 @@ export interface EntitySingleWorkerImplOptions<TEntity> {
   method: HttpMethod;
   url: string;
   payload?: Partial<TEntity>;
-  validator?: (value: unknown) => TEntity | Error;
+  validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
 }
 
 export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEntity> {
@@ -110,12 +111,14 @@ export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEnti
 
     let entity!: TEntity;
 
+    const selectExpand = selectExpandToObject(options);
+
     const parser = new JSONParser();
     
     parser.onValue = ({ value, key, parent, stack }) => {
       if (stack && stack.length === 0) {
         if (this.options.validator) {
-          const parseResult = this.options.validator(value);
+          const parseResult = this.options.validator(value, selectExpand);
           if (parseResult instanceof Error)
             throw parseResult;
 
@@ -145,7 +148,7 @@ export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEnti
         if (response.data instanceof Promise) {
           const value = await response.data as SafeAny;
           if (this.options.validator) {
-            const parseResult = this.options.validator(value);
+            const parseResult = this.options.validator(value, selectExpand);
             if (parseResult instanceof Error)
               throw parseResult;
 

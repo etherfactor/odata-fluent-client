@@ -3,6 +3,7 @@ import { AnyArray, SafeAny } from "../../utils/types";
 import { Value } from "../../values/base";
 import { DefaultHttpClientAdapter, HttpClientAdapter } from "../http-client-adapter";
 import { ODataClientConfig } from "../odata-client-config";
+import { EntitySelectExpand } from "./entity-select-expand";
 import { EntitySetClient, EntitySetClientImpl } from "./entity-set-client";
 import { EntitySetClientOptions } from "./entity-set-client-options";
 
@@ -29,7 +30,7 @@ interface EntitySetBuilderAddMethodFull<
   withCreate<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TMethod, TUpdate, TDelete, TValidator>;
   withUpdate<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TMethod, TDelete, TValidator>;
   withDelete<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TMethod, TValidator>;
-  withValidator(validator: (value: unknown) => TEntity | Error): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete, true>;
+  withValidator(validator: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete, true>;
   build(): EntitySetClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>;
 }
 
@@ -116,8 +117,8 @@ export class EntitySetBuilderImpl<
     return this as SafeAny;
   }
 
-  private validator?: (value: unknown) => TEntity | Error;
-  withValidator(validator: (value: unknown) => TEntity | Error): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete, true> {
+  private validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
+  withValidator(validator: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete, true> {
     this.validator = validator;
     return this as SafeAny;
   }

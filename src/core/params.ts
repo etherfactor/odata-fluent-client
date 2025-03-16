@@ -1,6 +1,7 @@
 import { Value } from "../values/base";
 import { AndLogicalValue } from "../values/logical";
 import { EntityExpand } from "./entity/entity-expand";
+import { EntitySelectExpand } from "./entity/entity-select-expand";
 
 export interface QueryParams {
   [key: string]: string
@@ -24,6 +25,19 @@ export interface Expand {
 export function expandToString(expand: Expand[]): string {
   const useValue = expand.map(expand => expand.value.toString()).join(', ');
   return useValue;
+}
+
+export function selectExpandToObject(options: ODataOptions): EntitySelectExpand {
+  const data: EntitySelectExpand = {
+    select: options.select ?? [],
+    expand: {},
+  };
+
+  for (const expand of options.expand ?? []) {
+    data.expand[expand.property] = selectExpandToObject({});
+  }
+
+  return data;
 }
 
 export type Filter = Value<boolean>;

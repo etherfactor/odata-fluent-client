@@ -2,6 +2,7 @@ import { extendUrl, HttpMethod } from "../../utils/http";
 import { Value } from "../../values/base";
 import { HttpClientAdapter } from "../http-client-adapter";
 import { ODataPathRoutingType } from "../odata-client-config";
+import { EntitySelectExpand } from "./entity-select-expand";
 import { EntitySet, EntitySetImpl, EntitySetWorker, EntitySetWorkerImpl } from "./entity-set";
 import { EntityKey, EntityPropertyType } from "./entity-set-client-builder";
 import { EntitySetClientOptions } from "./entity-set-client-options";
@@ -63,7 +64,7 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
       method: method,
       url: url,
       payload: payload,
-      validator: this.options.validator as (value: unknown) => TEntity | Error,
+      validator: this.options.validator as (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error,
     });
   }
 
@@ -77,6 +78,7 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
       method: method,
       url: url,
       payload: payload,
+      validator: this.options.validator as (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error,
     });
   }
 

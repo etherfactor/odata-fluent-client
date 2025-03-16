@@ -5,11 +5,12 @@ import { toIterable, toPromise } from "../../utils/promise";
 import { InferArrayType, SafeAny } from "../../utils/types";
 import { Value } from "../../values/base";
 import { HttpClientAdapter } from "../http-client-adapter";
-import { Count, Expand, Filter, ODataOptions, OrderBy, QueryParams, Select, Skip, SortDirection, Top, expandToString, filterToString, orderByToString, selectToString, skipToString, topToString } from "../params";
+import { Count, Expand, Filter, ODataOptions, OrderBy, QueryParams, Select, Skip, SortDirection, Top, expandToString, filterToString, orderByToString, selectExpandToObject, selectToString, skipToString, topToString } from "../params";
 import { PrefixGenerator } from "../prefix-generator";
 import { EntityAccessor, EntityAccessorImpl } from "./entity-accessor";
 import { EntityExpand, EntityExpandImpl } from "./entity-expand";
 import { EntitySetResponse } from "./entity-response";
+import { EntitySelectExpand } from "./entity-select-expand";
 
 export interface EntitySet<TEntity> {
   count(): EntitySet<TEntity>;
@@ -251,7 +252,7 @@ export interface EntitySetWorkerImplOptions<TEntity> {
   method: HttpMethod;
   url: string;
   payload?: Partial<TEntity>;
-  validator?: (value: unknown) => TEntity | Error;
+  validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
 }
 
 export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
@@ -292,6 +293,8 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
     const entities: TEntity[] = [];
     const queue = new AsyncQueue<TEntity>();
 
+    const selectExpand = selectExpandToObject(options);
+
     const parser = new JSONParser();
     
     parser.onValue = ({ value, key, parent, stack }) => {
@@ -302,7 +305,7 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
 
       if (stack && stack.length === 2 && stack[1].key === "value") {
         if (this.options.validator) {
-          const parseResult = this.options.validator(value);
+          const parseResult = this.options.validator(value, selectExpand);
           if (parseResult instanceof Error)
             throw parseResult;
 
@@ -341,7 +344,7 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
           const data = await response.data as SafeAny;
           for (const value of data["value"]) {
             if (this.options.validator) {
-              const parseResult = this.options.validator(value);
+              const parseResult = this.options.validator(value, selectExpand);
               if (parseResult instanceof Error)
                 throw parseResult;
 
