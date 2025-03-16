@@ -5,6 +5,7 @@ export interface EntitySetClientOptions {
   entitySet: string;
   key: unknown | unknown[];
   keyType: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[];
+  validator?: (value: unknown) => unknown | Error;
   readSet?: HttpMethod;
   read?: HttpMethod;
   create?: HttpMethod;

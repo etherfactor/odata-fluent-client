@@ -2,7 +2,6 @@ import { JSONParser } from "@streamparser/json";
 import { HttpMethod } from "../../utils/http";
 import { InferArrayType, SafeAny } from "../../utils/types";
 import { HttpClientAdapter } from "../http-client-adapter";
-import { HttpModelValidator } from "../http-model-validator";
 import { Expand, expandToString, ODataOptions, QueryParams, Select, selectToString } from "../params";
 import { EntityExpand, EntityExpandImpl } from "./entity-expand";
 import { EntityResponse } from "./entity-response";
@@ -78,7 +77,7 @@ export interface EntitySingleWorkerImplOptions<TEntity> {
   method: HttpMethod;
   url: string;
   payload?: Partial<TEntity>;
-  validator?: HttpModelValidator<TEntity>;
+  validator?: (value: unknown) => TEntity | Error;
 }
 
 export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEntity> {
@@ -116,14 +115,16 @@ export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEnti
     parser.onValue = ({ value, key, parent, stack }) => {
       if (stack && stack.length === 0) {
         if (this.options.validator) {
-          const parseResult = this.options.validator.validate(value);
-          if (!parseResult)
-            throw new Error("Model failed to validate; to get more detail, throw an exception from the validator");
+          const parseResult = this.options.validator(value);
+          if (parseResult instanceof Error)
+            throw parseResult;
+
+          entity = parseResult;
+        } else {
+          entity = value as TEntity;
         }
 
         console.log("received entity", value);
-
-        entity = value as TEntity;
       }
     };
 
@@ -144,12 +145,14 @@ export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEnti
         if (response.data instanceof Promise) {
           const value = await response.data as SafeAny;
           if (this.options.validator) {
-            const parseResult = this.options.validator.validate(value);
-            if (!parseResult)
-              throw new Error("Model failed to validate; to get more detail, throw an exception from the validator");
-          }
+            const parseResult = this.options.validator(value);
+            if (parseResult instanceof Error)
+              throw parseResult;
 
-          entity = value;
+            entity = parseResult;
+          } else {
+            entity = value;
+          }
         } else {
           for await (const chunk of response.data) {
             if (/\S/.test(chunk)) {

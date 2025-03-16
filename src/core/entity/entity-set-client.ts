@@ -63,6 +63,7 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
       method: method,
       url: url,
       payload: payload,
+      validator: this.options.validator as (value: unknown) => TEntity | Error,
     });
   }
 
