@@ -2,7 +2,7 @@ import { InferArrayType } from "../../utils/types";
 import { Value } from "../../values/base";
 import { Count, Expand, expandToString, Filter, filterToString, ODataOptions, OrderBy, orderByToString, Select, selectToString, Skip, skipToString, SortDirection, Top, topToString } from "../params";
 import { PrefixGenerator } from "../prefix-generator";
-import { EntityAccessor, EntityAccessorImpl } from "./accessor";
+import { EntityAccessor, EntityAccessorImpl } from "./entity-accessor";
 
 export interface EntityExpand<TEntity> {
   count(): EntityExpand<TEntity>;

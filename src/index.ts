@@ -1,12 +1,16 @@
-export { HttpClientAdapter, HttpModelValidator, HttpRequestData, HttpResponseData, ODataClient, RoutingType } from "./core/client";
+export { ODataClient } from "./core/odata-client";
+export { ODataClientConfig, ODataPathRoutingType } from "./core/odata-client-config";
 
-export { EntityClient } from "./core/entity/client";
-export { EntityExpand } from "./core/entity/expand";
-export { EntityResponse, EntitySetResponse } from "./core/entity/response";
-export { EntitySet } from "./core/entity/set";
-export { EntitySingle } from "./core/entity/single";
+export { EntityExpand } from "./core/entity/entity-expand";
+export { EntityResponse, EntitySetResponse } from "./core/entity/entity-response";
+export { EntitySet } from "./core/entity/entity-set";
+export { EntitySetClient as EntityClient } from "./core/entity/entity-set-client";
+export { EntitySingle } from "./core/entity/entity-single";
 
 export { Count, Expand, Filter, ODataOptions, OrderBy, QueryParams, Select, Skip, SortDirection, Top } from "./core/params";
+
+export { HttpClientAdapter, HttpRequestData, HttpResponseData } from "./core/http-client-adapter";
+export { HttpModelValidator } from "./core/http-model-validator";
 
 export { createOperatorFactory } from "./values/base";
 

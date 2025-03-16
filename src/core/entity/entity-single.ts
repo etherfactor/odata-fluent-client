@@ -1,10 +1,11 @@
 import { JSONParser } from "@streamparser/json";
 import { HttpMethod } from "../../utils/http";
 import { InferArrayType, SafeAny } from "../../utils/types";
-import { HttpClientAdapter, HttpModelValidator } from "../client";
+import { HttpClientAdapter } from "../http-client-adapter";
+import { HttpModelValidator } from "../http-model-validator";
 import { Expand, expandToString, ODataOptions, QueryParams, Select, selectToString } from "../params";
-import { EntityExpand, EntityExpandImpl } from "./expand";
-import { EntityResponse } from "./response";
+import { EntityExpand, EntityExpandImpl } from "./entity-expand";
+import { EntityResponse } from "./entity-response";
 
 export interface EntitySingle<TEntity> {
   execute(): EntityResponse<TEntity>;

@@ -4,12 +4,13 @@ import { HttpMethod } from "../../utils/http";
 import { toIterable, toPromise } from "../../utils/promise";
 import { InferArrayType, SafeAny } from "../../utils/types";
 import { Value } from "../../values/base";
-import { HttpClientAdapter, HttpModelValidator } from "../client";
+import { HttpClientAdapter } from "../http-client-adapter";
+import { HttpModelValidator } from "../http-model-validator";
 import { Count, Expand, Filter, ODataOptions, OrderBy, QueryParams, Select, Skip, SortDirection, Top, expandToString, filterToString, orderByToString, selectToString, skipToString, topToString } from "../params";
 import { PrefixGenerator } from "../prefix-generator";
-import { EntityAccessor, EntityAccessorImpl } from "./accessor";
-import { EntityExpand, EntityExpandImpl } from "./expand";
-import { EntitySetResponse } from "./response";
+import { EntityAccessor, EntityAccessorImpl } from "./entity-accessor";
+import { EntityExpand, EntityExpandImpl } from "./entity-expand";
+import { EntitySetResponse } from "./entity-response";
 
 export interface EntitySet<TEntity> {
   count(): EntitySet<TEntity>;

@@ -1,6 +1,6 @@
 import { Value } from "../values/base";
 import { AndLogicalValue } from "../values/logical";
-import { EntityExpand } from "./entity/expand";
+import { EntityExpand } from "./entity/entity-expand";
 
 export interface QueryParams {
   [key: string]: string

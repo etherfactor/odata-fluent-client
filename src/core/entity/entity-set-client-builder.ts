@@ -1,33 +1,16 @@
-import { HttpMethod } from "../utils/http";
-import { AnyArray, SafeAny } from "../utils/types";
-import { Value } from "../values/base";
-import { EntityClient, EntityClientImpl, ResourceOptions } from "./entity/client";
+import { HttpMethod } from "../../utils/http";
+import { AnyArray, SafeAny } from "../../utils/types";
+import { Value } from "../../values/base";
+import { DefaultHttpClientAdapter, HttpClientAdapter } from "../http-client-adapter";
+import { ODataClientConfig } from "../odata-client-config";
+import { EntitySetClient, EntitySetClientImpl } from "./entity-set-client";
+import { EntitySetClientOptions } from "./entity-set-client-options";
 
-export interface ODataClientConfig {
-  http: ODataClientHttpRawOptions | ODataClientHttpClientOptions;
-  serviceUrl: string;
-  routingType: RoutingType;
-}
-
-export class ODataClient {
-  private readonly config;
-  
-  constructor(
-    config: ODataClientConfig,
-  ) {
-    this.config = config;
-  }
-
-  entitySet<TEntity>(name: string): EntitySetBuilderAddKey<TEntity> {
-    return new EntitySetBuilderImpl(this.config, name);
-  }
-}
-
-interface EntitySetBuilderAddKey<TEntity> {
+export interface EntitySetBuilderAddKey<TEntity> {
   withKey<TKey extends EntityKey<TEntity>>(key: TKey) : EntitySetBuilderAddValue<TEntity, TKey>;
 }
 
-interface EntitySetBuilderAddValue<TEntity, TKey extends EntityKey<TEntity>> {
+export interface EntitySetBuilderAddValue<TEntity, TKey extends EntityKey<TEntity>> {
   withKeyType(builder: EntityKeyValue<EntityPropertyType<TEntity, TKey>>): EntitySetBuilderAddMethod<TEntity, TKey>;
 }
 
@@ -45,10 +28,10 @@ interface EntitySetBuilderAddMethodFull<
   withCreate<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TMethod, TUpdate, TDelete>;
   withUpdate<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TMethod, TDelete>;
   withDelete<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TMethod>;
-  build(): EntityClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>;
+  build(): EntitySetClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>;
 }
 
-type EntitySetBuilderAddMethod<
+export type EntitySetBuilderAddMethod<
   TEntity,
   TKey extends EntityKey<TEntity>,
   TReadSet extends HttpMethod | undefined = undefined,
@@ -64,7 +47,7 @@ type EntitySetBuilderAddMethod<
   (TDelete extends string ? {} : Pick<EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>, "withDelete">) &
   Pick<EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>, "build">;
 
-class EntitySetBuilderImpl<
+export class EntitySetBuilderImpl<
   TEntity,
   TKey extends EntityKey<TEntity>,
   TReadSet extends HttpMethod | undefined = undefined,
@@ -129,7 +112,7 @@ class EntitySetBuilderImpl<
     return this as SafeAny;
   }
 
-  build(): EntityClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete> {
+  build(): EntitySetClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete> {
     let adapter: HttpClientAdapter;
     if ("adapter" in this.config.http) {
       adapter = this.config.http.adapter;
@@ -137,7 +120,7 @@ class EntitySetBuilderImpl<
       adapter = DefaultHttpClientAdapter;
     }
 
-    const options: ResourceOptions = {
+    const options: EntitySetClientOptions = {
       entitySet: this.entitySet,
       key: this.key,
       keyType: this.keyType as ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[],
@@ -148,7 +131,7 @@ class EntitySetBuilderImpl<
       delete: this.delete,
     };
 
-    return new EntityClientImpl<TEntity, TKey>(options, adapter, this.config.serviceUrl, this.config.routingType);
+    return new EntitySetClientImpl<TEntity, TKey>(options, adapter, this.config.serviceUrl, this.config.routingType);
   }
 }
 
@@ -165,80 +148,3 @@ type EntityKeyValue<TKey> =
   TKey extends AnyArray
     ? { [K in keyof TKey]: (value: TKey[K]) => Value<TKey[K]> }
     : (value: TKey) => Value<TKey>;
-
-export interface HttpModelValidator<TEntity> {
-  validate(data: unknown): data is TEntity;
-}
-
-export type RoutingType = "parentheses" | "slash";
-
-interface ODataClientHttpRawOptions {
-  headers: Record<string, string>;
-}
-
-interface ODataClientHttpClientOptions {
-  adapter: HttpClientAdapter;
-}
-
-export interface HttpClientAdapter {
-  invoke(config: HttpRequestData): Promise<HttpResponseData>;
-}
-
-export interface HttpRequestData {
-  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  url: string;
-  headers: Record<string, string>;
-  query: Record<string, string>;
-  body?: any;
-}
-
-export interface HttpResponseData {
-  status: number;
-  data: Promise<unknown> | AsyncIterable<string>;
-}
-
-const DefaultHttpClientAdapter: HttpClientAdapter = {
-  invoke: async function (config: HttpRequestData): Promise<HttpResponseData> {
-    console.log(config);
-    let urlAndQuery = config.url;
-    if (config.query && Object.keys(config.query).length > 0) {
-      const query = Object.keys(config.query)
-        .map(key => `${key}=${encodeURIComponent(config.query[key])}`)
-        .join("&");
-
-      urlAndQuery = `${config.url}?${query}`;
-    }
-
-    const result = await fetch(
-      urlAndQuery,
-      {
-        method: config.method,
-        headers: config.headers,
-        body: config.body ? JSON.stringify(config.body) : undefined,
-      }
-    );
-
-    const decoder = new TextDecoder();
-    const reader = result.body?.getReader();
-    const iterable: AsyncIterable<string> = reader ? {
-      async *[Symbol.asyncIterator]() {
-        while (true) {
-          const { done, value } = await reader.read();
-          yield decoder.decode(value);
-          if (done) break;
-        }
-      }
-    } : emptyIterable;
-
-    return {
-      status: result.status,
-      data: iterable,
-    };
-  }
-}
-
-const emptyIterable = {
-  async *[Symbol.asyncIterator]() {
-    yield "";
-  }
-}

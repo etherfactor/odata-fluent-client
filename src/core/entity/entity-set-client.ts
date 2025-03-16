@@ -1,21 +1,13 @@
 import { extendUrl, HttpMethod } from "../../utils/http";
 import { Value } from "../../values/base";
-import { EntityKey, EntityPropertyType, HttpClientAdapter, RoutingType } from "../client";
-import { EntitySet, EntitySetImpl, EntitySetWorker, EntitySetWorkerImpl } from "./set";
-import { EntitySingle, EntitySingleImpl, EntitySingleWorker, EntitySingleWorkerImpl } from "./single";
+import { HttpClientAdapter } from "../http-client-adapter";
+import { ODataPathRoutingType } from "../odata-client-config";
+import { EntitySet, EntitySetImpl, EntitySetWorker, EntitySetWorkerImpl } from "./entity-set";
+import { EntityKey, EntityPropertyType } from "./entity-set-client-builder";
+import { EntitySetClientOptions } from "./entity-set-client-options";
+import { EntitySingle, EntitySingleImpl, EntitySingleWorker, EntitySingleWorkerImpl } from "./entity-single";
 
-export interface ResourceOptions {
-  entitySet: string;
-  key: unknown | unknown[];
-  keyType: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[];
-  readSet?: HttpMethod;
-  read?: HttpMethod;
-  create?: HttpMethod;
-  update?: HttpMethod;
-  delete?: HttpMethod;
-}
-
-interface EntityClientFull<
+interface EntitySetClientFull<
   TEntity,
   TKey extends EntityKey<TEntity>
 > {
@@ -26,7 +18,7 @@ interface EntityClientFull<
   delete(key: EntityPropertyType<TEntity, TKey>): Promise<void>;
 }
 
-export type EntityClient<
+export type EntitySetClient<
   TEntity,
   TKey extends EntityKey<TEntity>,
   TReadSet extends HttpMethod | undefined = undefined,
@@ -35,24 +27,24 @@ export type EntityClient<
   TUpdate extends HttpMethod | undefined = undefined,
   TDelete extends HttpMethod | undefined = undefined,
 > =
-  (TReadSet extends string ? Pick<EntityClientFull<TEntity, TKey>, "set"> : {}) &
-  (TRead extends string ? Pick<EntityClientFull<TEntity, TKey>, "read"> : {}) &
-  (TCreate extends string ? Pick<EntityClientFull<TEntity, TKey>, "create"> : {}) &
-  (TUpdate extends string ? Pick<EntityClientFull<TEntity, TKey>, "update"> : {}) &
-  (TDelete extends string ? Pick<EntityClientFull<TEntity, TKey>, "delete"> : {});
+  (TReadSet extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "set"> : {}) &
+  (TRead extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "read"> : {}) &
+  (TCreate extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "create"> : {}) &
+  (TUpdate extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "update"> : {}) &
+  (TDelete extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "delete"> : {});
 
-export class EntityClientImpl<TEntity, TKey extends EntityKey<TEntity>> implements EntityClientFull<TEntity, TKey> {
+export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> implements EntitySetClientFull<TEntity, TKey> {
   
-  private readonly options: ResourceOptions;
+  private readonly options: EntitySetClientOptions;
   private readonly entitySetUrl: string;
   private readonly adapter: HttpClientAdapter;
-  private readonly routingType: RoutingType;
+  private readonly routingType: ODataPathRoutingType;
 
   constructor(
-    options: ResourceOptions,
+    options: EntitySetClientOptions,
     adapter: HttpClientAdapter,
     serviceUrl: string,
-    routingType: RoutingType,
+    routingType: ODataPathRoutingType,
   ) {
     this.options = options;
     this.adapter = adapter;
@@ -132,7 +124,7 @@ export class EntityClientImpl<TEntity, TKey extends EntityKey<TEntity>> implemen
   }
 }
 
-function extendEntityUrl(url: string, routingType: RoutingType, keyName: unknown | unknown[], key: unknown | unknown[], keyType: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[]) {
+function extendEntityUrl(url: string, routingType: ODataPathRoutingType, keyName: unknown | unknown[], key: unknown | unknown[], keyType: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[]) {
   let useId: string;
   if (Array.isArray(keyName) && Array.isArray(key) && Array.isArray(keyType)) {
     useId = key.map((item, i) => {
