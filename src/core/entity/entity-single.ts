@@ -2,7 +2,7 @@ import { JSONParser } from "@streamparser/json";
 import { HttpMethod } from "../../utils/http";
 import { InferArrayType, SafeAny } from "../../utils/types";
 import { HttpClientAdapter } from "../http-client-adapter";
-import { Expand, expandToString, ODataOptions, QueryParams, Select, selectExpandToObject, selectToString } from "../params";
+import { Expand, getParams, ODataOptions, Select, selectExpandToObject } from "../params";
 import { EntityExpand, EntityExpandImpl } from "./entity-expand";
 import { EntityResponse } from "./entity-response";
 import { EntitySelectExpand } from "./entity-select-expand";
@@ -93,7 +93,7 @@ export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEnti
   }
 
   execute(options: ODataOptions): EntityResponse<TEntity> {
-    const params = this.getParams(options);
+    const params = getParams(options);
 
     const result = this.options.adapter.invoke({
       method: this.options.method,
@@ -127,8 +127,6 @@ export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEnti
         } else {
           entity = value as TEntity;
         }
-
-        console.log("received entity", value);
       }
     };
 
@@ -160,7 +158,6 @@ export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEnti
         } else {
           for await (const chunk of response.data) {
             if (/\S/.test(chunk)) {
-              console.log("chunk: >>", chunk, "<<");
               parser.write(chunk.trim());
             }
           }
@@ -175,19 +172,5 @@ export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEnti
     return {
       data: dataPromise,
     };
-  }
-
-  getParams(options: ODataOptions): QueryParams {
-    const params: QueryParams = {};
-
-    if (options.expand) {
-      params['$expand'] = expandToString(options.expand);
-    }
-
-    if (options.select) {
-      params['$select'] = selectToString(options.select);
-    }
-
-    return params;
   }
 }

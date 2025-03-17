@@ -11,5 +11,7 @@ export { Count, Expand, Filter, ODataOptions, OrderBy, QueryParams, Select, Skip
 
 export { HttpClientAdapter, HttpRequestData, HttpResponseData } from "./core/http-client-adapter";
 
+export { Guid } from "./types/guid";
+
 export { createOperatorFactory } from "./values/base";
 

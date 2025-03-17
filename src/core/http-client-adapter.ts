@@ -17,7 +17,6 @@ export interface HttpResponseData {
 
 export const DefaultHttpClientAdapter: HttpClientAdapter = {
   invoke: async function (config: HttpRequestData): Promise<HttpResponseData> {
-    console.log(config);
     let urlAndQuery = config.url;
     if (config.query && Object.keys(config.query).length > 0) {
       const query = Object.keys(config.query)
@@ -32,8 +31,6 @@ export const DefaultHttpClientAdapter: HttpClientAdapter = {
       headers: config.body ? { ...config.headers, "content-type": "application/json" } : config.headers,
       body: config.body ? JSON.stringify(config.body) : undefined,
     };
-
-    console.log("invoking", urlAndQuery, "with", options);
 
     const result = await fetch(
       urlAndQuery,

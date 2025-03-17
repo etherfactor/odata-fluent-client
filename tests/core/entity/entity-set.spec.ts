@@ -1,6 +1,7 @@
-import { Guid } from "../../types/guid/guid";
-import { EntitySet, o } from "./experiment";
-import { ɵEntitySet } from "./internal/entity-set";
+import { createOperatorFactory, EntitySet } from "../../../src";
+import { EntitySetImpl, EntitySetWorkerImpl } from "../../../src/core/entity/entity-set";
+import { getParams } from "../../../src/core/params";
+import { Guid } from "../../../src/types/guid";
 
 interface Model {
   id: Guid;
@@ -16,17 +17,24 @@ interface SubModel {
   value?: string;
 }
 
-describe('EntitySet', () => {
+const o = createOperatorFactory();
+
+describe('EntitySetImpl', () => {
   let set: EntitySet<Model>;
 
   beforeEach(() => {
-    set = new ɵEntitySet.Implementation<Model>();
+    const worker = new EntitySetWorkerImpl<Model>({
+      adapter: undefined!,
+      method: "GET",
+      url: "/v1/models",
+    });
+    set = new EntitySetImpl<Model>(worker);
   });
 
   it('should expand simple properties', () => {
     const expanded = set.expand('values');
 
-    const params = expanded.getParams();
+    const params = getParams(expanded.getOptions());
     expect(params['$expand']).toBe("values");
   });
 
@@ -40,7 +48,7 @@ describe('EntitySet', () => {
       )
     );
 
-    const params = expanded.getParams();
+    const params = getParams(expanded.getOptions());
     expect(params['$expand']).toBe("values($filter=key eq 'key')")
   });
 
@@ -49,7 +57,7 @@ describe('EntitySet', () => {
       x.orderBy('value')
     );
 
-    const params = expanded.getParams();
+    const params = getParams(expanded.getOptions());
     expect(params['$expand']).toBe("values($orderby=value asc)");
   });
 
@@ -58,7 +66,7 @@ describe('EntitySet', () => {
       x.skip(20)
     );
 
-    const params = expanded.getParams();
+    const params = getParams(expanded.getOptions());
     expect(params['$expand']).toBe("values($skip=20)");
   });
 
@@ -67,7 +75,7 @@ describe('EntitySet', () => {
       x.top(20)
     );
 
-    const params = expanded.getParams();
+    const params = getParams(expanded.getOptions());
     expect(params['$expand']).toBe("values($top=20)");
   });
 
@@ -77,7 +85,7 @@ describe('EntitySet', () => {
         .skip(20)
     );
 
-    const params = expanded.getParams();
+    const params = getParams(expanded.getOptions());
     expect(params['$expand']).toBe("values($skip=20; $top=20)");
   });
 
@@ -89,7 +97,7 @@ describe('EntitySet', () => {
       )
     );
 
-    const params = filtered.getParams();
+    const params = getParams(filtered.getOptions());
     expect(params['$filter']).toBe("id eq 00000000-0000-0000-0000-000000000000");
   });
 
@@ -107,7 +115,7 @@ describe('EntitySet', () => {
       )
     );
 
-    const params = filtered.getParams();
+    const params = getParams(filtered.getOptions());
     expect(params['$filter']).toBe("(quantity eq 1 and isActive eq true)");
   });
 
@@ -137,7 +145,7 @@ describe('EntitySet', () => {
       )
     );
 
-    const params = filtered.getParams();
+    const params = getParams(filtered.getOptions());
     expect(params['$filter']).toBe("((quantity eq 1 and isActive eq true) or (quantity eq 0 and isActive eq false))");
   });
 
@@ -157,14 +165,14 @@ describe('EntitySet', () => {
       )
     );
 
-    const params = filtered.getParams();
+    const params = getParams(filtered.getOptions());
     expect(params['$filter']).toBe("values/any(e0: (e0/key eq 'key' and e0/value eq 'value'))")
   });
 
   it('should orderby with one property', () => {
     const ordered = set.orderBy('quantity', 'asc');
 
-    const params = ordered.getParams();
+    const params = getParams(ordered.getOptions());
     expect(params['$orderby']).toBe("quantity asc");
   });
 
@@ -172,14 +180,14 @@ describe('EntitySet', () => {
     const ordered = set.orderBy('name', 'asc')
       .thenBy('quantity', 'desc');
 
-    const params = ordered.getParams();
+    const params = getParams(ordered.getOptions());
     expect(params['$orderby']).toBe("name asc, quantity desc");
   });
 
   it('should orderby with default asc', () => {
     const ordered = set.orderBy('name');
 
-    const params = ordered.getParams();
+    const params = getParams(ordered.getOptions());
     expect(params['$orderby']).toBe("name asc");
   });
 
@@ -187,39 +195,39 @@ describe('EntitySet', () => {
     const ordered = set.orderBy('quantity')
       .orderBy('name');
 
-    const params = ordered.getParams();
+    const params = getParams(ordered.getOptions());
     expect(params['$orderby']).toBe("name asc");
   });
 
   it('should select single properties', () => {
     const selected = set.select('name', 'quantity');
 
-    const params = selected.getParams();
+    const params = getParams(selected.getOptions());
     expect(params['$select']).toBe("name, quantity");
   });
 
   it('should select multiple properties', () => {
     const selected = set.select('name', 'quantity');
 
-    const params = selected.getParams();
+    const params = getParams(selected.getOptions());
     expect(params['$select']).toBe("name, quantity");
   });
 
   it('should skip', () => {
     const skipped = set.skip(20);
 
-    const params = skipped.getParams();
+    const params = getParams(skipped.getOptions());
     expect(params['$skip']).toBe("20");
   });
 
   it('should top', () => {
     const topped = set.top(20);
 
-    const params = topped.getParams();
+    const params = getParams(topped.getOptions());
     expect(params['$top']).toBe("20");
   });
 
-  it('should', () => {
+  it('should process multiple options simultaneously', () => {
     const result = set
       .filter(e =>
         o.or(
@@ -260,11 +268,36 @@ describe('EntitySet', () => {
       .top(20)
       .skip(20);
 
-    const params = result.getParams();
+    const params = getParams(result.getOptions());
     expect(params['$filter']).toBe("((quantity eq 1 and isActive eq true) or (quantity eq 0 and isActive eq false))");
     expect(params['$orderby']).toBe("name asc, description asc");
     expect(params['$skip']).toBe("20");
     expect(params['$top']).toBe("20");
     expect(params['$expand']).toBe("values($filter=value eq 'test'; $orderby=value asc)");
+  });
+
+  it('should allow separate chaining', () => {
+    const step1 = set.filter(e =>
+      o.eq(
+        e.prop('id'),
+        o.guid('00000000-0000-0000-0000-000000000000' as Guid),
+      )
+    );
+
+    const params1 = getParams(step1.getOptions());
+    expect(params1['$filter']).toBe("id eq 00000000-0000-0000-0000-000000000000");
+
+    const step2 = step1.orderBy('quantity', 'asc');
+
+    const params2 = getParams(step2.getOptions());
+    expect(params2['$filter']).toBe("id eq 00000000-0000-0000-0000-000000000000");
+    expect(params2['$orderby']).toBe("quantity asc");
+
+    const step3 = step1.orderBy('name', 'asc')
+      .thenBy('quantity', 'desc');
+
+    const params3 = getParams(step3.getOptions());
+    expect(params3['$filter']).toBe("id eq 00000000-0000-0000-0000-000000000000");
+    expect(params3['$orderby']).toBe("name asc, quantity desc");
   });
 });

@@ -5,7 +5,7 @@ import { toIterable, toPromise } from "../../utils/promise";
 import { InferArrayType, SafeAny } from "../../utils/types";
 import { Value } from "../../values/base";
 import { HttpClientAdapter } from "../http-client-adapter";
-import { Count, Expand, Filter, ODataOptions, OrderBy, QueryParams, Select, Skip, SortDirection, Top, expandToString, filterToString, orderByToString, selectExpandToObject, selectToString, skipToString, topToString } from "../params";
+import { Count, Expand, Filter, ODataOptions, OrderBy, Select, Skip, SortDirection, Top, getParams, selectExpandToObject } from "../params";
 import { PrefixGenerator } from "../prefix-generator";
 import { EntityAccessor, EntityAccessorImpl } from "./entity-accessor";
 import { EntityExpand, EntityExpandImpl } from "./entity-expand";
@@ -45,7 +45,6 @@ export class EntitySetImpl<TEntity> implements EntitySet<TEntity>, OrderedEntity
     worker: EntitySetWorker<TEntity>,
     options?: ODataOptions,
   ) {
-    console.log("new set; options", options);
     this.worker = worker;
     this.countValue = options?.count;
     this.expandValue = options?.expand;
@@ -267,7 +266,7 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
   }
 
   execute(options: ODataOptions): EntitySetResponse<TEntity> {
-    const params = this.getParams(options);
+    const params = getParams(options);
 
     const result = this.options.adapter.invoke({
       method: this.options.method,
@@ -300,7 +299,6 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
     
     parser.onValue = ({ value, key, parent, stack }) => {
       if (stack && stack.length === 1 && key === "@odata.count") {
-        console.log("received count", value);
         resolveCount(value as number);
       }
 
@@ -316,8 +314,6 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
           queue.push(value as TEntity);
           entities.push(value as TEntity);
         }
-
-        console.log("received entity", value);
       }
     };
 
@@ -357,7 +353,6 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
         } else {
           for await (const chunk of response.data) {
             if (/\S/.test(chunk)) {
-              console.log("chunk: >>", chunk, "<<");
               parser.write(chunk.trim());
             }
           }
@@ -372,39 +367,5 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
       data: dataPromise,
       iterator: queue,
     }
-  }
-
-  getParams(options: ODataOptions): QueryParams {
-    const params: QueryParams = {};
-
-    if (options.count) {
-      params["$count"] = "true";
-    }
-
-    if (options.expand) {
-      params["$expand"] = expandToString(options.expand);
-    }
-
-    if (options.filter) {
-      params["$filter"] = filterToString(options.filter);
-    }
-
-    if (options.orderBy) {
-      params["$orderby"] = orderByToString(options.orderBy);
-    }
-
-    if (options.select) {
-      params["$select"] = selectToString(options.select);
-    }
-
-    if (options.skip) {
-      params["$skip"] = skipToString(options.skip);
-    }
-
-    if (options.top) {
-      params["$top"] = topToString(options.top);
-    }
-
-    return params;
   }
 }

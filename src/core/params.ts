@@ -87,3 +87,37 @@ export function topToString(top: Top): string {
 }
 
 export type Count = true;
+
+export function getParams(options: ODataOptions): QueryParams {
+  const params: QueryParams = {};
+
+  if (options.count) {
+    params["$count"] = "true";
+  }
+
+  if (options.expand) {
+    params["$expand"] = expandToString(options.expand);
+  }
+
+  if (options.filter) {
+    params["$filter"] = filterToString(options.filter);
+  }
+
+  if (options.orderBy) {
+    params["$orderby"] = orderByToString(options.orderBy);
+  }
+
+  if (options.select) {
+    params["$select"] = selectToString(options.select);
+  }
+
+  if (options.skip) {
+    params["$skip"] = skipToString(options.skip);
+  }
+
+  if (options.top) {
+    params["$top"] = topToString(options.top);
+  }
+
+  return params;
+}
