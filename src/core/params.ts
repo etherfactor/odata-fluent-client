@@ -23,6 +23,7 @@ export interface Expand {
 }
 
 export function expandToString(expand: Expand[]): string {
+  console.log(expand);
   const useValue = expand.map(expand => expand.value.toString()).join(', ');
   return useValue;
 }

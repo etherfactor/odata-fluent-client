@@ -1,4 +1,4 @@
-import { InferArrayType } from "../../utils/types";
+import { InferArrayType, SafeAny } from "../../utils/types";
 import { Value } from "../../values/base";
 import { Count, Expand, expandToString, Filter, filterToString, ODataOptions, OrderBy, orderByToString, Select, selectToString, Skip, skipToString, SortDirection, Top, topToString } from "../params";
 import { PrefixGenerator } from "../prefix-generator";
@@ -6,9 +6,9 @@ import { EntityAccessor, EntityAccessorImpl } from "./entity-accessor";
 
 export interface EntityExpand<TEntity> {
   count(): EntityExpand<TEntity>;
-  expand<TExpanded extends keyof TEntity & string>(
+  expand<TExpanded extends keyof TEntity & string, TNewExpanded>(
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
-    builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntityExpand<TEntity>;
+    builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntityExpand<TEntity>;
   filter(builder: (entity: EntityAccessor<TEntity>) => Value<boolean>): EntityExpand<TEntity>;
   orderBy(property: keyof TEntity & string, direction?: SortDirection): OrderedEntityExpand<TEntity>;
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntityExpand<Pick<TEntity, TSelected>>;
@@ -53,8 +53,8 @@ export class EntityExpandImpl<TEntity> implements EntityExpand<TEntity>, Ordered
     return new EntityExpandImpl<TEntity>(this.property, options);
   }
 
-  expand<TExpanded extends keyof TEntity & string>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntityExpand<TEntity> {
-    let expander: EntityExpand<InferArrayType<TEntity[TExpanded]>> = new EntityExpandImpl<InferArrayType<TEntity[TExpanded]>>(property);
+  expand<TExpanded extends keyof TEntity & string, TNewExpanded>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntityExpand<TEntity> {
+    let expander: SafeAny = new EntityExpandImpl<InferArrayType<TEntity[TExpanded]>>(property);
     if (builder) {
       expander = builder(expander);
     }
@@ -65,7 +65,7 @@ export class EntityExpandImpl<TEntity> implements EntityExpand<TEntity>, Ordered
     const options = this.getOptions();
     options.expand = newExpand;
 
-    return new EntityExpandImpl<TEntity>(property, options);
+    return new EntityExpandImpl<TEntity>(this.property, options);
   }
 
   filter(builder: (entity: EntityAccessor<TEntity>) => Value<boolean>): EntityExpand<TEntity> {
@@ -90,7 +90,7 @@ export class EntityExpandImpl<TEntity> implements EntityExpand<TEntity>, Ordered
 
   thenBy(property: keyof TEntity & string, direction?: 'asc' | 'desc'): OrderedEntityExpand<TEntity> {
     const options = this.getOptions();
-    options.orderBy?.push({ property, direction: direction ?? 'asc' });
+    options.orderBy!.push({ property, direction: direction ?? 'asc' });
 
     return new EntityExpandImpl<TEntity>(this.property, options);
   }
@@ -98,7 +98,7 @@ export class EntityExpandImpl<TEntity> implements EntityExpand<TEntity>, Ordered
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntityExpand<Pick<TEntity, TSelected>> {
     const options = this.getOptions();
     options.select ??= [];
-    options.select = [...options.select, ...properties];
+    options.select = [...properties];
 
     return new EntityExpandImpl<Pick<TEntity, TSelected>>(this.property, options);
   }
@@ -132,6 +132,10 @@ export class EntityExpandImpl<TEntity> implements EntityExpand<TEntity>, Ordered
   toString(): string {
     let result = this.property;
     let extra = '';
+
+    if (this.countValue) {
+      extra += `; $count=true`;
+    }
 
     if (this.filterValue) {
       extra += `; $filter=${filterToString(this.filterValue)}`;

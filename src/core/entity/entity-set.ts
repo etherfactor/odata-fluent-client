@@ -15,9 +15,9 @@ import { EntitySelectExpand } from "./entity-select-expand";
 export interface EntitySet<TEntity> {
   count(): EntitySet<TEntity>;
   execute(): EntitySetResponse<TEntity>;
-  expand<TExpanded extends keyof TEntity & string>(
+  expand<TExpanded extends keyof TEntity & string, TNewExpanded>(
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
-    builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySet<TEntity>;
+    builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntitySet<TEntity>;
   filter(builder: (entity: EntityAccessor<TEntity>) => Value<boolean>): EntitySet<TEntity>;
   orderBy(property: keyof TEntity & string, direction?: SortDirection): OrderedEntitySet<TEntity>;
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySet<Pick<TEntity, TSelected>>;
@@ -66,8 +66,8 @@ export class EntitySetImpl<TEntity> implements EntitySet<TEntity>, OrderedEntity
     return this.new<TEntity>(this.worker, options);
   }
 
-  expand<TExpanded extends keyof TEntity & string>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySet<TEntity> {
-    let expander: EntityExpand<InferArrayType<TEntity[TExpanded]>> = new EntityExpandImpl<InferArrayType<TEntity[TExpanded]>>(property);
+  expand<TExpanded extends keyof TEntity & string, TNewExpanded>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntitySet<TEntity> {
+    let expander: SafeAny = new EntityExpandImpl<InferArrayType<TEntity[TExpanded]>>(property);
     if (builder) {
       expander = builder(expander);
     }

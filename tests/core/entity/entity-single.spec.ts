@@ -10,11 +10,14 @@ interface Model {
   name: string;
   description?: string;
   values: SubModel[];
+  altValues: SubModel[];
 }
 
 interface SubModel {
   key: string;
   value?: string;
+  related: SubModel[];
+  altRelated: SubModel[];
 }
 
 const o = createOperatorFactory();
@@ -38,6 +41,34 @@ describe('EntitySingleImpl', () => {
     expect(params['$expand']).toBe("values");
   });
 
+  it('should expand with count', () => {
+    const expanded = set.expand('values', x =>
+      x.count()
+    );
+
+    const params = getParams(expanded.getOptions());
+    expect(params['$expand']).toBe("values($count=true)")
+  });
+
+  it('should expand with expand', () => {
+    const expanded = set.expand('values', x =>
+      x.expand("related", x2 => x2)
+    );
+
+    const params = getParams(expanded.getOptions());
+    expect(params['$expand']).toBe("values($expand=related)")
+  });
+
+  it('should expand with multiple expands', () => {
+    const expanded = set.expand('values', x =>
+      x.expand("related", x2 => x2)
+        .expand("altRelated")
+    );
+
+    const params = getParams(expanded.getOptions());
+    expect(params['$expand']).toBe("values($expand=related, altRelated)")
+  });
+
   it('should expand with filter', () => {
     const expanded = set.expand('values', x =>
       x.filter(e =>
@@ -52,6 +83,25 @@ describe('EntitySingleImpl', () => {
     expect(params['$expand']).toBe("values($filter=key eq 'key')")
   });
 
+  it('should expand with multiple filters', () => {
+    const expanded = set.expand('values', x =>
+      x.filter(e =>
+        o.eq(
+          e.prop('key'),
+          o.string('key')
+        )
+      ).filter(e =>
+        o.eq(
+          e.prop('value'),
+          o.string('value')
+        )
+      )
+    );
+
+    const params = getParams(expanded.getOptions());
+    expect(params['$expand']).toBe("values($filter=(key eq 'key' and value eq 'value'))")
+  });
+
   it('should expand with orderby', () => {
     const expanded = set.expand('values', x =>
       x.orderBy('value')
@@ -59,6 +109,36 @@ describe('EntitySingleImpl', () => {
 
     const params = getParams(expanded.getOptions());
     expect(params['$expand']).toBe("values($orderby=value asc)");
+  });
+
+  it('should expand with multiple orderbys', () => {
+    const expanded = set.expand('values', x =>
+      x.orderBy('value', 'desc')
+        .thenBy('key', 'asc')
+        .thenBy('value')
+    );
+
+    const params = getParams(expanded.getOptions());
+    expect(params['$expand']).toBe("values($orderby=value desc, key asc, value asc)");
+  });
+
+  it('should expand with select', () => {
+    const expanded = set.expand('values', x =>
+      x.select("key")
+    );
+
+    const params = getParams(expanded.getOptions());
+    expect(params['$expand']).toBe("values($select=key)");
+  });
+
+  it('should expand with multiple selects', () => {
+    const expanded = set.expand('values', x =>
+      x.select("key", "value")
+        .select("value")
+    );
+
+    const params = getParams(expanded.getOptions());
+    expect(params['$expand']).toBe("values($select=value)");
   });
 
   it('should expand with skip', () => {
@@ -79,7 +159,7 @@ describe('EntitySingleImpl', () => {
     expect(params['$expand']).toBe("values($top=20)");
   });
 
-  it('should expand with multiple', () => {
+  it('should expand with multiple options', () => {
     const expanded = set.expand('values', x =>
       x.top(20)
         .skip(20)
@@ -87,6 +167,19 @@ describe('EntitySingleImpl', () => {
 
     const params = getParams(expanded.getOptions());
     expect(params['$expand']).toBe("values($skip=20; $top=20)");
+  });
+
+  it('should expand multiple times', () => {
+    const expanded = set.expand('values', x =>
+      x.top(20)
+        .skip(10)
+    ).expand('altValues', x =>
+      x.top(10)
+        .skip(20)
+    );
+
+    const params = getParams(expanded.getOptions());
+    expect(params['$expand']).toBe("values($skip=10; $top=20), altValues($skip=20; $top=10)");
   });
 
   it('should select single properties', () => {

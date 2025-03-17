@@ -9,9 +9,9 @@ import { EntitySelectExpand } from "./entity-select-expand";
 
 export interface EntitySingle<TEntity> {
   execute(): EntityResponse<TEntity>;
-  expand<TExpanded extends keyof TEntity & string>(
+  expand<TExpanded extends keyof TEntity & string, TNewExpanded>(
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
-    builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySingle<TEntity>;
+    builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntitySingle<TEntity>;
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySingle<Pick<TEntity, TSelected>>;
   getOptions(): ODataOptions;
 }
@@ -35,8 +35,8 @@ export class EntitySingleImpl<TEntity> implements EntitySingle<TEntity> {
     return new EntitySingleImpl(this.worker as unknown as EntitySingleWorkerImpl<TNewEntity>, options);
   }
 
-  expand<TExpanded extends keyof TEntity & string>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySingle<TEntity> {
-    let expander: EntityExpand<InferArrayType<TEntity[TExpanded]>> = new EntityExpandImpl<InferArrayType<TEntity[TExpanded]>>(property);
+  expand<TExpanded extends keyof TEntity & string, TNewExpanded>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntitySingle<TEntity> {
+    let expander: SafeAny = new EntityExpandImpl<InferArrayType<TEntity[TExpanded]>>(property);
     if (builder) {
       expander = builder(expander);
     }
