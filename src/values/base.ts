@@ -1,7 +1,7 @@
 import { Guid } from "../types/guid";
 import { SafeAny } from "../utils/types";
 import { EqualsComparisonValue, GreaterThanComparisonValue, GreaterThanOrEqualsComparisonValue, LessThanComparisonValue, LessThanOrEqualsComparisonValue, NotEqualsComparisonValue } from "./comparison";
-import { BooleanConstantValue, DateConstantValue, DateTimeConstantValue, GuidConstantValue, IntegerConstantValue, NullConstantValue, StringConstantValue, TimeConstantValue } from "./constant";
+import { BooleanConstantValue, DateConstantValue, DateTimeConstantValue, DoubleConstantValue, GuidConstantValue, IntegerConstantValue, NullConstantValue, StringConstantValue, TimeConstantValue } from "./constant";
 import { CeilingFunctionValue, ConcatFunctionValue, ContainsFunctionValue, EndsWithFunctionValue, FloorFunctionValue, IndexOfFunctionValue, LengthFunctionValue, RoundFunctionValue, StartsWithFunctionValue, SubstringFunctionValue, ToLowerFunctionValue, ToUpperFunctionValue, TrimFunctionValue } from "./function";
 import { AndLogicalValue, NotLogicalValue, OrLogicalValue } from "./logical";
 import { AddOperatorValue, DivideOperatorValue, ModuloOperatorValue, MultiplyOperatorValue, SubtractOperatorValue } from "./operator";
@@ -55,6 +55,9 @@ const defaultOperatorFactory: OperatorFactory = {
   },
   dateTime(value) {
     return new DateTimeConstantValue(value);
+  },
+  double(value) {
+    return new DoubleConstantValue(value);
   },
   divide(left, right) {
     return new DivideOperatorValue(left, right);
@@ -216,18 +219,20 @@ export interface OperatorFactory {
 
   /** null */
   null(): Value<SafeAny>;
-  /** '...' */
-  string(value: string): Value<string>;
   /** ... */
   bool(value: boolean): Value<boolean>;
-  /** ... */
-  int(value: number): Value<number>;
-  /** ... */
-  guid(value: Guid): Value<Guid>;
   /** ... */
   date(value: Date): Value<Date>;
   /** ... */
   dateTime(value: Date): Value<Date>;
+  /** ... */
+  double(value: number): Value<number>;
+  /** ... */
+  guid(value: Guid): Value<Guid>;
+  /** ... */
+  int(value: number): Value<number>;
+  /** '...' */
+  string(value: string): Value<string>;
   /** ... */
   time(value: Date): Value<Date>;
 }

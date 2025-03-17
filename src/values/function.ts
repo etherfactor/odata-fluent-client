@@ -107,7 +107,7 @@ export class SubstringFunctionValue extends FunctionValue<string> {
   override eval(data?: unknown): string {
     const root = (this.args[0] as Value<string>).eval(data);
     const arg1 = (this.args[1] as Value<number>).eval(data);
-    const arg2 = (this.args[2] as Value<number>).eval(data);
+    const arg2 = (this.args[2] as Value<number>)?.eval(data);
     return root.substring(arg1, arg2);
   }
 }

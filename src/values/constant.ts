@@ -63,6 +63,24 @@ export class DateTimeConstantValue extends ConstantValue<Date> {
   }
 }
 
+export class DoubleConstantValue extends ConstantValue<number> {
+
+  private readonly value: number;
+
+  constructor(value: number) {
+    super();
+    this.value = value;
+  }
+
+  override toString(): string {
+    return this.value.toString();
+  }
+
+  override eval(): number {
+    return this.value;
+  }
+}
+
 export class GuidConstantValue extends ConstantValue<Guid> {
 
   private readonly value: Guid;
