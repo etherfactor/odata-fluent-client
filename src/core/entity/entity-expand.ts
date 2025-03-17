@@ -15,6 +15,7 @@ export interface EntityExpand<TEntity> {
   skip(count: number): EntityExpand<TEntity>;
   top(count: number): EntityExpand<TEntity>;
   toString(): string;
+  getOptions(): ODataOptions;
 }
 
 export interface OrderedEntityExpand<TEntity> extends EntityExpand<TEntity> {
@@ -116,7 +117,7 @@ export class EntityExpandImpl<TEntity> implements EntityExpand<TEntity>, Ordered
     return new EntityExpandImpl<TEntity>(this.property, options);
   }
 
-  private getOptions(): ODataOptions {
+  getOptions(): ODataOptions {
     return {
       count: this.countValue,
       expand: this.expandValue,

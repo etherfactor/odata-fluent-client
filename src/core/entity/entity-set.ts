@@ -23,6 +23,7 @@ export interface EntitySet<TEntity> {
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySet<Pick<TEntity, TSelected>>;
   skip(count: number): EntitySet<TEntity>;
   top(count: number): EntitySet<TEntity>;
+  getOptions(): ODataOptions;
 }
 
 export interface OrderedEntitySet<TEntity> extends EntitySet<TEntity> {
@@ -130,7 +131,7 @@ export class EntitySetImpl<TEntity> implements EntitySet<TEntity>, OrderedEntity
     return this.new<TEntity>(this.worker, options);
   }
 
-  private getOptions(): ODataOptions {
+  getOptions(): ODataOptions {
     return {
       count: this.countValue,
       expand: this.expandValue,

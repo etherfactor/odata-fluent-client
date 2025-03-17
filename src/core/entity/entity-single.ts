@@ -13,6 +13,7 @@ export interface EntitySingle<TEntity> {
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
     builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<InferArrayType<TEntity[TExpanded]>>): EntitySingle<TEntity>;
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySingle<Pick<TEntity, TSelected>>;
+  getOptions(): ODataOptions;
 }
 
 export class EntitySingleImpl<TEntity> implements EntitySingle<TEntity> {
@@ -57,7 +58,7 @@ export class EntitySingleImpl<TEntity> implements EntitySingle<TEntity> {
     return this.new<Pick<TEntity, TSelected>>(this.worker, options);
   }
 
-  private getOptions(): ODataOptions {
+  getOptions(): ODataOptions {
     return {
       expand: this.expandValue,
       select: this.selectValue,

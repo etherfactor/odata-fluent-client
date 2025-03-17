@@ -34,7 +34,7 @@ export function selectExpandToObject(options: ODataOptions): EntitySelectExpand 
   };
 
   for (const expand of options.expand ?? []) {
-    data.expand[expand.property] = selectExpandToObject({});
+    data.expand[expand.property] = selectExpandToObject(expand.value.getOptions());
   }
 
   return data;
