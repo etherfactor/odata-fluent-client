@@ -3,7 +3,7 @@ import { createOperatorFactory, Guid } from "../../src";
 const o = createOperatorFactory();
 
 describe('Operators', () => {
-  // Logical
+  //Logical operators
   it('should and', () => {
     const trueValue = o.and(o.bool(true), o.bool(true));
     expect(trueValue.toString()).toBe("(true and true)");
@@ -30,7 +30,7 @@ describe('Operators', () => {
     expect(value.eval()).toBe(false);
   });
 
-  // Comparison Operators
+  //Comparison operators
   it('should eq', () => {
     const numEq = o.eq(o.int(3), o.int(3));
     expect(numEq.toString()).toBe("3 eq 3");
@@ -49,6 +49,10 @@ describe('Operators', () => {
     const boolNe = o.ne(o.bool(true), o.bool(true));
     expect(boolNe.toString()).toBe("true ne true");
     expect(boolNe.eval()).toBe(false);
+
+    const strNe = o.ne(o.string("a"), o.string("b"));
+    expect(strNe.toString()).toBe("'a' ne 'b'");
+    expect(strNe.eval()).toBe(true);
   });
 
   it('should lt', () => {
@@ -59,6 +63,10 @@ describe('Operators', () => {
     const value2 = o.lt(o.int(3), o.int(2));
     expect(value2.toString()).toBe("3 lt 2");
     expect(value2.eval()).toBe(false);
+
+    const strLt = o.lt(o.string("a"), o.string("b"));
+    expect(strLt.toString()).toBe("'a' lt 'b'");
+    expect(strLt.eval()).toBe(true);
   });
 
   it('should le', () => {
@@ -69,6 +77,10 @@ describe('Operators', () => {
     const value2 = o.le(o.int(4), o.int(3));
     expect(value2.toString()).toBe("4 le 3");
     expect(value2.eval()).toBe(false);
+
+    const strLe = o.le(o.string("a"), o.string("b"));
+    expect(strLe.toString()).toBe("'a' le 'b'");
+    expect(strLe.eval()).toBe(true);
   });
 
   it('should gt', () => {
@@ -79,6 +91,10 @@ describe('Operators', () => {
     const value2 = o.gt(o.int(3), o.int(5));
     expect(value2.toString()).toBe("3 gt 5");
     expect(value2.eval()).toBe(false);
+
+    const strGt = o.gt(o.string("a"), o.string("b"));
+    expect(strGt.toString()).toBe("'a' gt 'b'");
+    expect(strGt.eval()).toBe(false);
   });
 
   it('should ge', () => {
@@ -89,9 +105,13 @@ describe('Operators', () => {
     const value2 = o.ge(o.int(3), o.int(5));
     expect(value2.toString()).toBe("3 ge 5");
     expect(value2.eval()).toBe(false);
+
+    const strGe = o.ge(o.string("a"), o.string("b"));
+    expect(strGe.toString()).toBe("'a' ge 'b'");
+    expect(strGe.eval()).toBe(false);
   });
 
-  // String Operators
+  //String operators
   it('should contains', () => {
     const value = o.contains(o.string("hello world"), o.string("world"));
     expect(value.toString()).toBe("contains('hello world', 'world')");
@@ -174,7 +194,7 @@ describe('Operators', () => {
     expect(value.eval()).toBe("hello");
   });
 
-  // Arithmetic Operators
+  //Arithmetic operators
   it('should add', () => {
     const value = o.add(o.int(1), o.int(2));
     expect(value.toString()).toBe("(1 add 2)");
@@ -223,7 +243,7 @@ describe('Operators', () => {
     expect(value.eval()).toBe(2);
   });
 
-  // Constant values
+  //Constant values
   it('should null', () => {
     const value = o.null();
     expect(value.toString()).toBe("null");
