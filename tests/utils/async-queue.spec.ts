@@ -74,8 +74,6 @@ describe('AsyncQueue', () => {
     const first = await iterator.next();
     expect(first.value).toBe(1);
 
-    console.log("now failing queue");
-
     //Now, while the iterator is waiting for the next item, call fail()
     queue.fail(new Error('Queue failed'));
 
