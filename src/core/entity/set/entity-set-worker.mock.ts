@@ -8,22 +8,28 @@ import { Skip } from "../../parameters/skip";
 import { Top } from "../../parameters/top";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
 import { EntitySetResponse } from "../response/entity-response";
-import { EntitySetWorker } from "./entity-set";
+import { EntitySetWorker } from "./entity-set-worker";
+
+export interface EntitySetWorkerMockOptions<TEntity> {
+  getData: () => Record<string, TEntity>;
+  payload?: Partial<TEntity>;
+  validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
+}
 
 export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
 
-  private readonly config;
+  private readonly options;
 
   constructor(
-    config: EntitySetWorkerMockOptions<TEntity>,
+    options: EntitySetWorkerMockOptions<TEntity>,
   ) {
-    this.config = config;
+    this.options = options;
   }
 
   execute(options: ODataOptions): EntitySetResponse<TEntity> {
     const data = {
       "@odata.count": undefined as number | undefined,
-      value: Object.values(this.config.getData())
+      value: Object.values(this.options.getData())
     };
     
     data.value = this.applyFilters(data.value, options.filter ?? []);
@@ -104,10 +110,4 @@ export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
 
     return finalData;
   }
-}
-
-export interface EntitySetWorkerMockOptions<TEntity> {
-  getData: () => Record<string, TEntity>;
-  payload?: Partial<TEntity>;
-  validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
 }

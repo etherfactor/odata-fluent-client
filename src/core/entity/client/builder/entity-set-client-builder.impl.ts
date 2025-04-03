@@ -1,12 +1,11 @@
 import { HttpMethod } from "../../../../utils/http";
 import { SafeAny } from "../../../../utils/types";
 import { Value } from "../../../../values/base";
-import { ODataClientConfig } from "../../../client/odata-client";
-import { DefaultHttpClientAdapter, HttpClientAdapter } from "../../../http/http-client-adapter";
-import { EntitySetClientOptions } from "../../entity-set-client-options";
+import { ODataClientOptions } from "../../../client/odata-client";
+import { DefaultHttpClientAdapter } from "../../../http/http-client-adapter";
 import { EntitySelectExpand } from "../../expand/entity-select-expand";
 import { EntitySetClient } from "../entity-set-client";
-import { EntitySetClientImpl } from "../entity-set-client.impl";
+import { EntitySetClientImpl, EntitySetClientImplOptions } from "../entity-set-client.impl";
 import { EntityKey, EntityKeyValue, EntityPropertyType, EntitySetBuilderAddKey, EntitySetBuilderAddMethod, EntitySetBuilderAddMethodFull, EntitySetBuilderAddValue } from "./entity-set-client-builder";
 
 export class EntitySetBuilderImpl<
@@ -21,14 +20,14 @@ export class EntitySetBuilderImpl<
   EntitySetBuilderAddValue<TEntity, TKey>,
   EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>
 {
-  private readonly config: ODataClientConfig;
+  private readonly options: ODataClientOptions;
   private readonly entitySet: string;
 
   constructor(
-    config: ODataClientConfig,
+    options: ODataClientOptions,
     entitySet: string,
   ) {
-    this.config = config;
+    this.options = options;
     this.entitySet = entitySet;
   }
 
@@ -81,18 +80,15 @@ export class EntitySetBuilderImpl<
   }
 
   build(): EntitySetClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete> {
-    let adapter: HttpClientAdapter;
-    if ("adapter" in this.config.http) {
-      adapter = this.config.http.adapter;
-    } else {
-      adapter = DefaultHttpClientAdapter;
-    }
+    const adapter = this.options.http.adapter
+      ?? DefaultHttpClientAdapter;
 
-    const options: EntitySetClientOptions = {
-      serviceUrl: this.config.serviceUrl,
+    const options: EntitySetClientImplOptions = {
+      serviceUrl: this.options.serviceUrl,
       entitySet: this.entitySet,
-      routingType: this.config.routingType,
+      routingType: this.options.routingType,
       adapter: adapter,
+      headers: this.options.http.headers ?? {},
       key: this.key,
       keyType: this.keyType as ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[],
       validator: this.validator,

@@ -2,21 +2,40 @@ import { HttpMethod, extendUrl } from "../../../utils/http";
 import { SafeAny } from "../../../utils/types";
 import { Value } from "../../../values/base";
 import { ODataPathRoutingType } from "../../client/odata-client";
-import { EntitySetClientOptions } from "../entity-set-client-options";
-import { EntitySet, EntitySetImpl, EntitySetWorker } from "../set/entity-set";
-import { EntitySetWorkerImpl } from "../set/entity-set.impl";
-import { EntitySingle, EntitySingleWorker } from "../single/entity-single";
-import { EntitySingleImpl, EntitySingleWorkerImpl } from "../single/entity-single.impl";
+import { HttpClientAdapter } from "../../http/http-client-adapter";
+import { EntitySelectExpand } from "../expand/entity-select-expand";
+import { EntitySet, EntitySetImpl } from "../set/entity-set";
+import { EntitySetWorker } from "../set/entity-set-worker";
+import { EntitySetWorkerImpl } from "../set/entity-set-worker.impl";
+import { EntitySingle, EntitySingleImpl } from "../single/entity-single";
+import { EntitySingleWorker } from "../single/entity-single-worker";
+import { EntitySingleWorkerImpl } from "../single/entity-single-worker.impl";
 import { EntityKey, EntityPropertyType } from "./builder/entity-set-client-builder";
 import { EntitySetClientFull } from "./entity-set-client";
 
+export interface EntitySetClientImplOptions {
+  serviceUrl: string;
+  entitySet: string;
+  routingType: ODataPathRoutingType;
+  adapter: HttpClientAdapter;
+  headers: Record<string, string>;
+  key: unknown | unknown[];
+  keyType: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[];
+  validator?: (value: unknown, selectExpand: EntitySelectExpand) => unknown | Error;
+  readSet?: HttpMethod;
+  read?: HttpMethod;
+  create?: HttpMethod;
+  update?: HttpMethod;
+  delete?: HttpMethod;
+}
+
 export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> implements EntitySetClientFull<TEntity, TKey> {
   
-  private readonly options: EntitySetClientOptions;
+  private readonly options: EntitySetClientImplOptions;
   private readonly entitySetUrl: string;
 
   constructor(
-    options: EntitySetClientOptions,
+    options: EntitySetClientImplOptions,
   ) {
     this.options = options;
     this.entitySetUrl = extendUrl(this.options.serviceUrl, this.options.entitySet);
@@ -27,6 +46,7 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
       adapter: this.options.adapter,
       method: method,
       url: url,
+      headers: this.options.headers,
       payload: payload,
       validator: this.options.validator as SafeAny, //generic typing doesn't play nicely with this
     });
@@ -37,6 +57,7 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
       adapter: this.options.adapter,
       method: method,
       url: url,
+      headers: this.options.headers,
       payload: payload,
       validator: this.options.validator as SafeAny, //generic typing doesn't play nicely with this
     });

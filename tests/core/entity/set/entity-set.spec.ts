@@ -1,6 +1,6 @@
 import { createOperatorFactory, EntitySet, Guid } from "../../../../src";
 import { EntitySetImpl } from "../../../../src/core/entity/set/entity-set";
-import { EntitySetWorkerImpl } from "../../../../src/core/entity/set/entity-set.impl";
+import { EntitySetWorkerImpl } from "../../../../src/core/entity/set/entity-set-worker.impl";
 import { getParams } from "../../../../src/core/parameters/odata-options";
 
 
@@ -31,6 +31,7 @@ describe('EntitySetImpl', () => {
       adapter: undefined!,
       method: "GET",
       url: "/v1/models",
+      headers: {},
     });
     set = new EntitySetImpl<Model>(worker);
   });

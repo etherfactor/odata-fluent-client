@@ -1,34 +1,30 @@
-
 import { EntitySetBuilderAddKey } from "../entity/client/builder/entity-set-client-builder";
 import { EntitySetBuilderImpl } from "../entity/client/builder/entity-set-client-builder.impl";
 import { HttpClientAdapter } from "../http/http-client-adapter";
 
-export interface ODataClientConfig {
-  http: ODataClientHttpRawOptions | ODataClientHttpClientOptions;
+export interface ODataClientOptions {
+  http: ODataClientHttpOptions;
   serviceUrl: string;
   routingType: ODataPathRoutingType;
 }
 
 export type ODataPathRoutingType = "parentheses" | "slash";
 
-interface ODataClientHttpRawOptions {
-  headers: Record<string, string>;
-}
-
-interface ODataClientHttpClientOptions {
-  adapter: HttpClientAdapter;
+interface ODataClientHttpOptions {
+  adapter?: HttpClientAdapter;
+  headers?: Record<string, string>;
 }
 
 export class ODataClient {
-  private readonly config;
+  private readonly options;
   
   constructor(
-    config: ODataClientConfig,
+    options: ODataClientOptions,
   ) {
-    this.config = config;
+    this.options = options;
   }
 
   entitySet<TEntity>(name: string): EntitySetBuilderAddKey<TEntity> {
-    return new EntitySetBuilderImpl(this.config, name);
+    return new EntitySetBuilderImpl(this.options, name);
   }
 }

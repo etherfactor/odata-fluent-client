@@ -1,73 +1,19 @@
 import { JSONParser } from "@streamparser/json";
-import { Expand, ODataOptions, Select } from "../../..";
+import { ODataOptions } from "../../..";
 import { HttpMethod } from "../../../utils/http";
-import { InferArrayType, SafeAny } from "../../../utils/types";
+import { SafeAny } from "../../../utils/types";
 import { HttpClientAdapter } from "../../http/http-client-adapter";
 import { selectExpandToObject } from "../../parameters/expand";
 import { getParams } from "../../parameters/odata-options";
-import { EntityExpand, EntityExpandImpl } from "../expand/entity-expand";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
 import { EntityResponse } from "../response/entity-response";
-import { EntitySingle, EntitySingleWorker } from "./entity-single";
-
-export class EntitySingleImpl<TEntity> implements EntitySingle<TEntity> {
-
-  protected readonly worker: EntitySingleWorker<TEntity>;
-  private readonly expandValue?: Expand[];
-  private readonly selectValue?: Select[];
-
-  constructor(
-    worker: EntitySingleWorker<TEntity>,
-    options?: ODataOptions,
-  ) {
-    this.worker = worker;
-    this.expandValue = options?.expand;
-    this.selectValue = options?.select;
-  }
-
-  protected new<TNewEntity = TEntity>(worker: EntitySingleWorker<TNewEntity>, options?: ODataOptions): EntitySingleImpl<TNewEntity> {
-    return new EntitySingleImpl(this.worker as unknown as EntitySingleWorkerImpl<TNewEntity>, options);
-  }
-
-  expand<TExpanded extends keyof TEntity & string, TNewExpanded>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntitySingle<TEntity> {
-    let expander: SafeAny = new EntityExpandImpl<InferArrayType<TEntity[TExpanded]>>(property);
-    if (builder) {
-      expander = builder(expander);
-    }
-
-    const expand: Expand = { property, value: expander };
-    const newExpand = [...(this.expandValue ?? []), expand];
-
-    const options = this.getOptions();
-    options.expand = newExpand;
-
-    return this.new<TEntity>(this.worker, options);
-  }
-
-  select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySingle<Pick<TEntity, TSelected>> {
-    const options = this.getOptions();
-    options.select ??= [];
-    options.select = [...options.select, ...properties];
-
-    return this.new<Pick<TEntity, TSelected>>(this.worker, options);
-  }
-
-  getOptions(): ODataOptions {
-    return {
-      expand: this.expandValue,
-      select: this.selectValue,
-    };
-  }
-
-  execute(): EntityResponse<TEntity> {
-    return this.worker.execute(this.getOptions());
-  }
-}
+import { EntitySingleWorker } from "./entity-single-worker";
 
 export interface EntitySingleWorkerImplOptions<TEntity> {
   adapter: HttpClientAdapter;
   method: HttpMethod;
   url: string;
+  headers: Record<string, string>;
   payload?: Partial<TEntity>;
   validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
 }
@@ -88,7 +34,7 @@ export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEnti
     const result = this.options.adapter.invoke({
       method: this.options.method,
       url: this.options.url,
-      headers: {},
+      headers: this.options.headers,
       query: params,
       body: this.options.payload,
     });

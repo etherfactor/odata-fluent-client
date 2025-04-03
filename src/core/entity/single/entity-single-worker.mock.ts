@@ -4,21 +4,21 @@ import { ODataOptions } from "../../parameters/odata-options";
 import { Select } from "../../parameters/select";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
 import { EntityResponse } from "../response/entity-response";
-import { EntitySingleWorker } from "./entity-single";
+import { EntitySingleWorker } from "./entity-single-worker";
 
 export class EntitySingleWorkerMock<TEntity> implements EntitySingleWorker<TEntity> {
 
-  private readonly config;
+  private readonly options;
 
   constructor(
-    config: EntitySingleWorkerMockOptions<TEntity>,
+    options: EntitySingleWorkerMockOptions<TEntity>,
   ) {
-    this.config = config;
+    this.options = options;
   }
 
   execute(options: ODataOptions): EntityResponse<TEntity> {
-    const useId = toIdString(this.config.id);
-    const entitySet = this.config.getData();
+    const useId = toIdString(this.options.id);
+    const entitySet = this.options.getData();
     let data: TEntity = entitySet[useId];
     
     data = this.applySelect(data, options.select ?? []);

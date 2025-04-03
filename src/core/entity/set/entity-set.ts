@@ -1,8 +1,6 @@
-import { HttpMethod } from "../../../utils/http";
 import { PrefixGenerator } from "../../../utils/prefix-generator";
 import { InferArrayType, SafeAny } from "../../../utils/types";
 import { Value } from "../../../values/base";
-import { HttpClientAdapter } from "../../http/http-client-adapter";
 import { Count } from "../../parameters/count";
 import { Expand } from "../../parameters/expand";
 import { Filter } from "../../parameters/filter";
@@ -13,8 +11,8 @@ import { Skip } from "../../parameters/skip";
 import { Top } from "../../parameters/top";
 import { EntityAccessor, EntityAccessorImpl } from "../expand/entity-accessor";
 import { EntityExpand, EntityExpandImpl } from "../expand/entity-expand";
-import { EntitySelectExpand } from "../expand/entity-select-expand";
 import { EntitySetResponse } from "../response/entity-response";
+import { EntitySetWorker } from "./entity-set-worker";
 
 export interface EntitySet<TEntity> {
   count(): EntitySet<TEntity>;
@@ -32,10 +30,6 @@ export interface EntitySet<TEntity> {
 
 export interface OrderedEntitySet<TEntity> extends EntitySet<TEntity> {
   thenBy(property: keyof TEntity & string, direction?: SortDirection): EntitySet<TEntity>;
-}
-
-export interface EntitySetWorker<TEntity> {
-  execute(options: ODataOptions): EntitySetResponse<TEntity>;
 }
 
 export class EntitySetImpl<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TEntity> {
@@ -153,12 +147,4 @@ export class EntitySetImpl<TEntity> implements EntitySet<TEntity>, OrderedEntity
   execute(): EntitySetResponse<TEntity> {
     return this.worker.execute(this.getOptions());
   }
-}
-
-export interface EntitySetWorkerImplOptions<TEntity> {
-  adapter: HttpClientAdapter;
-  method: HttpMethod;
-  url: string;
-  payload?: Partial<TEntity>;
-  validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
 }

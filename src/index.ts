@@ -1,5 +1,5 @@
-export { ODataClient, ODataClientConfig, ODataPathRoutingType } from "./core/client/odata-client";
-export { MockODataClient, MockODataClientConfig } from "./core/client/odata-client.mock";
+export { ODataClient, ODataClientOptions as ODataClientConfig, ODataPathRoutingType } from "./core/client/odata-client";
+export { MockODataClient, MockODataClientOptions as MockODataClientConfig } from "./core/client/odata-client.mock";
 
 export { DefaultHttpClientAdapter, HttpClientAdapter, HttpRequestData, HttpResponseData } from "./core/http/http-client-adapter";
 

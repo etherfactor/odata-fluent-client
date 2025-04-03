@@ -1,5 +1,6 @@
 import { createOperatorFactory, EntitySingle, Guid } from "../../../../src";
-import { EntitySingleImpl, EntitySingleWorkerImpl } from "../../../../src/core/entity/single/entity-single.impl";
+import { EntitySingleImpl } from "../../../../src/core/entity/single/entity-single";
+import { EntitySingleWorkerImpl } from "../../../../src/core/entity/single/entity-single-worker.impl";
 import { getParams } from "../../../../src/core/parameters/odata-options";
 
 interface Model {
@@ -29,6 +30,7 @@ describe('EntitySingleImpl', () => {
       adapter: undefined!,
       method: "GET",
       url: "/v1/models",
+      headers: {},
     });
     set = new EntitySingleImpl<Model>(worker);
   });

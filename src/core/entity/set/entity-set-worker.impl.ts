@@ -1,10 +1,22 @@
 import { JSONParser } from "@streamparser/json";
 import { AsyncQueue } from "../../../utils/async-queue";
+import { HttpMethod } from "../../../utils/http";
 import { SafeAny } from "../../../utils/types";
+import { HttpClientAdapter } from "../../http/http-client-adapter";
 import { selectExpandToObject } from "../../parameters/expand";
 import { getParams, ODataOptions } from "../../parameters/odata-options";
+import { EntitySelectExpand } from "../expand/entity-select-expand";
 import { EntitySetResponse } from "../response/entity-response";
-import { EntitySetWorker, EntitySetWorkerImplOptions } from "./entity-set";
+import { EntitySetWorker } from "./entity-set-worker";
+
+export interface EntitySetWorkerImplOptions<TEntity> {
+  adapter: HttpClientAdapter;
+  method: HttpMethod;
+  url: string;
+  headers: Record<string, string>;
+  payload?: Partial<TEntity>;
+  validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
+}
 
 export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
 
@@ -22,7 +34,7 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
     const result = this.options.adapter.invoke({
       method: this.options.method,
       url: this.options.url,
-      headers: {},
+      headers: this.options.headers,
       query: params,
       body: this.options.payload,
     });

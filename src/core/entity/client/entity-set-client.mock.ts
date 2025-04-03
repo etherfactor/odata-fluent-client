@@ -1,15 +1,16 @@
 import { HttpMethod } from "../../../utils/http";
 import { toIdString } from "../../../utils/id";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
-import { EntitySet, EntitySetImpl, EntitySetWorker } from "../set/entity-set";
-import { EntitySetWorkerMock } from "../set/entity-set.mock";
-import { EntitySingle, EntitySingleWorker } from "../single/entity-single";
-import { EntitySingleImpl } from "../single/entity-single.impl";
-import { EntitySingleWorkerMock } from "../single/entity-single.mock";
+import { EntitySet, EntitySetImpl } from "../set/entity-set";
+import { EntitySetWorker } from "../set/entity-set-worker";
+import { EntitySetWorkerMock } from "../set/entity-set-worker.mock";
+import { EntitySingle, EntitySingleImpl } from "../single/entity-single";
+import { EntitySingleWorker } from "../single/entity-single-worker";
+import { EntitySingleWorkerMock } from "../single/entity-single-worker.mock";
 import { EntityKey, EntityPropertyType } from "./builder/entity-set-client-builder";
 import { EntitySetClientFull } from "./entity-set-client";
 
-export interface MockEntitySetClientOptions {
+export interface EntitySetClientMockOptions {
   entitySet: Record<string, object>;
   addIdToEntity?: (entity: any) => string;
   validator?: (value: unknown, selectExpand: EntitySelectExpand) => unknown | Error;
@@ -22,10 +23,10 @@ export interface MockEntitySetClientOptions {
 
 export class EntitySetClientMock<TEntity, TKey extends EntityKey<TEntity>> implements EntitySetClientFull<TEntity, TKey> {
   
-  private readonly options: MockEntitySetClientOptions;
+  private readonly options: EntitySetClientMockOptions;
 
   constructor(
-    options: MockEntitySetClientOptions,
+    options: EntitySetClientMockOptions,
   ) {
     this.options = options;
   }
