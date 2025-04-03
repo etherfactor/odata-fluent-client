@@ -1,9 +1,14 @@
 import { toIterable, toPromise } from "../../../utils/promise";
 import { SafeAny } from "../../../utils/types";
-import { EntitySetResponse } from "../../entity/entity-response";
-import { EntitySelectExpand } from "../../entity/entity-select-expand";
-import { EntitySetWorker } from "../../entity/entity-set";
-import { Filter, ODataOptions, OrderBy, Select, Skip, Top } from "../../params";
+import { Filter } from "../../parameters/filter";
+import { ODataOptions } from "../../parameters/odata-options";
+import { OrderBy } from "../../parameters/orderby";
+import { Select } from "../../parameters/select";
+import { Skip } from "../../parameters/skip";
+import { Top } from "../../parameters/top";
+import { EntitySelectExpand } from "../expand/entity-select-expand";
+import { EntitySetResponse } from "../response/entity-response";
+import { EntitySetWorker } from "./entity-set";
 
 export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
 

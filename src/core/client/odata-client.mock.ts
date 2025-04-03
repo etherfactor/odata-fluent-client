@@ -1,6 +1,6 @@
-import { ODataClient } from "../../client/odata-client";
-import { EntitySetBuilderAddKey } from "../../entity/entity-set-client-builder";
-import { EntitySetBuilderMock } from "../entity/entity-set-client-builder.mock";
+import { EntitySetBuilderAddKey } from "../entity/client/builder/entity-set-client-builder";
+import { EntitySetBuilderMock } from "../entity/client/builder/entity-set-client-builder.mock";
+import { ODataClient } from "./odata-client";
 
 export interface MockODataClientConfig {
   getEntitySet(name: string): Record<string, object>;

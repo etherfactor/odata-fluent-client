@@ -1,7 +1,14 @@
-import { InferArrayType, SafeAny } from "../../utils/types";
-import { Value } from "../../values/base";
-import { Count, Expand, expandToString, Filter, filterToString, ODataOptions, OrderBy, orderByToString, Select, selectToString, Skip, skipToString, SortDirection, Top, topToString } from "../params";
-import { PrefixGenerator } from "../prefix-generator";
+import { PrefixGenerator } from "../../../utils/prefix-generator";
+import { InferArrayType, SafeAny } from "../../../utils/types";
+import { Value } from "../../../values/base";
+import { Count } from "../../parameters/count";
+import { Expand, expandToString } from "../../parameters/expand";
+import { Filter, filterToString } from "../../parameters/filter";
+import { ODataOptions } from "../../parameters/odata-options";
+import { OrderBy, orderByToString, SortDirection } from "../../parameters/orderby";
+import { Select, selectToString } from "../../parameters/select";
+import { Skip, skipToString } from "../../parameters/skip";
+import { Top, topToString } from "../../parameters/top";
 import { EntityAccessor, EntityAccessorImpl } from "./entity-accessor";
 
 export interface EntityExpand<TEntity> {

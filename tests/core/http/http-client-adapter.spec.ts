@@ -1,4 +1,4 @@
-import { DefaultHttpClientAdapter, HttpRequestData } from "../../src/core/http-client-adapter";
+import { DefaultHttpClientAdapter, HttpRequestData } from "../../../src";
 
 describe('DefaultHttpClientAdapter', () => {
   beforeEach(() => {

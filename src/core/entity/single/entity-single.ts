@@ -1,7 +1,7 @@
-import { InferArrayType } from "../../utils/types";
-import { ODataOptions } from "../params";
-import { EntityExpand } from "./entity-expand";
-import { EntityResponse } from "./entity-response";
+import { ODataOptions } from "../../..";
+import { InferArrayType } from "../../../utils/types";
+import { EntityExpand } from "../expand/entity-expand";
+import { EntityResponse } from "../response/entity-response";
 
 export interface EntitySingle<TEntity> {
   execute(): EntityResponse<TEntity>;

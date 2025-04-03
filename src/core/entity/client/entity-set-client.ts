@@ -1,6 +1,7 @@
-import { EntitySet, EntitySingle } from "../..";
-import { HttpMethod } from "../../utils/http";
-import { EntityKey, EntityPropertyType } from "./entity-set-client-builder";
+import { HttpMethod } from "../../../utils/http";
+import { EntitySet } from "../set/entity-set";
+import { EntitySingle } from "../single/entity-single";
+import { EntityKey, EntityPropertyType } from "./builder/entity-set-client-builder";
 
 export interface EntitySetClientFull<
   TEntity,

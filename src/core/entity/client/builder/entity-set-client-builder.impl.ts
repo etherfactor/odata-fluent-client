@@ -1,12 +1,15 @@
-import { HttpMethod } from "../../../utils/http";
-import { SafeAny } from "../../../utils/types";
-import { EntitySelectExpand } from "../../entity/entity-select-expand";
-import { EntitySetClient } from "../../entity/entity-set-client";
-import { EntityKey, EntityKeyValue, EntityPropertyType, EntitySetBuilderAddKey, EntitySetBuilderAddMethod, EntitySetBuilderAddMethodFull, EntitySetBuilderAddValue } from "../../entity/entity-set-client-builder";
-import { MockODataClientConfig } from "../client/odata-client.mock";
-import { EntitySetClientMock, MockEntitySetClientOptions } from "./entity-set-client.mock";
+import { HttpMethod } from "../../../../utils/http";
+import { SafeAny } from "../../../../utils/types";
+import { Value } from "../../../../values/base";
+import { ODataClientConfig } from "../../../client/odata-client";
+import { DefaultHttpClientAdapter, HttpClientAdapter } from "../../../http/http-client-adapter";
+import { EntitySetClientOptions } from "../../entity-set-client-options";
+import { EntitySelectExpand } from "../../expand/entity-select-expand";
+import { EntitySetClient } from "../entity-set-client";
+import { EntitySetClientImpl } from "../entity-set-client.impl";
+import { EntityKey, EntityKeyValue, EntityPropertyType, EntitySetBuilderAddKey, EntitySetBuilderAddMethod, EntitySetBuilderAddMethodFull, EntitySetBuilderAddValue } from "./entity-set-client-builder";
 
-export class EntitySetBuilderMock<
+export class EntitySetBuilderImpl<
   TEntity,
   TKey extends EntityKey<TEntity>,
   TReadSet extends HttpMethod | undefined = undefined,
@@ -18,11 +21,11 @@ export class EntitySetBuilderMock<
   EntitySetBuilderAddValue<TEntity, TKey>,
   EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>
 {
-  private readonly config: MockODataClientConfig;
+  private readonly config: ODataClientConfig;
   private readonly entitySet: string;
 
   constructor(
-    config: MockODataClientConfig,
+    config: ODataClientConfig,
     entitySet: string,
   ) {
     this.config = config;
@@ -78,9 +81,20 @@ export class EntitySetBuilderMock<
   }
 
   build(): EntitySetClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete> {
-    const options: MockEntitySetClientOptions = {
-      entitySet: this.config.getEntitySet(this.entitySet),
-      addIdToEntity: this.config.addIdToEntity[this.entitySet],
+    let adapter: HttpClientAdapter;
+    if ("adapter" in this.config.http) {
+      adapter = this.config.http.adapter;
+    } else {
+      adapter = DefaultHttpClientAdapter;
+    }
+
+    const options: EntitySetClientOptions = {
+      serviceUrl: this.config.serviceUrl,
+      entitySet: this.entitySet,
+      routingType: this.config.routingType,
+      adapter: adapter,
+      key: this.key,
+      keyType: this.keyType as ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[],
       validator: this.validator,
       readSet: this.readSet,
       read: this.read,
@@ -89,6 +103,6 @@ export class EntitySetBuilderMock<
       delete: this.delete,
     };
 
-    return new EntitySetClientMock<TEntity, TKey>(options);
+    return new EntitySetClientImpl<TEntity, TKey>(options);
   }
 }

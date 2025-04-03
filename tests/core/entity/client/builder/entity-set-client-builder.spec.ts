@@ -1,6 +1,5 @@
-import { createOperatorFactory, ODataClient } from "../../../src";
-import { DefaultHttpClientAdapter, HttpClientAdapter } from "../../../src/core/http-client-adapter";
-import { toPromise } from "../../../src/utils/promise";
+import { createOperatorFactory, DefaultHttpClientAdapter, HttpClientAdapter, ODataClient } from "../../../../../src";
+import { toPromise } from "../../../../../src/utils/promise";
 
 interface Model {
   id: number;

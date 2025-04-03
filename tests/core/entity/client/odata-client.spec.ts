@@ -1,4 +1,4 @@
-import { ODataClient } from "../../src";
+import { ODataClient } from "../../../../src";
 
 interface Model {
   id: number;

@@ -1,13 +1,20 @@
-import { HttpMethod } from "../../utils/http";
-import { InferArrayType, SafeAny } from "../../utils/types";
-import { Value } from "../../values/base";
-import { HttpClientAdapter } from "../http-client-adapter";
-import { Count, Expand, Filter, ODataOptions, OrderBy, Select, Skip, SortDirection, Top } from "../params";
-import { PrefixGenerator } from "../prefix-generator";
-import { EntityAccessor, EntityAccessorImpl } from "./entity-accessor";
-import { EntityExpand, EntityExpandImpl } from "./entity-expand";
-import { EntitySetResponse } from "./entity-response";
-import { EntitySelectExpand } from "./entity-select-expand";
+import { HttpMethod } from "../../../utils/http";
+import { PrefixGenerator } from "../../../utils/prefix-generator";
+import { InferArrayType, SafeAny } from "../../../utils/types";
+import { Value } from "../../../values/base";
+import { HttpClientAdapter } from "../../http/http-client-adapter";
+import { Count } from "../../parameters/count";
+import { Expand } from "../../parameters/expand";
+import { Filter } from "../../parameters/filter";
+import { ODataOptions } from "../../parameters/odata-options";
+import { OrderBy, SortDirection } from "../../parameters/orderby";
+import { Select } from "../../parameters/select";
+import { Skip } from "../../parameters/skip";
+import { Top } from "../../parameters/top";
+import { EntityAccessor, EntityAccessorImpl } from "../expand/entity-accessor";
+import { EntityExpand, EntityExpandImpl } from "../expand/entity-expand";
+import { EntitySelectExpand } from "../expand/entity-select-expand";
+import { EntitySetResponse } from "../response/entity-response";
 
 export interface EntitySet<TEntity> {
   count(): EntitySet<TEntity>;

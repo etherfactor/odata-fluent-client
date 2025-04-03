@@ -1,7 +1,6 @@
-import { createOperatorFactory, EntitySingle } from "../../../src";
-import { EntitySingleImpl, EntitySingleWorkerImpl } from "../../../src/core/entity/entity-single.impl";
-import { getParams } from "../../../src/core/params";
-import { Guid } from "../../../src/types/guid";
+import { createOperatorFactory, EntitySingle, Guid } from "../../../../src";
+import { EntitySingleImpl, EntitySingleWorkerImpl } from "../../../../src/core/entity/single/entity-single.impl";
+import { getParams } from "../../../../src/core/parameters/odata-options";
 
 interface Model {
   id: Guid;

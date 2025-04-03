@@ -1,8 +1,8 @@
-import { AnyArray, InferArrayType } from "../../utils/types";
-import { Value } from "../../values/base";
-import { AllCollectionValue, AnyCollectionValue } from "../../values/collection";
-import { EntityPropertyValue } from "../../values/property";
-import { PrefixGenerator } from "../prefix-generator";
+import { PrefixGenerator } from "../../../utils/prefix-generator";
+import { AnyArray, InferArrayType } from "../../../utils/types";
+import { Value } from "../../../values/base";
+import { AllCollectionValue, AnyCollectionValue } from "../../../values/collection";
+import { EntityPropertyValue } from "../../../values/property";
 
 export interface EntityAccessor<TEntity> {
   prop<TKey extends keyof TEntity & string>(property: TKey): Value<TEntity[TKey]>;

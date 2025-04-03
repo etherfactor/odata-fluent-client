@@ -1,11 +1,13 @@
 import { JSONParser } from "@streamparser/json";
-import { HttpMethod } from "../../utils/http";
-import { InferArrayType, SafeAny } from "../../utils/types";
-import { HttpClientAdapter } from "../http-client-adapter";
-import { Expand, getParams, ODataOptions, Select, selectExpandToObject } from "../params";
-import { EntityExpand, EntityExpandImpl } from "./entity-expand";
-import { EntityResponse } from "./entity-response";
-import { EntitySelectExpand } from "./entity-select-expand";
+import { Expand, ODataOptions, Select } from "../../..";
+import { HttpMethod } from "../../../utils/http";
+import { InferArrayType, SafeAny } from "../../../utils/types";
+import { HttpClientAdapter } from "../../http/http-client-adapter";
+import { selectExpandToObject } from "../../parameters/expand";
+import { getParams } from "../../parameters/odata-options";
+import { EntityExpand, EntityExpandImpl } from "../expand/entity-expand";
+import { EntitySelectExpand } from "../expand/entity-select-expand";
+import { EntityResponse } from "../response/entity-response";
 import { EntitySingle, EntitySingleWorker } from "./entity-single";
 
 export class EntitySingleImpl<TEntity> implements EntitySingle<TEntity> {

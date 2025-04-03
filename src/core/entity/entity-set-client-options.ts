@@ -1,8 +1,8 @@
 import { HttpMethod } from "../../utils/http";
 import { Value } from "../../values/base";
 import { ODataPathRoutingType } from "../client/odata-client";
-import { HttpClientAdapter } from "../http-client-adapter";
-import { EntitySelectExpand } from "./entity-select-expand";
+import { HttpClientAdapter } from "../http/http-client-adapter";
+import { EntitySelectExpand } from "./expand/entity-select-expand";
 
 export interface EntitySetClientOptions {
   serviceUrl: string;

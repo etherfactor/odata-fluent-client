@@ -1,13 +1,13 @@
 import { HttpMethod } from "../../../utils/http";
 import { toIdString } from "../../../utils/id";
-import { EntitySelectExpand } from "../../entity/entity-select-expand";
-import { EntitySet, EntitySetImpl, EntitySetWorker } from "../../entity/entity-set";
-import { EntitySetClientFull } from "../../entity/entity-set-client";
-import { EntityKey, EntityPropertyType } from "../../entity/entity-set-client-builder";
-import { EntitySingle, EntitySingleWorker } from "../../entity/entity-single";
-import { EntitySingleImpl } from "../../entity/entity-single.impl";
-import { EntitySetWorkerMock } from "./entity-set.mock";
-import { EntitySingleWorkerMock } from "./entity-single.mock";
+import { EntitySelectExpand } from "../expand/entity-select-expand";
+import { EntitySet, EntitySetImpl, EntitySetWorker } from "../set/entity-set";
+import { EntitySetWorkerMock } from "../set/entity-set.mock";
+import { EntitySingle, EntitySingleWorker } from "../single/entity-single";
+import { EntitySingleImpl } from "../single/entity-single.impl";
+import { EntitySingleWorkerMock } from "../single/entity-single.mock";
+import { EntityKey, EntityPropertyType } from "./builder/entity-set-client-builder";
+import { EntitySetClientFull } from "./entity-set-client";
 
 export interface MockEntitySetClientOptions {
   entitySet: Record<string, object>;

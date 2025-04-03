@@ -1,9 +1,10 @@
 import { toIdString } from "../../../utils/id";
 import { toPromise } from "../../../utils/promise";
-import { EntityResponse } from "../../entity/entity-response";
-import { EntitySelectExpand } from "../../entity/entity-select-expand";
-import { EntitySingleWorker } from "../../entity/entity-single";
-import { ODataOptions, Select } from "../../params";
+import { ODataOptions } from "../../parameters/odata-options";
+import { Select } from "../../parameters/select";
+import { EntitySelectExpand } from "../expand/entity-select-expand";
+import { EntityResponse } from "../response/entity-response";
+import { EntitySingleWorker } from "./entity-single";
 
 export class EntitySingleWorkerMock<TEntity> implements EntitySingleWorker<TEntity> {
 

@@ -1,8 +1,9 @@
 import { JSONParser } from "@streamparser/json";
-import { AsyncQueue } from "../../utils/async-queue";
-import { SafeAny } from "../../utils/types";
-import { ODataOptions, getParams, selectExpandToObject } from "../params";
-import { EntitySetResponse } from "./entity-response";
+import { AsyncQueue } from "../../../utils/async-queue";
+import { SafeAny } from "../../../utils/types";
+import { selectExpandToObject } from "../../parameters/expand";
+import { getParams, ODataOptions } from "../../parameters/odata-options";
+import { EntitySetResponse } from "../response/entity-response";
 import { EntitySetWorker, EntitySetWorkerImplOptions } from "./entity-set";
 
 export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {

@@ -1,7 +1,7 @@
 
-import { EntitySetBuilderAddKey } from "../entity/entity-set-client-builder";
-import { EntitySetBuilderImpl } from "../entity/entity-set-client-builder.impl";
-import { HttpClientAdapter } from "../http-client-adapter";
+import { EntitySetBuilderAddKey } from "../entity/client/builder/entity-set-client-builder";
+import { EntitySetBuilderImpl } from "../entity/client/builder/entity-set-client-builder.impl";
+import { HttpClientAdapter } from "../http/http-client-adapter";
 
 export interface ODataClientConfig {
   http: ODataClientHttpRawOptions | ODataClientHttpClientOptions;

@@ -1,8 +1,8 @@
-import { createOperatorFactory, EntitySet } from "../../../src";
-import { EntitySetImpl } from "../../../src/core/entity/entity-set";
-import { EntitySetWorkerImpl } from "../../../src/core/entity/entity-set.impl";
-import { getParams } from "../../../src/core/params";
-import { Guid } from "../../../src/types/guid";
+import { createOperatorFactory, EntitySet, Guid } from "../../../../src";
+import { EntitySetImpl } from "../../../../src/core/entity/set/entity-set";
+import { EntitySetWorkerImpl } from "../../../../src/core/entity/set/entity-set.impl";
+import { getParams } from "../../../../src/core/parameters/odata-options";
+
 
 interface Model {
   id: Guid;

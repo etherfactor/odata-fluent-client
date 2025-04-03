@@ -1,14 +1,14 @@
-import { HttpMethod, extendUrl } from "../../utils/http";
-import { SafeAny } from "../../utils/types";
-import { Value } from "../../values/base";
-import { ODataPathRoutingType } from "../client/odata-client";
-import { EntitySet, EntitySetImpl, EntitySetWorker } from "./entity-set";
+import { HttpMethod, extendUrl } from "../../../utils/http";
+import { SafeAny } from "../../../utils/types";
+import { Value } from "../../../values/base";
+import { ODataPathRoutingType } from "../../client/odata-client";
+import { EntitySetClientOptions } from "../entity-set-client-options";
+import { EntitySet, EntitySetImpl, EntitySetWorker } from "../set/entity-set";
+import { EntitySetWorkerImpl } from "../set/entity-set.impl";
+import { EntitySingle, EntitySingleWorker } from "../single/entity-single";
+import { EntitySingleImpl, EntitySingleWorkerImpl } from "../single/entity-single.impl";
+import { EntityKey, EntityPropertyType } from "./builder/entity-set-client-builder";
 import { EntitySetClientFull } from "./entity-set-client";
-import { EntityKey, EntityPropertyType } from "./entity-set-client-builder";
-import { EntitySetClientOptions } from "./entity-set-client-options";
-import { EntitySetWorkerImpl } from "./entity-set.impl";
-import { EntitySingle, EntitySingleWorker } from "./entity-single";
-import { EntitySingleImpl, EntitySingleWorkerImpl } from "./entity-single.impl";
 
 export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> implements EntitySetClientFull<TEntity, TKey> {
   

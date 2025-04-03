@@ -1,8 +1,8 @@
-import { HttpMethod } from "../../utils/http";
-import { AnyArray } from "../../utils/types";
-import { Value } from "../../values/base";
-import { EntitySelectExpand } from "./entity-select-expand";
-import { EntitySetClient } from "./entity-set-client";
+import { HttpMethod } from "../../../../utils/http";
+import { AnyArray } from "../../../../utils/types";
+import { Value } from "../../../../values/base";
+import { EntitySelectExpand } from "../../expand/entity-select-expand";
+import { EntitySetClient } from "../entity-set-client";
 
 export interface EntitySetBuilderAddKey<TEntity> {
   withKey<TKey extends EntityKey<TEntity>>(key: TKey) : EntitySetBuilderAddValue<TEntity, TKey>;
