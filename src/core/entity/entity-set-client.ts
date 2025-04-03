@@ -1,12 +1,8 @@
-import { extendUrl, HttpMethod } from "../../utils/http";
-import { Value } from "../../values/base";
-import { ODataPathRoutingType } from "../odata-client-config";
-import { EntitySet, EntitySetImpl, EntitySetWorker } from "./entity-set";
+import { EntitySet, EntitySingle } from "../..";
+import { HttpMethod } from "../../utils/http";
 import { EntityKey, EntityPropertyType } from "./entity-set-client-builder";
-import { EntitySetClientOptions } from "./entity-set-client-options";
-import { EntitySingle, EntitySingleImpl, EntitySingleWorker } from "./entity-single";
 
-interface EntitySetClientFull<
+export interface EntitySetClientFull<
   TEntity,
   TKey extends EntityKey<TEntity>
 > {
@@ -31,90 +27,3 @@ export type EntitySetClient<
   (TCreate extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "create"> : {}) &
   (TUpdate extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "update"> : {}) &
   (TDelete extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "delete"> : {});
-
-export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> implements EntitySetClientFull<TEntity, TKey> {
-  
-  private readonly options: EntitySetClientOptions;
-  private readonly entitySetUrl: string;
-
-  constructor(
-    options: EntitySetClientOptions,
-    createSetWorker: (method: HttpMethod, url: string, payload?: Partial<TEntity>) => EntitySetWorker<TEntity>,
-    createSingleWorker: (method: HttpMethod, url: string, payload?: Partial<TEntity>) => EntitySingleWorker<TEntity>
-  ) {
-    this.options = options;
-    this.entitySetUrl = extendUrl(this.options.serviceUrl, this.options.entitySet);
-
-    this.createSetWorker = createSetWorker;
-    this.createSingleWorker = createSingleWorker;
-  }
-
-  private createSetWorker: (method: HttpMethod, url: string, payload?: Partial<TEntity>) => EntitySetWorker<TEntity>;
-
-  private createSingleWorker: (method: HttpMethod, url: string, payload?: Partial<TEntity>) => EntitySingleWorker<TEntity>;
-
-  get set(): EntitySet<TEntity> {
-    if (!this.options.readSet)
-      throw new Error("This resource does not support querying the entity set");
-
-    const url = this.entitySetUrl;
-    const worker = this.createSetWorker(this.options.readSet, url);
-    return new EntitySetImpl(worker);
-  }
-
-  read(key: EntityPropertyType<TEntity, TKey>): EntitySingle<TEntity> {
-    if (!this.options.read)
-      throw new Error("This resource does not support reading entities");
-
-    const url = extendEntityUrl(this.entitySetUrl, this.options.routingType, this.options.key, key, this.options.keyType);
-    const worker = this.createSingleWorker(this.options.read, url);
-    return new EntitySingleImpl(worker);
-  }
-
-  create(entity: Partial<TEntity>): EntitySingle<TEntity> {
-    if (!this.options.create)
-      throw new Error("This resource does not support creating entities");
-
-    const url = this.entitySetUrl;
-    const worker = this.createSingleWorker(this.options.create, url, entity);
-    return new EntitySingleImpl(worker);
-  }
-
-  update(key: EntityPropertyType<TEntity, TKey>, entity: Partial<TEntity>): EntitySingle<TEntity> {
-    if (!this.options.update)
-      throw new Error("This resource does not support updating entities");
-
-    const url = extendEntityUrl(this.entitySetUrl, this.options.routingType, this.options.key, key, this.options.keyType);
-    const worker = this.createSingleWorker(this.options.update, url, entity);
-    return new EntitySingleImpl(worker);
-  }
-
-  async delete(key: EntityPropertyType<TEntity, TKey>): Promise<void> {
-    if (!this.options.update)
-      throw new Error("This resource does not support deleting entities");
-
-    const url = extendEntityUrl(this.entitySetUrl, this.options.routingType, this.options.key, key, this.options.keyType);
-    //TODO Add this
-  }
-}
-
-function extendEntityUrl(url: string, routingType: ODataPathRoutingType, keyName: unknown | unknown[], key: unknown | unknown[], keyType: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[]) {
-  let useId: string;
-  if (Array.isArray(keyName) && Array.isArray(key) && Array.isArray(keyType)) {
-    useId = key.map((item, i) => {
-      const origKeyName = keyName[i] as string;
-      const useKeyName = origKeyName.substring(0, 1).toUpperCase() + origKeyName.substring(1);
-      return `${useKeyName}=${keyType[i](item).toString()}`;
-    }).join(",");
-  } else if (!Array.isArray(keyName) && !Array.isArray(key) && !Array.isArray(keyType)) {
-    useId = keyType(key).toString();
-  } else {
-    throw new Error("The ids and value builders must both be arrays or non-arrays");
-  }
-
-  if (routingType === "slash") {
-    return `${url}/${useId}`;
-  } else {
-    return `${url}(${useId})`;
-  }
-}

@@ -1,5 +1,6 @@
 import { createOperatorFactory, EntitySet } from "../../../src";
-import { EntitySetImpl, EntitySetWorkerImpl } from "../../../src/core/entity/entity-set";
+import { EntitySetImpl } from "../../../src/core/entity/entity-set";
+import { EntitySetWorkerImpl } from "../../../src/core/entity/entity-set.impl";
 import { getParams } from "../../../src/core/params";
 import { Guid } from "../../../src/types/guid";
 

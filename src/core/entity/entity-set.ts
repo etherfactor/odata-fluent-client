@@ -1,11 +1,8 @@
-import { JSONParser } from "@streamparser/json";
-import { AsyncQueue } from "../../utils/async-queue";
 import { HttpMethod } from "../../utils/http";
-import { toIterable, toPromise } from "../../utils/promise";
 import { InferArrayType, SafeAny } from "../../utils/types";
 import { Value } from "../../values/base";
 import { HttpClientAdapter } from "../http-client-adapter";
-import { Count, Expand, Filter, ODataOptions, OrderBy, Select, Skip, SortDirection, Top, getParams, selectExpandToObject } from "../params";
+import { Count, Expand, Filter, ODataOptions, OrderBy, Select, Skip, SortDirection, Top } from "../params";
 import { PrefixGenerator } from "../prefix-generator";
 import { EntityAccessor, EntityAccessorImpl } from "./entity-accessor";
 import { EntityExpand, EntityExpandImpl } from "./entity-expand";
@@ -28,6 +25,10 @@ export interface EntitySet<TEntity> {
 
 export interface OrderedEntitySet<TEntity> extends EntitySet<TEntity> {
   thenBy(property: keyof TEntity & string, direction?: SortDirection): EntitySet<TEntity>;
+}
+
+export interface EntitySetWorker<TEntity> {
+  execute(options: ODataOptions): EntitySetResponse<TEntity>;
 }
 
 export class EntitySetImpl<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TEntity> {
@@ -147,225 +148,10 @@ export class EntitySetImpl<TEntity> implements EntitySet<TEntity>, OrderedEntity
   }
 }
 
-export interface EntitySetWorker<TEntity> {
-  execute(options: ODataOptions): EntitySetResponse<TEntity>;
-}
-
 export interface EntitySetWorkerImplOptions<TEntity> {
   adapter: HttpClientAdapter;
   method: HttpMethod;
   url: string;
   payload?: Partial<TEntity>;
   validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
-}
-
-export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
-
-  private readonly options: EntitySetWorkerImplOptions<TEntity>;
-
-  constructor(
-    options: EntitySetWorkerImplOptions<TEntity>,
-  ) {
-    this.options = options;
-  }
-
-  execute(options: ODataOptions): EntitySetResponse<TEntity> {
-    const params = getParams(options);
-
-    const result = this.options.adapter.invoke({
-      method: this.options.method,
-      url: this.options.url,
-      headers: {},
-      query: params,
-      body: this.options.payload,
-    });
-
-    let resolveCount: (count: number) => void;
-    let rejectCount: (err: Error) => void;
-    const countPromise = new Promise<number>((resolve, reject) => {
-      resolveCount = resolve;
-      rejectCount = reject;
-    });
-
-    let resolveData: (data: TEntity[]) => void;
-    let rejectData: (err: Error) => void;
-    const dataPromise = new Promise<TEntity[]>((resolve, reject) => {
-      resolveData = resolve;
-      rejectData = reject;
-    });
-
-    const entities: TEntity[] = [];
-    const queue = new AsyncQueue<TEntity>();
-
-    const selectExpand = selectExpandToObject(options);
-
-    const parser = new JSONParser();
-    
-    parser.onValue = ({ value, key, parent, stack }) => {
-      if (stack && stack.length === 1 && key === "@odata.count") {
-        resolveCount(value as number);
-      }
-
-      if (stack && stack.length === 2 && stack[1].key === "value") {
-        if (this.options.validator) {
-          const parseResult = this.options.validator(value, selectExpand);
-          if (parseResult instanceof Error)
-            throw parseResult;
-
-          queue.push(parseResult);
-          entities.push(parseResult);
-        } else {
-          queue.push(value as TEntity);
-          entities.push(value as TEntity);
-        }
-      }
-    };
-
-    const onError = (err: Error): void => {
-      rejectCount(err);
-      rejectData(err);
-      queue.fail(err);
-    };
-
-    parser.onError = onError;
-
-    const onEnd = (): void => {
-      resolveData(entities);
-      rejectCount(new Error("Count was not received from the server"));
-      queue.complete();
-    }
-
-    parser.onEnd = onEnd;
-
-    (async () => {
-      try {
-        const response = await result;
-
-        if (response.data instanceof Promise) {
-          const data = await response.data as SafeAny;
-          for (const value of data["value"]) {
-            if (this.options.validator) {
-              const parseResult = this.options.validator(value, selectExpand);
-              if (parseResult instanceof Error)
-                throw parseResult;
-
-              entities.push(parseResult);
-            } else {
-              entities.push(value);
-            }
-          }
-        } else {
-          for await (const chunk of response.data) {
-            if (/\S/.test(chunk)) {
-              parser.write(chunk.trim());
-            }
-          }
-        }
-      } catch (err) {
-        onError(err as Error);
-      }
-    })();
-
-    return {
-      count: countPromise,
-      data: dataPromise,
-      iterator: queue,
-    }
-  }
-}
-
-export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
-
-  private getData: () => TEntity[];
-
-  constructor(
-    getData: () => TEntity[],
-  ) {
-    this.getData = getData;
-  }
-
-  execute(options: ODataOptions): EntitySetResponse<TEntity> {
-    const data = {
-      "@odata.count": undefined as number | undefined,
-      value: this.getData()
-    };
-    
-    data.value = this.applyFilters(data.value, options.filter ?? []);
-    if (options.count) {
-      data["@odata.count"] = data.value.length;
-    }
-    data.value = this.applyOrderBy(data.value, options.orderBy ?? []);
-    data.value = this.applySkipTop(data.value, options.skip ?? 0, options.top ?? 100);
-    data.value = this.applySelect(data.value, options.select ?? []);
-
-    return {
-      count: toPromise(data["@odata.count"]!),
-      data: toPromise(data.value),
-      iterator: toIterable(data.value),
-    };
-  }
-
-  private applyFilters(data: TEntity[], filters: Filter[]): TEntity[] {
-    let finalData = data;
-    for (const filter of filters) {
-      finalData = finalData.filter(datum => filter.eval(datum));
-    }
-
-    return finalData;
-  }
-  
-  private applyOrderBy(data: TEntity[], orderBy: OrderBy[]): TEntity[] {
-    const sortedData = [...data];
-    sortedData.sort((a, b) => {
-      for (const orderByProp of orderBy) {
-        const prop = orderByProp.property as keyof TEntity;
-        let aValue = a[prop];
-        let bValue = b[prop];
-
-        if (typeof aValue === "string") {
-          aValue = aValue.toLowerCase() as SafeAny;
-        }
-
-        if (typeof bValue === "string") {
-          bValue = bValue.toLowerCase() as SafeAny;
-        }
-
-        if (aValue < bValue) {
-          return orderByProp.direction === "asc" ? -1 : 1;
-        }
-
-        if (aValue > bValue) {
-          return orderByProp.direction === "asc" ? 1 : -1;
-        }
-      }
-
-      return 0;
-    });
-
-    return sortedData;
-  }
-
-  private applySkipTop(data: TEntity[], skip: Skip, top: Top) {
-    const startAt = skip;
-    const endAt = startAt + top;
-    const finalData = data.slice(startAt, endAt);
-
-    return finalData;
-  }
-
-  private applySelect(data: TEntity[], select: Select[]) {
-    if (select.length === 0)
-      return data;
-
-    const finalData = data.map(datum => {
-      const newObj: TEntity = {} as TEntity;
-      for (const property of select) {
-        newObj[property as keyof TEntity] = datum[property as keyof TEntity];
-      }
-
-      return newObj;
-    });
-
-    return finalData;
-  }
 }

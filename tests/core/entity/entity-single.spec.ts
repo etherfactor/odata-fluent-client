@@ -1,5 +1,5 @@
-import { createOperatorFactory } from "../../../src";
-import { EntitySingle, EntitySingleImpl, EntitySingleWorkerImpl } from "../../../src/core/entity/entity-single";
+import { createOperatorFactory, EntitySingle } from "../../../src";
+import { EntitySingleImpl, EntitySingleWorkerImpl } from "../../../src/core/entity/entity-single.impl";
 import { getParams } from "../../../src/core/params";
 import { Guid } from "../../../src/types/guid";
 
