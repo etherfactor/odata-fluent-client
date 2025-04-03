@@ -49,7 +49,7 @@ describe('EntitySetBuilderImpl', () => {
       .build();
 
     expect(set).toBeTruthy();
-    expect((set as any)["adapter"]).toBe(DefaultHttpClientAdapter);
+    expect((set as any)["options"]["adapter"]).toBe(DefaultHttpClientAdapter);
   });
 
   it('should use the provided http adapter if one is specified', () => {
@@ -74,6 +74,6 @@ describe('EntitySetBuilderImpl', () => {
       .build();
 
     expect(set).toBeTruthy();
-    expect((set as any)["adapter"]).toBe(adapter);
+    expect((set as any)["options"]["adapter"]).toBe(adapter);
   });
 });

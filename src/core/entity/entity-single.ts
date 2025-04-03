@@ -174,3 +174,47 @@ export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEnti
     };
   }
 }
+
+export class EntitySingleWorkerMock<TEntity> implements EntitySingleWorker<TEntity> {
+
+  private getData: () => TEntity[];
+
+  constructor(
+    getData: () => TEntity[],
+  ) {
+    this.getData = getData;
+  }
+
+  execute(options: ODataOptions): EntityResponse<TEntity> {
+    // const data: TEntity = {
+    //   "@odata.count": undefined as number | undefined,
+    //   value: this.getData()
+    // };
+    
+    // data.value = this.applyFilters(data.value, options.filter ?? []);
+    // if (options.count) {
+    //   data["@odata.count"] = data.value.length;
+    // }
+    // data.value = this.applyOrderBy(data.value, options.orderBy ?? []);
+    // data.value = this.applySkipTop(data.value, options.skip ?? 0, options.top ?? 100);
+    // data.value = this.applySelect(data.value, options.select ?? []);
+
+    // return {
+    //   data: toPromise(data.value),
+    //   iterator: toIterable(data.value),
+    // };
+    throw new Error("Not implemented");
+  }
+
+  private applySelect(data: TEntity, select: Select[]) {
+    if (select.length === 0)
+      return data;
+
+    const finalData: TEntity = {} as TEntity;
+    for (const property of select) {
+      finalData[property as keyof TEntity] = data[property as keyof TEntity];
+    }
+
+    return finalData;
+  }
+}

@@ -2,10 +2,12 @@ import { HttpMethod } from "../../utils/http";
 import { AnyArray, SafeAny } from "../../utils/types";
 import { Value } from "../../values/base";
 import { DefaultHttpClientAdapter, HttpClientAdapter } from "../http-client-adapter";
-import { ODataClientConfig } from "../odata-client-config";
+import { isMockConfig, MockODataClientConfig, ODataClientConfig } from "../odata-client-config";
 import { EntitySelectExpand } from "./entity-select-expand";
+import { EntitySetWorkerImpl, EntitySetWorkerMock } from "./entity-set";
 import { EntitySetClient, EntitySetClientImpl } from "./entity-set-client";
 import { EntitySetClientOptions } from "./entity-set-client-options";
+import { EntitySingleWorkerImpl, EntitySingleWorkerMock } from "./entity-single";
 
 export interface EntitySetBuilderAddKey<TEntity> {
   withKey<TKey extends EntityKey<TEntity>>(key: TKey) : EntitySetBuilderAddValue<TEntity, TKey>;
@@ -64,11 +66,11 @@ export class EntitySetBuilderImpl<
   EntitySetBuilderAddValue<TEntity, TKey>,
   EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>
 {
-  private readonly config: ODataClientConfig;
+  private readonly config: ODataClientConfig | MockODataClientConfig;
   private readonly entitySet: string;
 
   constructor(
-    config: ODataClientConfig,
+    config: ODataClientConfig | MockODataClientConfig,
     entitySet: string,
   ) {
     this.config = config;
@@ -124,26 +126,80 @@ export class EntitySetBuilderImpl<
   }
 
   build(): EntitySetClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete> {
-    let adapter: HttpClientAdapter;
-    if ("adapter" in this.config.http) {
-      adapter = this.config.http.adapter;
+    if (isMockConfig(this.config)) {
+      const options: EntitySetClientOptions = {
+        serviceUrl: "https://localhost",
+        entitySet: this.entitySet,
+        routingType: "parentheses",
+        key: this.key,
+        keyType: this.keyType as ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[],
+        validator: this.validator,
+        readSet: this.readSet,
+        read: this.read,
+        create: this.create,
+        update: this.update,
+        delete: this.delete,
+      };
+
+      return new EntitySetClientImpl<TEntity, TKey>(
+        options,
+        () => {
+          return new EntitySetWorkerMock(
+            () => []
+          );
+        },
+        () => {
+          return new EntitySingleWorkerMock(
+            () => []
+          );
+        }
+      );
     } else {
-      adapter = DefaultHttpClientAdapter;
+      let adapter: HttpClientAdapter;
+      if ("adapter" in this.config.http) {
+        adapter = this.config.http.adapter;
+      } else {
+        adapter = DefaultHttpClientAdapter;
+      }
+
+      const options: EntitySetClientOptions = {
+        serviceUrl: this.config.serviceUrl,
+        entitySet: this.entitySet,
+        routingType: this.config.routingType,
+        adapter: adapter,
+        key: this.key,
+        keyType: this.keyType as ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[],
+        validator: this.validator,
+        readSet: this.readSet,
+        read: this.read,
+        create: this.create,
+        update: this.update,
+        delete: this.delete,
+      };
+
+      return new EntitySetClientImpl<TEntity, TKey>(
+        options,
+        (method, url, payload) => {
+          return new EntitySetWorkerImpl({
+            adapter: adapter,
+            method: method,
+            url: url,
+            payload: payload,
+            validator: this.validator,
+          });
+        },
+        (method, url, payload) => {
+          return new EntitySingleWorkerImpl({
+            adapter: adapter,
+            method: method,
+            url: url,
+            payload: payload,
+            validator: this.validator,
+          });
+        }
+      );
     }
 
-    const options: EntitySetClientOptions = {
-      entitySet: this.entitySet,
-      key: this.key,
-      keyType: this.keyType as ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[],
-      validator: this.validator,
-      readSet: this.readSet,
-      read: this.read,
-      create: this.create,
-      update: this.update,
-      delete: this.delete,
-    };
-
-    return new EntitySetClientImpl<TEntity, TKey>(options, adapter, this.config.serviceUrl, this.config.routingType);
   }
 }
 
