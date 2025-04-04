@@ -39,15 +39,15 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
       body: this.options.payload,
     });
 
-    let resolveCount: (count: number) => void;
-    let rejectCount: (err: Error) => void;
+    let resolveCount!: (count: number) => void;
+    let rejectCount!: (err: Error) => void;
     const countPromise = new Promise<number>((resolve, reject) => {
       resolveCount = resolve;
       rejectCount = reject;
     });
 
-    let resolveData: (data: TEntity[]) => void;
-    let rejectData: (err: Error) => void;
+    let resolveData!: (data: TEntity[]) => void;
+    let rejectData!: (err: Error) => void;
     const dataPromise = new Promise<TEntity[]>((resolve, reject) => {
       resolveData = resolve;
       rejectData = reject;
@@ -102,6 +102,9 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
 
         if (response.data instanceof Promise) {
           const data = await response.data as SafeAny;
+          if ("@odata.count" in data) {
+            resolveCount(data["@odata.count"]);
+          }
           for (const value of data["value"]) {
             if (this.options.validator) {
               const parseResult = this.options.validator(value, selectExpand);
@@ -113,6 +116,7 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
               entities.push(value);
             }
           }
+          resolveData(entities);
         } else {
           for await (const chunk of response.data) {
             if (/\S/.test(chunk)) {
