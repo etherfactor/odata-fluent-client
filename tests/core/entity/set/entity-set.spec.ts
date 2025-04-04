@@ -1,8 +1,8 @@
 import { createOperatorFactory, EntitySet, Guid } from "../../../../src";
 import { EntitySetImpl } from "../../../../src/core/entity/set/entity-set";
 import { EntitySetWorkerImpl } from "../../../../src/core/entity/set/entity-set-worker.impl";
+import { EntitySetWorkerMock } from "../../../../src/core/entity/set/entity-set-worker.mock";
 import { getParams } from "../../../../src/core/parameters/odata-options";
-
 
 interface Model {
   id: Guid;
@@ -438,5 +438,27 @@ describe('EntitySetImpl', () => {
     const params3 = getParams(step3.getOptions());
     expect(params3['$filter']).toBe("id eq 00000000-0000-0000-0000-000000000000");
     expect(params3['$orderby']).toBe("name asc, quantity desc");
+  });
+
+  it('should execute using the provided worker', async () => {
+    const worker = new EntitySetWorkerMock<Model>({
+      getData: () => ({
+        "5bf73a02-3be5-40fc-be60-b038549d993e": {
+          id: "5bf73a02-3be5-40fc-be60-b038549d993e" as Guid,
+          quantity: 1,
+          isActive: true,
+          name: "Test",
+          values: [],
+          altValues: [],
+        },
+      }),
+    });
+    set = new EntitySetImpl<Model>(worker);
+
+    const { data } = set.execute();
+    const result = await data;
+
+    expect(result.length).toBe(1);
+    expect(result[0].id).toBe("5bf73a02-3be5-40fc-be60-b038549d993e");
   });
 });

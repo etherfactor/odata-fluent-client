@@ -9,6 +9,6 @@ export function toIdString(id: unknown | unknown[]) {
       return item.toString();
     }).join("|");
   } else {
-    return id.toString() ?? "";
+    return id.toString();
   }
 }

@@ -105,15 +105,20 @@ export class EntitySetImpl<TEntity> implements EntitySet<TEntity>, OrderedEntity
 
   thenBy(property: keyof TEntity & string, direction?: 'asc' | 'desc'): OrderedEntitySet<TEntity> {
     const options = this.getOptions();
-    options.orderBy?.push({ property, direction: direction ?? 'asc' });
+    options.orderBy!.push({ property, direction: direction ?? 'asc' });
 
     return this.new<TEntity>(this.worker, options);
   }
 
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySet<Pick<TEntity, TSelected>> {
     const options = this.getOptions();
-    options.select ??= [];
-    options.select = [...options.select, ...properties];
+    //options.select ??= [];
+    //options.select = [...options.select, ...properties];
+
+    //Using this method as calling .select() mutates the entity and reduces the available properties. If we add subsequent
+    //selections to the existing list, the returned API model and the expected API model will not match. We can improve this
+    //if we separately track the original entity and the selected projection, at which point we can use the method above
+    options.select = [...properties];
 
     return this.new<Pick<TEntity, TSelected>>(this.worker, options);
   }

@@ -1,6 +1,7 @@
 import { createOperatorFactory, EntitySingle, Guid } from "../../../../src";
 import { EntitySingleImpl } from "../../../../src/core/entity/single/entity-single";
 import { EntitySingleWorkerImpl } from "../../../../src/core/entity/single/entity-single-worker.impl";
+import { EntitySingleWorkerMock } from "../../../../src/core/entity/single/entity-single-worker.mock";
 import { getParams } from "../../../../src/core/parameters/odata-options";
 
 interface Model {
@@ -242,5 +243,28 @@ describe('EntitySingleImpl', () => {
     const params3 = getParams(step3.getOptions());
     expect(params3['$expand']).toBe("values($filter=value eq 'test'; $orderby=value asc)");
     expect(params3['$select']).toBe("id, name");
+  });
+  
+  it('should execute using the provided worker', async () => {
+    const worker = new EntitySingleWorkerMock<Model>({
+      id: "5bf73a02-3be5-40fc-be60-b038549d993e",
+      getData: () => ({
+        "5bf73a02-3be5-40fc-be60-b038549d993e": {
+          id: "5bf73a02-3be5-40fc-be60-b038549d993e" as Guid,
+          quantity: 1,
+          isActive: true,
+          name: "Test",
+          values: [],
+          altValues: [],
+        },
+      }),
+    });
+    set = new EntitySingleImpl<Model>(worker);
+
+    const { data } = set.execute();
+    const result = await data;
+
+    expect(result).toBeTruthy();
+    expect(result.id).toBe("5bf73a02-3be5-40fc-be60-b038549d993e");
   });
 });
