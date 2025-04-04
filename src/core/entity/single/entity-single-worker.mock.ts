@@ -6,6 +6,13 @@ import { EntitySelectExpand } from "../expand/entity-select-expand";
 import { EntityResponse } from "../response/entity-response";
 import { EntitySingleWorker } from "./entity-single-worker";
 
+export interface EntitySingleWorkerMockOptions<TEntity> {
+  getData: () => Record<string, TEntity>;
+  id: unknown | unknown[];
+  payload?: Partial<TEntity>;
+  validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
+}
+
 export class EntitySingleWorkerMock<TEntity> implements EntitySingleWorker<TEntity> {
 
   private readonly options;
@@ -39,11 +46,4 @@ export class EntitySingleWorkerMock<TEntity> implements EntitySingleWorker<TEnti
 
     return finalData;
   }
-}
-
-export interface EntitySingleWorkerMockOptions<TEntity> {
-  getData: () => Record<string, TEntity>;
-  id: unknown | unknown[];
-  payload?: Partial<TEntity>;
-  validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
 }
