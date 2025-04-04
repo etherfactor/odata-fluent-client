@@ -108,7 +108,7 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
   }
 }
 
-function extendEntityUrl(url: string, routingType: ODataPathRoutingType, keyName: unknown | unknown[], key: unknown | unknown[], keyType: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[]) {
+export function extendEntityUrl(url: string, routingType: ODataPathRoutingType, keyName: unknown | unknown[], key: unknown | unknown[], keyType: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[]) {
   let useId: string;
   if (Array.isArray(keyName) && Array.isArray(key) && Array.isArray(keyType)) {
     useId = key.map((item, i) => {

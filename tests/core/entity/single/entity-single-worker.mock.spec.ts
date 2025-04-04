@@ -14,7 +14,7 @@ describe("EntitySingleWorkerMock", () => {
     "3": { id: 3, name: "Charlie", age: 35 },
   };
 
-  test("should return full entity when no select option provided", async () => {
+  it("should return full entity when no select option provided", async () => {
     const workerOpt: EntitySingleWorkerMockOptions<TestEntity> = {
       getData: () => sampleData,
       id: "1",
@@ -29,7 +29,7 @@ describe("EntitySingleWorkerMock", () => {
     expect(data).toEqual(sampleData["1"]);
   });
 
-  test("should apply select correctly", async () => {
+  it("should apply select correctly", async () => {
     const workerOpt: EntitySingleWorkerMockOptions<TestEntity> = {
       getData: () => sampleData,
       id: "2",
@@ -48,7 +48,7 @@ describe("EntitySingleWorkerMock", () => {
     expect(data).toEqual({ id: sampleData["2"].id, name: sampleData["2"].name });
   });
 
-  test("should return undefined for non-existent entity", async () => {
+  it("should return undefined for non-existent entity", async () => {
     const workerOpt: EntitySingleWorkerMockOptions<TestEntity> = {
       getData: () => sampleData,
       id: "non-existent",
@@ -62,7 +62,7 @@ describe("EntitySingleWorkerMock", () => {
     expect(data).toBeUndefined();
   });
 
-  test("should handle array id conversion correctly", async () => {
+  it("should handle array id conversion correctly", async () => {
     const arrayId = [1, 2];
     const arrayIdString = toIdString(arrayId);
     const sampleDataWithArrayId: Record<string, TestEntity> = {

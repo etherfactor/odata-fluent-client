@@ -23,7 +23,7 @@ describe("EntitySetWorkerMock", () => {
     worker = new EntitySetWorkerMock(options);
   });
 
-  test("should return all data with default options", async () => {
+  it("should return all data with default options", async () => {
     const options: ODataOptions = {};
 
     const result = worker.execute(options);
@@ -40,7 +40,7 @@ describe("EntitySetWorkerMock", () => {
     expect(iterated).toEqual(data);
   });
 
-  test("should apply filter correctly", async () => {
+  it("should apply filter correctly", async () => {
     const options: ODataOptions = {
       filter: [
         { eval: (datum: TestEntity) => datum.age > 30 }
@@ -52,7 +52,7 @@ describe("EntitySetWorkerMock", () => {
     expect(data).toEqual([{ id: 3, name: "Charlie", age: 35 }]);
   });
 
-  test("should return correct count when count option is true", async () => {
+  it("should return correct count when count option is true", async () => {
     const options: ODataOptions = {
       count: true
     };
@@ -62,7 +62,7 @@ describe("EntitySetWorkerMock", () => {
     expect(count).toEqual(Object.values(sampleData).length);
   });
 
-  test("should apply orderBy correctly", async () => {
+  it("should apply orderBy correctly", async () => {
     const options: ODataOptions = {
       orderBy: [
         { property: "age", direction: "asc" }
@@ -81,7 +81,7 @@ describe("EntitySetWorkerMock", () => {
     expect(dataDesc).toEqual(expectedDesc);
   });
 
-  test("should apply skip and top correctly", async () => {
+  it("should apply skip and top correctly", async () => {
     const options: ODataOptions = {
       orderBy: [
         { property: "id", direction: "asc" }
@@ -99,7 +99,7 @@ describe("EntitySetWorkerMock", () => {
     expect(data).toEqual(expected);
   });
 
-  test("should apply select correctly", async () => {
+  it("should apply select correctly", async () => {
     const options: ODataOptions = {
       select: [
         "id",
@@ -114,7 +114,7 @@ describe("EntitySetWorkerMock", () => {
     expect(data).toEqual(expected);
   });
 
-  test("should apply combined options correctly", async () => {
+  it("should apply combined options correctly", async () => {
     //Combine filter, orderBy, skip/top, select, and count.
     //Filter: include only entities with age >= 30.
     //Order by name descending.
