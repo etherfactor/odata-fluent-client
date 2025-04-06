@@ -5,7 +5,7 @@ import { EntityKey, EntityPropertyType } from "./builder/entity-set-client-build
 
 export interface EntitySetClientFull<
   TEntity,
-  TKey extends EntityKey<TEntity>
+  TKey extends EntityKey<TEntity>,
 > {
   get set(): EntitySet<TEntity>;
   read(key: EntityPropertyType<TEntity, TKey>): EntitySingle<TEntity>;
@@ -22,9 +22,11 @@ export type EntitySetClient<
   TCreate extends HttpMethod | undefined = undefined,
   TUpdate extends HttpMethod | undefined = undefined,
   TDelete extends HttpMethod | undefined = undefined,
+  TNavigation extends {} = {},
 > =
   (TReadSet extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "set"> : {}) &
   (TRead extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "read"> : {}) &
   (TCreate extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "create"> : {}) &
   (TUpdate extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "update"> : {}) &
-  (TDelete extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "delete"> : {});
+  (TDelete extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "delete"> : {}) &
+  TNavigation;
