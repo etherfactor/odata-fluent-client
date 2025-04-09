@@ -3,8 +3,6 @@ import { AnyArray } from "../../../../utils/types";
 import { Value } from "../../../../values/base";
 import { EntitySelectExpand } from "../../expand/entity-select-expand";
 import { EntitySetClient } from "../entity-set-client";
-import { EntityNavigation } from "../navigation/entity-navigation";
-import { EntityNavigationBuilderAddType } from "../navigation/entity-navigation-builder";
 
 export interface EntitySetBuilderAddKey<TEntity> {
   withKey<TKey extends EntityKey<TEntity>>(key: TKey) : EntitySetBuilderAddValue<TEntity, TKey>;
@@ -31,8 +29,7 @@ export interface EntitySetBuilderAddMethodFull<
   withUpdate<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TMethod, TDelete, TValidator, TNavigation>;
   withDelete<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TMethod, TValidator, TNavigation>;
   withValidator(validator: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete, true, TNavigation>;
-  withNavigation<TNavKey extends (keyof TEntity & string), TNewNav extends {}>(navigation: TNavKey, builder: (nav: EntityNavigationBuilderAddType<TNavKey>) => EntityNavigation<TNewNav>): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete, true, TNavigation & TNewNav>;
-  build(): EntitySetClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete, TNavigation>;
+  build(): EntitySetClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>;
 }
 
 export type EntitySetBuilderAddMethod<
@@ -52,7 +49,7 @@ export type EntitySetBuilderAddMethod<
   (TUpdate extends string ? {} : Pick<EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete, TValidator, TNavigation>, "withUpdate">) &
   (TDelete extends string ? {} : Pick<EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete, TValidator, TNavigation>, "withDelete">) &
   (TValidator extends true ? {} : Pick<EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete, TValidator, TNavigation>, "withValidator">) &
-  Pick<EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete, TValidator, TNavigation>, "withNavigation" | "build">;
+  Pick<EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete, TValidator, TNavigation>, "build">;
 
 export type EntityKey<TEntity> = keyof TEntity | [keyof TEntity, ...(keyof TEntity)[]];
 
@@ -62,6 +59,11 @@ export type EntityPropertyType<TEntity, TKey> =
     : TKey extends keyof TEntity
     ? TEntity[TKey]
     : never;
+
+export type EntityKeyType<TEntity, TKey extends EntityKey<TEntity>> =
+  TKey extends AnyArray
+    ? { [K in keyof TKey]: TKey extends keyof TEntity ? TEntity[TKey] : never }
+    : TKey extends keyof TEntity ? TEntity[TKey] : never;
 
 export type EntityKeyValue<TKey> =
   TKey extends AnyArray

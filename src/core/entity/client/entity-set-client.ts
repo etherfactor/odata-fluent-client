@@ -22,11 +22,9 @@ export type EntitySetClient<
   TCreate extends HttpMethod | undefined = undefined,
   TUpdate extends HttpMethod | undefined = undefined,
   TDelete extends HttpMethod | undefined = undefined,
-  TNavigation extends {} = {},
 > =
   (TReadSet extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "set"> : {}) &
   (TRead extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "read"> : {}) &
   (TCreate extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "create"> : {}) &
   (TUpdate extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "update"> : {}) &
-  (TDelete extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "delete"> : {}) &
-  TNavigation;
+  (TDelete extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "delete"> : {});
