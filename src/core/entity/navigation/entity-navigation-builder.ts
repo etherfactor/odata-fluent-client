@@ -1,7 +1,7 @@
-import { HttpMethod } from "../../../../utils/http";
-import { SafeAny } from "../../../../utils/types";
-import { EntityKey, EntityKeyType } from "../builder/entity-set-client-builder";
-import { EntitySetClient } from "../entity-set-client";
+import { HttpMethod } from "../../../utils/http";
+import { SafeAny } from "../../../utils/types";
+import { EntityKey, EntityKeyType } from "../client/builder/entity-set-client-builder";
+import { EntitySetClient } from "../client/entity-set-client";
 import { Navigation } from "./entity-navigation";
 
 export interface NavigationBuilderAddCardinality<

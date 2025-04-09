@@ -49,7 +49,21 @@ modelSubmodels.add(1, "a");
 
 const newModels = client.bind.navigation(models, { models: modelSubmodels });
 
-newModels.navigation.models.add(1, "a");
+newModels.navigations.models.add(1, "a");
+
+const test1Action = client.action("test1")
+  .withMethod("POST")
+  .withBody<{ value: string }>()
+  .withReturnType<{ result: boolean }>()
+  .build();
+
+const test2Action = client.action(models, "test2")
+  .withMethod("POST")
+  .withBody<{ value: string }>()
+  .withReturnType<{ result: boolean }>()
+  .build();
+
+const moreNewModels = client.bind.action(newModels, { test2: test2Action });
 
 // const newModels = models
 //   .navigations
