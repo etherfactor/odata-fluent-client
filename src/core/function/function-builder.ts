@@ -1,36 +1,36 @@
 import { EntityKey } from "../entity/client/builder/entity-set-client-builder";
 import { EntityInvokableBuilderAddMethod, EntityInvokableBuilderAddParameters, EntityInvokableBuilderAddReturnType, EntityInvokableBuilderFinal, InvokableBuilderAddMethod, InvokableBuilderAddParameters, InvokableBuilderAddReturnType, InvokableBuilderFinal } from "../invokable/invokable-builder";
 
-export interface ActionBuilderAddMethod extends InvokableBuilderAddMethod { }
+export interface FunctionBuilderAddMethod extends InvokableBuilderAddMethod { }
 
-export interface ActionBuilderAddParameters extends InvokableBuilderAddParameters { }
+export interface FunctionBuilderAddParameters extends InvokableBuilderAddParameters { }
 
-export interface ActionBuilderAddReturnType<
+export interface FunctionBuilderAddReturnType<
   TParameter extends {},
 > extends InvokableBuilderAddReturnType<TParameter> { }
 
-export interface ActionBuilderFinal<
+export interface FunctionBuilderFinal<
   TParameter extends {},
   TReturn,
 > extends InvokableBuilderFinal<TParameter, TReturn> { }
 
-export interface EntityActionBuilderAddMethod<
+export interface EntityFunctionBuilderAddMethod<
   TEntity,
   TKey extends EntityKey<TEntity>,
 > extends EntityInvokableBuilderAddMethod<TEntity, TKey> { }
 
-export interface EntityActionBuilderAddParameters<
+export interface EntityFunctionBuilderAddParameters<
   TEntity,
   TKey extends EntityKey<TEntity>,
 > extends EntityInvokableBuilderAddParameters<TEntity, TKey> { }
 
-export interface EntityActionBuilderAddReturnType<
+export interface EntityFunctionBuilderAddReturnType<
   TEntity,
   TKey extends EntityKey<TEntity>,
   TParameter extends {},
 > extends EntityInvokableBuilderAddReturnType<TEntity, TKey, TParameter> { }
 
-export interface EntityActionBuilderFinal<
+export interface EntityFunctionBuilderFinal<
   TEntity,
   TKey extends EntityKey<TEntity>,
   TParameter extends {},

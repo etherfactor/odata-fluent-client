@@ -6,6 +6,8 @@ import { EntitySetBuilderImpl } from "../entity/client/builder/entity-set-client
 import { EntitySetClient } from "../entity/client/entity-set-client";
 import { Navigation } from "../entity/navigation/entity-navigation";
 import { NavigationBuilderAddCardinality } from "../entity/navigation/entity-navigation-builder";
+import { EntityFunction } from "../function/function";
+import { EntityFunctionBuilderAddMethod, FunctionBuilderAddMethod } from "../function/function-builder";
 import { HttpClientAdapter } from "../http/http-client-adapter";
 
 export interface ODataClientOptions {
@@ -50,9 +52,19 @@ export class ODataClient {
     return undefined!;
   }
 
+  function(name: string): FunctionBuilderAddMethod;
+  function<TEntity, TKey extends EntityKey<TEntity>>(set: EntitySetClient<TEntity, TKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>, name: string): EntityFunctionBuilderAddMethod<TEntity, TKey>;
+  function(
+    set: unknown,
+    name?: unknown
+  ): any {
+    return undefined!;
+  }
+
   readonly bind = {
     navigation: bindNavigation,
     action: bindAction,
+    function: bindFunction,
   };
 }
 
@@ -73,5 +85,15 @@ function bindAction<
   set: TSet,
   actions: TAction
 ): TSet & { actions: TAction } {
+  return undefined!
+};
+
+function bindFunction<
+  TSet extends EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>,
+  TFunction extends { [key: string]: EntityFunction<SafeAny, SafeAny, SafeAny> }
+> (
+  set: TSet,
+  actions: TFunction
+): TSet & { functions: TFunction } {
   return undefined!
 };

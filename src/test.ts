@@ -38,7 +38,8 @@ const subModels = client
   .withDelete("DELETE")
   .build();
 
-const modelSubmodels = client.navigation(models, "models")
+const modelSubmodels = client
+  .navigation(models, "models")
   .withCollection()
   .withReference(subModels)
   .withAdd("POST")
@@ -51,19 +52,37 @@ const newModels = client.bind.navigation(models, { models: modelSubmodels });
 
 newModels.navigations.models.add(1, "a");
 
-const test1Action = client.action("test1")
+const act1Action = client
+  .action("act1")
   .withMethod("POST")
   .withBody<{ value: string }>()
   .withReturnType<{ result: boolean }>()
   .build();
 
-const test2Action = client.action(models, "test2")
+const act2Action = client
+  .action(models, "act2")
   .withMethod("POST")
   .withBody<{ value: string }>()
   .withReturnType<{ result: boolean }>()
   .build();
 
-const moreNewModels = client.bind.action(newModels, { test2: test2Action });
+const moreNewModels = client.bind.action(newModels, { act2: act2Action });
+
+const func1Function = client
+  .function("func1")
+  .withMethod("GET")
+  .withParameters<{ value: string }>()
+  .withReturnType<{ result: boolean }>()
+  .build();
+
+const func2Function = client
+  .function(models, "func2")
+  .withMethod("GET")
+  .withParameters<{ value: string }>()
+  .withReturnType<{ result: boolean }>()
+  .build();
+
+const evenMoreNewModels = client.bind.function(moreNewModels, { func2: func2Function });
 
 // const newModels = models
 //   .navigations
