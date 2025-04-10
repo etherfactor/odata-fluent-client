@@ -63,6 +63,10 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
     });
   }
 
+  get name(): string {
+    return this.options.entitySet;
+  }
+
   get set(): EntitySet<TEntity> {
     if (!this.options.readSet)
       throw new Error("This resource does not support querying the entity set");

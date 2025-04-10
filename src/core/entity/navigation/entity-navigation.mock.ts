@@ -1,0 +1,166 @@
+import { SafeAny } from "../../../utils/types";
+import { NewMockODataClientOptions } from "../../client/odata-client.mock";
+import { EntitySetClient } from "../client/entity-set-client";
+import { EntityNavigationAction, EntityNavigationFull } from "./entity-navigation";
+
+export interface EntityNavigationClientMockOptions {
+  rootOptions: NewMockODataClientOptions;
+  navigation: string;
+  fromSet: EntitySetClient<SafeAny, SafeAny, "GET", "GET", SafeAny, SafeAny, SafeAny>;
+  toSet: EntitySetClient<SafeAny, SafeAny, "GET", "GET", SafeAny, SafeAny, SafeAny>;
+}
+
+export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigationFull<TKey1, TKey2> {
+
+  private readonly options: EntityNavigationClientMockOptions;
+
+  constructor(
+    options: EntityNavigationClientMockOptions,
+  ) {
+    this.options = options;
+  }
+
+  add(from: TKey1, to: TKey2): EntityNavigationAction {
+    return {
+      execute: () => ({
+        result: (async () => {
+          const setOptions = this.options.rootOptions.entitySets[this.options.fromSet.name];
+          if (!setOptions) {
+            return false;
+          }
+  
+          const navOptions = setOptions.navigations?.[this.options.navigation];
+  
+          const fromSet = this.options.fromSet;
+          const toSet = this.options.toSet;
+  
+          let fromEntity: SafeAny;
+          let toEntity: SafeAny;
+          try {
+            fromEntity = await fromSet.read(from).execute().data;
+            toEntity = await toSet.read(to).execute().data;
+          } catch {
+            return false;
+          }
+  
+          fromEntity[this.options.navigation] ??= [];
+          fromEntity[this.options.navigation].push(toEntity);
+  
+          if (navOptions && navOptions.onAdd) {
+            navOptions.onAdd(fromEntity, toEntity);
+          }
+  
+          return true;
+        })()
+      })
+    };
+  }
+
+  remove(from: TKey1, to: TKey2): EntityNavigationAction {
+    return {
+      execute: () => ({
+        result: (async () => {
+          const setOptions = this.options.rootOptions.entitySets[this.options.fromSet.name];
+          if (!setOptions) {
+            return false;
+          }
+  
+          const navOptions = setOptions.navigations?.[this.options.navigation];
+  
+          const fromSet = this.options.fromSet;
+          const toSet = this.options.toSet;
+  
+          let fromEntity: SafeAny;
+          let toEntity: SafeAny;
+          try {
+            fromEntity = await fromSet.read(from).execute().data;
+            toEntity = await toSet.read(to).execute().data;
+          } catch {
+            return false;
+          }
+  
+          fromEntity[this.options.navigation] ??= [];
+          const fromCount = fromEntity[this.options.navigation].length;
+          fromEntity[this.options.navigation] = fromEntity[this.options.navigation].filter((item: SafeAny) => item !== toEntity);
+          const toCount = fromEntity[this.options.navigation];
+
+          if (navOptions && navOptions.onRemove) {
+            navOptions.onRemove(fromEntity, toEntity);
+          }
+  
+          return true;
+        })()
+      })
+    };
+  }
+
+  set(from: TKey1, to: TKey2): EntityNavigationAction {
+    return {
+      execute: () => ({
+        result: (async () => {
+          const setOptions = this.options.rootOptions.entitySets[this.options.fromSet.name];
+          if (!setOptions) {
+            return false;
+          }
+  
+          const navOptions = setOptions.navigations?.[this.options.navigation];
+  
+          const fromSet = this.options.fromSet;
+          const toSet = this.options.toSet;
+  
+          let fromEntity: SafeAny;
+          let toEntity: SafeAny;
+          try {
+            fromEntity = await fromSet.read(from).execute().data;
+            toEntity = await toSet.read(to).execute().data;
+          } catch {
+            return false;
+          }
+  
+          fromEntity[this.options.navigation] = toEntity;
+  
+          if (navOptions && navOptions.onAdd) {
+            navOptions.onAdd(fromEntity, toEntity);
+          }
+  
+          return true;
+        })()
+      })
+    };
+  }
+
+  unset(from: TKey1, to: TKey2): EntityNavigationAction {
+    return {
+      execute: () => ({
+        result: (async () => {
+          const setOptions = this.options.rootOptions.entitySets[this.options.fromSet.name];
+          if (!setOptions) {
+            return false;
+          }
+  
+          const navOptions = setOptions.navigations?.[this.options.navigation];
+  
+          const fromSet = this.options.fromSet;
+          const toSet = this.options.toSet;
+  
+          let fromEntity: SafeAny;
+          let toEntity: SafeAny;
+          try {
+            fromEntity = await fromSet.read(from).execute().data;
+            toEntity = await toSet.read(to).execute().data;
+          } catch {
+            return false;
+          }
+  
+          fromEntity[this.options.navigation] = null;
+  
+          if (navOptions && navOptions.onAdd) {
+            navOptions.onAdd(fromEntity, toEntity);
+          }
+  
+          return true;
+        })()
+      })
+    };
+  }
+}

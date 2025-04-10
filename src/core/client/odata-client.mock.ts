@@ -1,6 +1,9 @@
 import { SafeAny } from "../../utils/types";
-import { EntitySetBuilderAddKey } from "../entity/client/builder/entity-set-client-builder";
+import { EntityKey, EntitySetBuilderAddKey } from "../entity/client/builder/entity-set-client-builder";
 import { EntitySetBuilderMock } from "../entity/client/builder/entity-set-client-builder.mock";
+import { EntitySetClient } from "../entity/client/entity-set-client";
+import { NavigationBuilderAddCardinality } from "../entity/navigation/builder/entity-navigation-builder";
+import { EntityNavigationBuilderMock } from "../entity/navigation/builder/entity-navigation-builder.mock";
 import { ODataClient } from "./odata-client";
 
 export interface MockODataClientOptions {
@@ -11,7 +14,7 @@ export interface MockODataClientOptions {
 export interface NewMockODataClientOptions {
   entitySets: {
     [name: string]: {
-      data: () => SafeAny[];
+      data: () => Record<string, SafeAny>;
       id: string | string[];
       idGenerator: () => SafeAny | SafeAny[];
       onCreate?: (entity: SafeAny) => void;
@@ -49,7 +52,7 @@ export class MockODataClient extends ODataClient {
   private readonly mockOptions;
 
   constructor(
-    options: MockODataClientOptions,
+    options: NewMockODataClientOptions,
   ) {
     super({
       serviceUrl: "http://localhost",
@@ -59,7 +62,14 @@ export class MockODataClient extends ODataClient {
     this.mockOptions = options;
   }
 
-  entitySet<TEntity>(name: string): EntitySetBuilderAddKey<TEntity> {
+  override entitySet<TEntity>(name: string): EntitySetBuilderAddKey<TEntity> {
     return new EntitySetBuilderMock(this.mockOptions, name);
+  }
+
+  override navigation<TEntity, TKey extends EntityKey<TEntity>, TNavProperty extends keyof TEntity & string>(
+    fromSet: EntitySetClient<TEntity, TKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>,
+    property: TNavProperty
+  ): NavigationBuilderAddCardinality<TEntity, TKey, TNavProperty> {
+    return new EntityNavigationBuilderMock(this.mockOptions, fromSet, property);
   }
 }

@@ -56,14 +56,14 @@ const act1Action = client
   .action("act1")
   .withMethod("POST")
   .withBody<{ value: string }>()
-  .withReturnType<{ result: boolean }>()
+  .withCollectionResponse<{ result: boolean }>()
   .build();
 
 const act2Action = client
   .action(models, "act2")
   .withMethod("POST")
   .withBody<{ value: string }>()
-  .withReturnType<{ result: boolean }>()
+  .withCollectionResponse<{ result: boolean }>()
   .build();
 
 const moreNewModels = client.bind.action(newModels, { act2: act2Action });
@@ -72,17 +72,26 @@ const func1Function = client
   .function("func1")
   .withMethod("GET")
   .withParameters<{ value: string }>()
-  .withReturnType<{ result: boolean }>()
+  .withCollectionResponse<{ result: boolean }>()
   .build();
 
 const func2Function = client
   .function(models, "func2")
   .withMethod("GET")
   .withParameters<{ value: string }>()
-  .withReturnType<{ result: boolean }>()
+  .withCollectionResponse<{ result: boolean }>()
   .build();
 
 const evenMoreNewModels = client.bind.function(moreNewModels, { func2: func2Function });
+
+evenMoreNewModels.actions
+  .act2.invoke(1, { value: "a" })
+  .filter(e =>
+    o.eq(
+      e.prop("result"),
+      o.bool(true)
+    )
+  );
 
 // const newModels = models
 //   .navigations

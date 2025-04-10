@@ -11,8 +11,9 @@ export interface ActionBuilderAddReturnType<
 
 export interface ActionBuilderFinal<
   TParameter extends {},
+  TCollection extends boolean,
   TReturn,
-> extends InvokableBuilderFinal<TParameter, TReturn> { }
+> extends InvokableBuilderFinal<TParameter, TCollection, TReturn> { }
 
 export interface EntityActionBuilderAddMethod<
   TEntity,
@@ -34,5 +35,6 @@ export interface EntityActionBuilderFinal<
   TEntity,
   TKey extends EntityKey<TEntity>,
   TParameter extends {},
+  TCollection extends boolean,
   TReturn,
-> extends EntityInvokableBuilderFinal<TEntity, TKey, TParameter, TReturn> { }
+> extends EntityInvokableBuilderFinal<TEntity, TKey, TParameter, TCollection, TReturn> { }

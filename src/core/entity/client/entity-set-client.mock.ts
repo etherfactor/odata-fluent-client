@@ -45,6 +45,10 @@ export class EntitySetClientMock<TEntity, TKey extends EntityKey<TEntity>> imple
       validator: this.options.validator as any,
     });
   }
+  
+  get name(): string {
+    throw new Error("Method not implemented.");
+  }
 
   get set(): EntitySet<TEntity> {
     if (!this.options.readSet)

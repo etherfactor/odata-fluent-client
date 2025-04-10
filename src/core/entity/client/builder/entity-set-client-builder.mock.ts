@@ -1,6 +1,6 @@
 import { HttpMethod } from "../../../../utils/http";
 import { SafeAny } from "../../../../utils/types";
-import { MockODataClientOptions } from "../../../client/odata-client.mock";
+import { NewMockODataClientOptions } from "../../../client/odata-client.mock";
 import { EntitySelectExpand } from "../../expand/entity-select-expand";
 import { EntitySetClient } from "../entity-set-client";
 import { EntitySetClientMock, EntitySetClientMockOptions } from "../entity-set-client.mock";
@@ -18,11 +18,11 @@ export class EntitySetBuilderMock<
   EntitySetBuilderAddValue<TEntity, TKey>,
   EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>
 {
-  private readonly options: MockODataClientOptions;
+  private readonly options: NewMockODataClientOptions;
   private readonly entitySet: string;
 
   constructor(
-    options: MockODataClientOptions,
+    options: NewMockODataClientOptions,
     entitySet: string,
   ) {
     this.options = options;
@@ -79,8 +79,8 @@ export class EntitySetBuilderMock<
 
   build(): EntitySetClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete> {
     const options: EntitySetClientMockOptions = {
-      entitySet: this.options.getEntitySet(this.entitySet),
-      addIdToEntity: this.options.addIdToEntity[this.entitySet],
+      entitySet: this.options.entitySets[this.entitySet].data(),
+      addIdToEntity: () => "", // this.options.addIdToEntity[this.entitySet], //TODO: fix this
       validator: this.validator,
       readSet: this.readSet,
       read: this.read,

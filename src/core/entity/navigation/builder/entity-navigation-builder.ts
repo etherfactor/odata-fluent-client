@@ -1,8 +1,8 @@
-import { HttpMethod } from "../../../utils/http";
-import { SafeAny } from "../../../utils/types";
-import { EntityKey, EntityKeyType } from "../client/builder/entity-set-client-builder";
-import { EntitySetClient } from "../client/entity-set-client";
-import { Navigation } from "./entity-navigation";
+import { HttpMethod } from "../../../../utils/http";
+import { SafeAny } from "../../../../utils/types";
+import { EntityKey, EntityKeyType } from "../../client/builder/entity-set-client-builder";
+import { EntitySetClient } from "../../client/entity-set-client";
+import { EntityNavigation } from "../entity-navigation";
 
 export interface NavigationBuilderAddCardinality<
   TEntity,
@@ -41,7 +41,7 @@ export interface NavigationBuilderAddMethodFull<
   withRemove<TMethod extends HttpMethod>(method: TMethod): NavigationBuilderAddMethod<TEntity, TKey, TNavProperty, TNavEntity, TNavKey, TCollection, TAdd, TMethod, TSet, TUnset>;
   withSet<TMethod extends HttpMethod>(method: TMethod): NavigationBuilderAddMethod<TEntity, TKey, TNavProperty, TNavEntity, TNavKey, TCollection, TAdd, TRemove, TMethod, TUnset>;
   withUnset<TMethod extends HttpMethod>(method: TMethod): NavigationBuilderAddMethod<TEntity, TKey, TNavProperty, TNavEntity, TNavKey, TCollection, TAdd, TRemove, TSet, TMethod>;
-  build(): Navigation<EntityKeyType<TEntity, TKey>, EntityKeyType<TNavEntity, TNavKey>, TAdd, TRemove, TSet, TUnset>;
+  build(): EntityNavigation<EntityKeyType<TEntity, TKey>, EntityKeyType<TNavEntity, TNavKey>, TAdd, TRemove, TSet, TUnset>;
 }
 
 export type NavigationBuilderAddMethod<

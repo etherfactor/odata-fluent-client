@@ -7,6 +7,7 @@ export interface EntitySetClientFull<
   TEntity,
   TKey extends EntityKey<TEntity>,
 > {
+  get name(): string;
   get set(): EntitySet<TEntity>;
   read(key: EntityPropertyType<TEntity, TKey>): EntitySingle<TEntity>;
   create(entity: Partial<TEntity>): EntitySingle<TEntity>;
@@ -27,4 +28,5 @@ export type EntitySetClient<
   (TRead extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "read"> : {}) &
   (TCreate extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "create"> : {}) &
   (TUpdate extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "update"> : {}) &
-  (TDelete extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "delete"> : {});
+  (TDelete extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "delete"> : {}) &
+  Pick<EntitySetClientFull<TEntity, TKey>, "name">;

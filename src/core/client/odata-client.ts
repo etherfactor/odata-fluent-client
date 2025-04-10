@@ -4,8 +4,9 @@ import { ActionBuilderAddMethod, EntityActionBuilderAddMethod } from "../action/
 import { EntityKey, EntitySetBuilderAddKey } from "../entity/client/builder/entity-set-client-builder";
 import { EntitySetBuilderImpl } from "../entity/client/builder/entity-set-client-builder.impl";
 import { EntitySetClient } from "../entity/client/entity-set-client";
-import { Navigation } from "../entity/navigation/entity-navigation";
-import { NavigationBuilderAddCardinality } from "../entity/navigation/entity-navigation-builder";
+import { NavigationBuilderAddCardinality } from "../entity/navigation/builder/entity-navigation-builder";
+import { EntityNavigationBuilderImpl } from "../entity/navigation/builder/entity-navigation-builder.impl";
+import { EntityNavigation } from "../entity/navigation/entity-navigation";
 import { EntityFunction } from "../function/function";
 import { EntityFunctionBuilderAddMethod, FunctionBuilderAddMethod } from "../function/function-builder";
 import { HttpClientAdapter } from "../http/http-client-adapter";
@@ -40,7 +41,7 @@ export class ODataClient {
     fromSet: EntitySetClient<TEntity, TKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>,
     property: TNavProperty
   ): NavigationBuilderAddCardinality<TEntity, TKey, TNavProperty> {
-    return undefined!;
+    return new EntityNavigationBuilderImpl(this.options, fromSet, property);
   }
 
   action(name: string): ActionBuilderAddMethod;
@@ -70,30 +71,54 @@ export class ODataClient {
 
 function bindNavigation<
   TSet extends EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>,
-  TNavigation extends { [key: string]: Navigation<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny> }
+  TNavigation extends { [key: string]: EntityNavigation<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny> }
 > (
   set: TSet,
   navigations: TNavigation,
 ): TSet & { navigations: TNavigation } {
-  return undefined!;
+  const maybe = (set as SafeAny).navigations;
+  let use;
+  if (maybe && typeof maybe === "object") {
+    use = {...maybe, ...navigations};
+  } else {
+    use = {...navigations};
+  }
+  (set as SafeAny).navigations = use;
+  return use;
 };
 
 function bindAction<
   TSet extends EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>,
-  TAction extends { [key: string]: EntityAction<SafeAny, SafeAny, SafeAny> }
+  TAction extends { [key: string]: EntityAction<SafeAny, SafeAny, SafeAny, SafeAny> }
 > (
   set: TSet,
   actions: TAction
 ): TSet & { actions: TAction } {
-  return undefined!
+  const maybe = (set as SafeAny).actions;
+  let use;
+  if (maybe && typeof maybe === "object") {
+    use = {...maybe, ...actions};
+  } else {
+    use = {...actions};
+  }
+  (set as SafeAny).actions = use;
+  return use;
 };
 
 function bindFunction<
   TSet extends EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>,
-  TFunction extends { [key: string]: EntityFunction<SafeAny, SafeAny, SafeAny> }
+  TFunction extends { [key: string]: EntityFunction<SafeAny, SafeAny, SafeAny, SafeAny> }
 > (
   set: TSet,
-  actions: TFunction
+  functions: TFunction
 ): TSet & { functions: TFunction } {
-  return undefined!
+  const maybe = (set as SafeAny).functions;
+  let use;
+  if (maybe && typeof maybe === "object") {
+    use = {...maybe, ...functions};
+  } else {
+    use = {...functions};
+  }
+  (set as SafeAny).functions = use;
+  return use;
 };

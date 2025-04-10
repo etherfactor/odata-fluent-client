@@ -14,14 +14,16 @@ export interface InvokableBuilderAddParameters {
 export interface InvokableBuilderAddReturnType<
   TParameter extends {},
 > {
-  withReturnType<TReturn>(): InvokableBuilderFinal<TParameter, TReturn>;
+  withCollectionResponse<TReturn>(): InvokableBuilderFinal<TParameter, true, TReturn>;
+  withSingleResponse<TReturn>(): InvokableBuilderFinal<TParameter, false, TReturn>;
 }
 
 export interface InvokableBuilderFinal<
   TParameter extends {},
+  TCollection extends boolean,
   TReturn,
 > {
-  build(): Invokable<TParameter, TReturn>;
+  build(): Invokable<TParameter, TCollection, TReturn>;
 }
 
 export interface EntityInvokableBuilderAddMethod<
@@ -44,14 +46,16 @@ export interface EntityInvokableBuilderAddReturnType<
   TKey extends EntityKey<TEntity>,
   TParameter extends {},
 > {
-  withReturnType<TReturn>(): EntityInvokableBuilderFinal<TEntity, TKey, TParameter, TReturn>;
+  withCollectionResponse<TReturn>(): EntityInvokableBuilderFinal<TEntity, TKey, TParameter, true, TReturn>;
+  withSingleResponse<TReturn>(): EntityInvokableBuilderFinal<TEntity, TKey, TParameter, false, TReturn>;
 }
 
 export interface EntityInvokableBuilderFinal<
   TEntity,
   TKey extends EntityKey<TEntity>,
   TParameter extends {},
+  TCollection extends boolean,
   TReturn,
 > {
-  build(): EntityInvokable<EntityKeyType<TEntity, TKey>, TParameter, TReturn>;
+  build(): EntityInvokable<EntityKeyType<TEntity, TKey>, TParameter, TCollection, TReturn>;
 }
