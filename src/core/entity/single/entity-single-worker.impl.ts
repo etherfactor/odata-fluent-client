@@ -1,8 +1,7 @@
 import { JSONParser } from "@streamparser/json";
-import { ODataOptions } from "../../..";
+import { DefaultHttpClientAdapter, ODataClientOptions, ODataOptions } from "../../..";
 import { HttpMethod } from "../../../utils/http";
 import { SafeAny } from "../../../utils/types";
-import { HttpClientAdapter } from "../../http/http-client-adapter";
 import { selectExpandToObject } from "../../parameters/expand";
 import { getParams } from "../../parameters/odata-options";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
@@ -10,10 +9,9 @@ import { EntityResponse } from "../response/entity-response";
 import { EntitySingleWorker } from "./entity-single-worker";
 
 export interface EntitySingleWorkerImplOptions<TEntity> {
-  adapter: HttpClientAdapter;
+  rootOptions: ODataClientOptions;
   method: HttpMethod;
   url: string;
-  headers: Record<string, string>;
   payload?: Partial<TEntity>;
   validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
 }
@@ -31,10 +29,11 @@ export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEnti
   execute(options: ODataOptions): EntityResponse<TEntity> {
     const params = getParams(options);
 
-    const result = this.options.adapter.invoke({
+    const adapter = this.options.rootOptions.http.adapter ?? DefaultHttpClientAdapter;
+    const result = adapter.invoke({
       method: this.options.method,
       url: this.options.url,
-      headers: this.options.headers,
+      headers: this.options.rootOptions.http.headers ?? {},
       query: params,
       body: this.options.payload,
     });

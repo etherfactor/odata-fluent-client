@@ -1,5 +1,5 @@
-import { EntityKey } from "../entity/client/builder/entity-set-client-builder";
-import { EntityInvokableBuilderAddMethod, EntityInvokableBuilderAddParameters, EntityInvokableBuilderAddReturnType, EntityInvokableBuilderFinal, InvokableBuilderAddMethod, InvokableBuilderAddParameters, InvokableBuilderAddReturnType, InvokableBuilderFinal } from "../invokable/invokable-builder";
+import { EntityKey } from "../../entity/client/builder/entity-set-client-builder";
+import { EntityInvokableBuilderAddMethod, EntityInvokableBuilderAddParameters, EntityInvokableBuilderAddReturnType, EntityInvokableBuilderFinal, InvokableBuilderAddMethod, InvokableBuilderAddParameters, InvokableBuilderAddReturnType, InvokableBuilderFinal } from "../../invokable/invokable-builder";
 
 export interface ActionBuilderAddMethod extends InvokableBuilderAddMethod { }
 

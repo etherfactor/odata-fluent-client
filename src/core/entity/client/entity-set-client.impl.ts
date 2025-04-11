@@ -2,7 +2,6 @@ import { HttpMethod, extendUrl } from "../../../utils/http";
 import { SafeAny } from "../../../utils/types";
 import { Value } from "../../../values/base";
 import { ODataClientOptions, ODataPathRoutingType } from "../../client/odata-client";
-import { DefaultHttpClientAdapter } from "../../http/http-client-adapter";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
 import { EntitySet, EntitySetImpl } from "../set/entity-set";
 import { EntitySetWorker } from "../set/entity-set-worker";
@@ -40,10 +39,9 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
 
   private createSetWorker(method: HttpMethod, url: string, payload?: Partial<TEntity>): EntitySetWorker<TEntity> {
     return new EntitySetWorkerImpl({
-      adapter: this.options.rootOptions.http.adapter ?? DefaultHttpClientAdapter,
+      rootOptions: this.options.rootOptions,
       method: method,
       url: url,
-      headers: this.options.rootOptions.http.headers ?? {},
       payload: payload,
       validator: this.options.validator as SafeAny, //generic typing doesn't play nicely with this
     });
@@ -51,10 +49,9 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
 
   private createSingleWorker(method: HttpMethod, url: string, payload?: Partial<TEntity>): EntitySingleWorker<TEntity> {
     return new EntitySingleWorkerImpl({
-      adapter: this.options.rootOptions.http.adapter ?? DefaultHttpClientAdapter,
+      rootOptions: this.options.rootOptions,
       method: method,
       url: url,
-      headers: this.options.rootOptions.http.headers ?? {},
       payload: payload,
       validator: this.options.validator as SafeAny, //generic typing doesn't play nicely with this
     });

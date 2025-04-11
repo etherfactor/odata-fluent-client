@@ -1,6 +1,6 @@
 import { SafeAny } from "../../utils/types";
 import { EntityAction } from "../action/action";
-import { ActionBuilderAddMethod, EntityActionBuilderAddMethod } from "../action/action-builder";
+import { ActionBuilderAddMethod, EntityActionBuilderAddMethod } from "../action/builder/action-builder";
 import { EntityKey, EntitySetBuilderAddKey } from "../entity/client/builder/entity-set-client-builder";
 import { EntitySetBuilderImpl } from "../entity/client/builder/entity-set-client-builder.impl";
 import { EntitySetClient } from "../entity/client/entity-set-client";
