@@ -34,7 +34,10 @@ export class ODataClient {
   }
 
   entitySet<TEntity>(name: string): EntitySetBuilderAddKey<TEntity> {
-    return new EntitySetBuilderImpl(this.options, name);
+    return new EntitySetBuilderImpl({
+      rootOptions: this.options,
+      entitySet: name,
+    });
   }
 
   navigation<TEntity, TKey extends EntityKey<TEntity>, TNavProperty extends keyof TEntity & string>(

@@ -50,27 +50,27 @@ export class EntityNavigationBuilderMock<
     return this as SafeAny;
   }
 
-  //private add?: HttpMethod;
+  private add?: HttpMethod;
   withAdd<TMethod extends HttpMethod>(method: TMethod): NavigationBuilderAddMethod<TEntity, TKey, TNavProperty, TNavEntity, TNavKey, TCollection, TMethod, TRemove, TSet, TUnset> {
-    //this.add = method;
+    this.add = method;
     return this as SafeAny;
   }
 
-  //private remove?: HttpMethod;
+  private remove?: HttpMethod;
   withRemove<TMethod extends HttpMethod>(method: TMethod): NavigationBuilderAddMethod<TEntity, TKey, TNavProperty, TNavEntity, TNavKey, TCollection, TAdd, TMethod, TSet, TUnset> {
-    //this.remove = method;
+    this.remove = method;
     return this as SafeAny;
   }
 
-  //private set?: HttpMethod;
+  private set?: HttpMethod;
   withSet<TMethod extends HttpMethod>(method: TMethod): NavigationBuilderAddMethod<TEntity, TKey, TNavProperty, TNavEntity, TNavKey, TCollection, TAdd, TRemove, TMethod, TUnset> {
-    //this.set = method;
+    this.set = method;
     return this as SafeAny;
   }
 
-  //private unset?: HttpMethod;
+  private unset?: HttpMethod;
   withUnset<TMethod extends HttpMethod>(method: TMethod): NavigationBuilderAddMethod<TEntity, TKey, TNavProperty, TNavEntity, TNavKey, TCollection, TAdd, TRemove, TSet, TMethod> {
-    //this.unset = method;
+    this.unset = method;
     return this as SafeAny;
   }
 
@@ -80,6 +80,10 @@ export class EntityNavigationBuilderMock<
       navigation: this.navigation,
       fromSet: this.fromSet as SafeAny,
       toSet: this.navSet as SafeAny,
+      add: this.add,
+      remove: this.remove,
+      set: this.set,
+      unset: this.unset,
     });
   }
 }

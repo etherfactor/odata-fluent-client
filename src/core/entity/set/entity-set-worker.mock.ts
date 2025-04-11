@@ -1,5 +1,6 @@
 import { toIterable, toPromise } from "../../../utils/promise";
 import { SafeAny } from "../../../utils/types";
+import { NewMockODataClientOptions } from "../../client/odata-client.mock";
 import { Filter } from "../../parameters/filter";
 import { ODataOptions } from "../../parameters/odata-options";
 import { OrderBy } from "../../parameters/orderby";
@@ -11,25 +12,28 @@ import { EntitySetResponse } from "../response/entity-response";
 import { EntitySetWorker } from "./entity-set-worker";
 
 export interface EntitySetWorkerMockOptions<TEntity> {
-  getData: () => Record<string, TEntity>;
-  payload?: Partial<TEntity>;
+  rootOptions: NewMockODataClientOptions;
+  entitySet: string;
   validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
 }
 
 export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
 
   private readonly options;
+  private readonly entitySet;
 
   constructor(
     options: EntitySetWorkerMockOptions<TEntity>,
   ) {
     this.options = options;
+    this.entitySet = options.rootOptions.entitySets[options.entitySet];
   }
 
   execute(options: ODataOptions): EntitySetResponse<TEntity> {
+    const allData = this.entitySet.data();
     const data = {
       "@odata.count": undefined as number | undefined,
-      value: Object.values(this.options.getData())
+      value: Object.values(allData)
     };
     
     data.value = this.applyFilters(data.value, options.filter ?? []);

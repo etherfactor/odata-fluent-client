@@ -16,7 +16,18 @@ describe("EntitySingleWorkerMock", () => {
 
   it("should return full entity when no select option provided", async () => {
     const workerOpt: EntitySingleWorkerMockOptions<TestEntity> = {
-      getData: () => sampleData,
+      rootOptions: {
+        entitySets: {
+          models: {
+            data: () => sampleData,
+            id: "id",
+            idGenerator: () => 0,
+          }
+        },
+        actions: {},
+        functions: {},
+      },
+      entitySet: "models",
       id: "1",
     };
     const worker = new EntitySingleWorkerMock(workerOpt);
@@ -31,7 +42,18 @@ describe("EntitySingleWorkerMock", () => {
 
   it("should apply select correctly", async () => {
     const workerOpt: EntitySingleWorkerMockOptions<TestEntity> = {
-      getData: () => sampleData,
+      rootOptions: {
+        entitySets: {
+          models: {
+            data: () => sampleData,
+            id: "id",
+            idGenerator: () => 0,
+          }
+        },
+        actions: {},
+        functions: {},
+      },
+      entitySet: "models",
       id: "2",
     };
     const worker = new EntitySingleWorkerMock(workerOpt);
@@ -50,7 +72,18 @@ describe("EntitySingleWorkerMock", () => {
 
   it("should return undefined for non-existent entity", async () => {
     const workerOpt: EntitySingleWorkerMockOptions<TestEntity> = {
-      getData: () => sampleData,
+      rootOptions: {
+        entitySets: {
+          models: {
+            data: () => sampleData,
+            id: "id",
+            idGenerator: () => 0,
+          }
+        },
+        actions: {},
+        functions: {},
+      },
+      entitySet: "models",
       id: "non-existent",
     };
     const worker = new EntitySingleWorkerMock(workerOpt);
@@ -70,7 +103,18 @@ describe("EntitySingleWorkerMock", () => {
     };
 
     const workerOpt: EntitySingleWorkerMockOptions<TestEntity> = {
-      getData: () => sampleDataWithArrayId,
+      rootOptions: {
+        entitySets: {
+          models: {
+            data: () => sampleDataWithArrayId,
+            id: "id",
+            idGenerator: () => 0,
+          }
+        },
+        actions: {},
+        functions: {},
+      },
+      entitySet: "models",
       id: arrayId,
     };
     const worker = new EntitySingleWorkerMock(workerOpt);

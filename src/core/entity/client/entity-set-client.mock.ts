@@ -1,5 +1,6 @@
 import { HttpMethod } from "../../../utils/http";
 import { toIdString } from "../../../utils/id";
+import { NewMockODataClientOptions } from "../../client/odata-client.mock";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
 import { EntitySet, EntitySetImpl } from "../set/entity-set";
 import { EntitySetWorker } from "../set/entity-set-worker";
@@ -11,7 +12,8 @@ import { EntityKey, EntityPropertyType } from "./builder/entity-set-client-build
 import { EntitySetClientFull } from "./entity-set-client";
 
 export interface EntitySetClientMockOptions {
-  entitySet: Record<string, object>;
+  rootOptions: NewMockODataClientOptions;
+  entitySet: string;
   addIdToEntity?: (entity: any) => string;
   validator?: (value: unknown, selectExpand: EntitySelectExpand) => unknown | Error;
   readSet?: HttpMethod;
@@ -33,14 +35,16 @@ export class EntitySetClientMock<TEntity, TKey extends EntityKey<TEntity>> imple
 
   private createSetWorker(): EntitySetWorker<TEntity> {
     return new EntitySetWorkerMock({
-      getData: () => this.options.entitySet as Record<string, TEntity>,
+      rootOptions: this.options.rootOptions,
+      entitySet: this.options.entitySet,
       validator: this.options.validator as any,
     });
   }
 
   private createSingleWorker(id: unknown | unknown[]): EntitySingleWorker<TEntity> {
     return new EntitySingleWorkerMock({
-      getData: () => this.options.entitySet as Record<string, TEntity>,
+      rootOptions: this.options.rootOptions,
+      entitySet: this.options.entitySet,
       id: id,
       validator: this.options.validator as any,
     });
@@ -70,11 +74,20 @@ export class EntitySetClientMock<TEntity, TKey extends EntityKey<TEntity>> imple
     if (!this.options.create)
       throw new Error("This resource does not support creating entities");
 
-    if (!this.options.addIdToEntity)
-      throw new Error("Must define an 'addIdToEntity' for this entity set");
+    const setOptions = this.options.rootOptions.entitySets[this.options.entitySet];
+    const setData = setOptions.data();
 
-    const newId = this.options.addIdToEntity(entity);
-    this.options.entitySet[newId] = entity;
+    const newId = setOptions.idGenerator();
+    if (Array.isArray(setOptions.id)) {
+      for (let i = 0; i < setOptions.id.length; i++) {
+        entity[setOptions.id[i] as keyof typeof entity] = newId[i];
+      }
+    } else {
+      entity[setOptions.id as keyof typeof entity] = newId;
+    }
+
+    const id = toIdString(newId);
+    setData[id] = entity;
 
     const worker = this.createSingleWorker(newId);
     return new EntitySingleImpl(worker);
@@ -84,8 +97,11 @@ export class EntitySetClientMock<TEntity, TKey extends EntityKey<TEntity>> imple
     if (!this.options.update)
       throw new Error("This resource does not support updating entities");
 
+    const setOptions = this.options.rootOptions.entitySets[this.options.entitySet];
+    const setData = setOptions.data();
+    
     const id = toIdString(key);
-    this.options.entitySet[id] = {...this.options.entitySet[id], ...entity};
+    setData[id] = {...setData[id], ...entity};
 
     const worker = this.createSingleWorker(key);
     return new EntitySingleImpl(worker);

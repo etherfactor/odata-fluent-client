@@ -1,4 +1,4 @@
-import { createOperatorFactory, DefaultHttpClientAdapter, HttpClientAdapter, MockODataClient, ODataClient } from "../../../../../src";
+import { createOperatorFactory, HttpClientAdapter, MockODataClient, ODataClient } from "../../../../../src";
 import { toPromise } from "../../../../../src/utils/promise";
 
 interface Model {
@@ -11,10 +11,15 @@ const o = createOperatorFactory();
 describe('EntitySetBuilderMock', () => {
   it('should allow building an entity set', () => {
     const builder = new MockODataClient({
-      getEntitySet(name) {
-        return {};
+      entitySets: {
+        models: {
+          data: () => ({}),
+          id: "id",
+          idGenerator: () => 0,
+        }
       },
-      addIdToEntity: {},
+      actions: {},
+      functions: {},
     }).entitySet<Model>("models");
 
     const set = builder
@@ -49,7 +54,7 @@ describe('EntitySetBuilderMock', () => {
       .build();
 
     expect(set).toBeTruthy();
-    expect((set as any)["options"]["adapter"]).toBe(DefaultHttpClientAdapter);
+    expect((set as any)["options"]["rootOptions"]["http"]["adapter"]).toBeUndefined();
   });
 
   it('should use the provided http adapter if one is specified', () => {
@@ -74,6 +79,6 @@ describe('EntitySetBuilderMock', () => {
       .build();
 
     expect(set).toBeTruthy();
-    expect((set as any)["options"]["adapter"]).toBe(adapter);
+    expect((set as any)["options"]["rootOptions"]["http"]["adapter"]).toBe(adapter);
   });
 });

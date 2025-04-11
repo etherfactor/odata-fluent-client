@@ -63,7 +63,10 @@ export class MockODataClient extends ODataClient {
   }
 
   override entitySet<TEntity>(name: string): EntitySetBuilderAddKey<TEntity> {
-    return new EntitySetBuilderMock(this.mockOptions, name);
+    return new EntitySetBuilderMock({
+      rootOptions: this.mockOptions,
+      entitySet: name,
+    });
   }
 
   override navigation<TEntity, TKey extends EntityKey<TEntity>, TNavProperty extends keyof TEntity & string>(

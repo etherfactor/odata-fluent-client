@@ -6,6 +6,11 @@ import { EntitySetClient } from "../entity-set-client";
 import { EntitySetClientMock, EntitySetClientMockOptions } from "../entity-set-client.mock";
 import { EntityKey, EntityKeyValue, EntityPropertyType, EntitySetBuilderAddKey, EntitySetBuilderAddMethod, EntitySetBuilderAddMethodFull, EntitySetBuilderAddValue } from "./entity-set-client-builder";
 
+export interface EntitySetBuilderMockOptions {
+  rootOptions: NewMockODataClientOptions;
+  entitySet: string;
+}
+
 export class EntitySetBuilderMock<
   TEntity,
   TKey extends EntityKey<TEntity>,
@@ -18,15 +23,12 @@ export class EntitySetBuilderMock<
   EntitySetBuilderAddValue<TEntity, TKey>,
   EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>
 {
-  private readonly options: NewMockODataClientOptions;
-  private readonly entitySet: string;
+  private readonly options;
 
   constructor(
-    options: NewMockODataClientOptions,
-    entitySet: string,
+    options: EntitySetBuilderMockOptions,
   ) {
     this.options = options;
-    this.entitySet = entitySet;
   }
 
   private key!: TKey;
@@ -79,8 +81,8 @@ export class EntitySetBuilderMock<
 
   build(): EntitySetClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete> {
     const options: EntitySetClientMockOptions = {
-      entitySet: this.options.entitySets[this.entitySet].data(),
-      addIdToEntity: () => "", // this.options.addIdToEntity[this.entitySet], //TODO: fix this
+      rootOptions: this.options.rootOptions,
+      entitySet: this.options.entitySet,
       validator: this.validator,
       readSet: this.readSet,
       read: this.read,

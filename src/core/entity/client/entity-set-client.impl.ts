@@ -1,8 +1,8 @@
 import { HttpMethod, extendUrl } from "../../../utils/http";
 import { SafeAny } from "../../../utils/types";
 import { Value } from "../../../values/base";
-import { ODataPathRoutingType } from "../../client/odata-client";
-import { HttpClientAdapter } from "../../http/http-client-adapter";
+import { ODataClientOptions, ODataPathRoutingType } from "../../client/odata-client";
+import { DefaultHttpClientAdapter } from "../../http/http-client-adapter";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
 import { EntitySet, EntitySetImpl } from "../set/entity-set";
 import { EntitySetWorker } from "../set/entity-set-worker";
@@ -14,11 +14,8 @@ import { EntityKey, EntityPropertyType } from "./builder/entity-set-client-build
 import { EntitySetClientFull } from "./entity-set-client";
 
 export interface EntitySetClientImplOptions {
-  serviceUrl: string;
+  rootOptions: ODataClientOptions;
   entitySet: string;
-  routingType: ODataPathRoutingType;
-  adapter: HttpClientAdapter;
-  headers: Record<string, string>;
   key: unknown | unknown[];
   keyType: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[];
   validator?: (value: unknown, selectExpand: EntitySelectExpand) => unknown | Error;
@@ -38,15 +35,15 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
     options: EntitySetClientImplOptions,
   ) {
     this.options = options;
-    this.entitySetUrl = extendUrl(this.options.serviceUrl, this.options.entitySet);
+    this.entitySetUrl = extendUrl(this.options.rootOptions.serviceUrl, this.options.entitySet);
   }
 
   private createSetWorker(method: HttpMethod, url: string, payload?: Partial<TEntity>): EntitySetWorker<TEntity> {
     return new EntitySetWorkerImpl({
-      adapter: this.options.adapter,
+      adapter: this.options.rootOptions.http.adapter ?? DefaultHttpClientAdapter,
       method: method,
       url: url,
-      headers: this.options.headers,
+      headers: this.options.rootOptions.http.headers ?? {},
       payload: payload,
       validator: this.options.validator as SafeAny, //generic typing doesn't play nicely with this
     });
@@ -54,10 +51,10 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
 
   private createSingleWorker(method: HttpMethod, url: string, payload?: Partial<TEntity>): EntitySingleWorker<TEntity> {
     return new EntitySingleWorkerImpl({
-      adapter: this.options.adapter,
+      adapter: this.options.rootOptions.http.adapter ?? DefaultHttpClientAdapter,
       method: method,
       url: url,
-      headers: this.options.headers,
+      headers: this.options.rootOptions.http.headers ?? {},
       payload: payload,
       validator: this.options.validator as SafeAny, //generic typing doesn't play nicely with this
     });
@@ -80,7 +77,7 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
     if (!this.options.read)
       throw new Error("This resource does not support reading entities");
 
-    const url = extendEntityUrl(this.entitySetUrl, this.options.routingType, this.options.key, key, this.options.keyType);
+    const url = extendEntityUrl(this.entitySetUrl, this.options.rootOptions.routingType, this.options.key, key, this.options.keyType);
     const worker = this.createSingleWorker(this.options.read, url);
     return new EntitySingleImpl(worker);
   }
@@ -98,7 +95,7 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
     if (!this.options.update)
       throw new Error("This resource does not support updating entities");
 
-    const url = extendEntityUrl(this.entitySetUrl, this.options.routingType, this.options.key, key, this.options.keyType);
+    const url = extendEntityUrl(this.entitySetUrl, this.options.rootOptions.routingType, this.options.key, key, this.options.keyType);
     const worker = this.createSingleWorker(this.options.update, url, entity);
     return new EntitySingleImpl(worker);
   }
@@ -107,7 +104,7 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
     if (!this.options.update)
       throw new Error("This resource does not support deleting entities");
 
-    const url = extendEntityUrl(this.entitySetUrl, this.options.routingType, this.options.key, key, this.options.keyType);
+    const url = extendEntityUrl(this.entitySetUrl, this.options.rootOptions.routingType, this.options.key, key, this.options.keyType);
     //TODO Add this
   }
 }

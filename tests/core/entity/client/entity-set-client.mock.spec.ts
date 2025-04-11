@@ -18,8 +18,20 @@ describe("EntitySetClientMock", () => {
       "1": { id: 1, name: "Alice" },
     };
 
+    let id = 1;
     options = {
-      entitySet,
+      rootOptions: {
+        entitySets: {
+          models: {
+            data: () => entitySet,
+            id: "id",
+            idGenerator: () => ++id,
+          }
+        },
+        actions: {},
+        functions: {},
+      },
+      entitySet: "models",
       validator: (value: unknown) => value,
       readSet: "GET",
       read: "GET",
@@ -39,10 +51,6 @@ describe("EntitySetClientMock", () => {
       const setInstance = client.set;
       expect(setInstance).toBeInstanceOf(EntitySetImpl);
       expect((setInstance as SafeAny)["worker"]).toHaveProperty("options");
-
-      const getData = (setInstance as SafeAny)["worker"].options.getData;
-      expect(typeof getData).toBe("function");
-      expect(getData()).toBe(entitySet);
     });
 
     it("should throw error when readSet is not provided", () => {
@@ -60,10 +68,6 @@ describe("EntitySetClientMock", () => {
       const singleInstance = client.read(key);
       expect(singleInstance).toBeInstanceOf(EntitySingleImpl);
       expect((singleInstance as SafeAny)["worker"].options.id).toEqual(key);
-
-      const getData = (singleInstance as SafeAny)["worker"].options.getData;
-      expect(typeof getData).toBe("function");
-      expect(getData()).toBe(entitySet);
     });
 
     it("should throw error when read option is not provided", () => {
@@ -80,8 +84,8 @@ describe("EntitySetClientMock", () => {
       const newEntity = { id: 2, name: "Bob" };
       const singleInstance = client.create(newEntity);
       expect(singleInstance).toBeInstanceOf(EntitySingleImpl);
-      expect(options.entitySet["2"]).toEqual(newEntity);
-      expect((singleInstance as SafeAny)["worker"].options.id).toEqual("2");
+      expect(entitySet["2"]).toEqual(newEntity);
+      expect((singleInstance as SafeAny)["worker"].options.id).toEqual(2);
     });
 
     it("should throw error when create option is not provided", () => {
@@ -91,14 +95,6 @@ describe("EntitySetClientMock", () => {
         "This resource does not support creating entities"
       );
     });
-
-    it("should throw error when addIdToEntity is not provided", () => {
-      delete options.addIdToEntity;
-      client = new EntitySetClientMock(options);
-      expect(() => client.create({ id: 2, name: "Bob" })).toThrow(
-        "Must define an 'addIdToEntity' for this entity set"
-      );
-    });
   });
 
   describe("Method: update", () => {
@@ -106,7 +102,7 @@ describe("EntitySetClientMock", () => {
       const updatedData = { name: "Alice Updated", extra: "data" };
       const singleInstance = client.update(1, updatedData);
       expect(singleInstance).toBeInstanceOf(EntitySingleImpl);
-      const updatedEntity = options.entitySet["1"];
+      const updatedEntity = entitySet["1"];
       expect(updatedEntity).toMatchObject({
         id: 1,
         name: "Alice Updated",

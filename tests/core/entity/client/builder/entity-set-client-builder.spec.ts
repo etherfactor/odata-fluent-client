@@ -1,4 +1,4 @@
-import { createOperatorFactory, DefaultHttpClientAdapter, HttpClientAdapter, ODataClient } from "../../../../../src";
+import { createOperatorFactory, HttpClientAdapter, ODataClient } from "../../../../../src";
 import { toPromise } from "../../../../../src/utils/promise";
 
 interface Model {
@@ -48,7 +48,7 @@ describe('EntitySetBuilderImpl', () => {
       .build();
 
     expect(set).toBeTruthy();
-    expect((set as any)["options"]["adapter"]).toBe(DefaultHttpClientAdapter);
+    expect((set as any)["options"]["rootOptions"]["http"]["adapter"]).toBeUndefined();
   });
 
   it('should use the provided http adapter if one is specified', () => {
@@ -73,6 +73,6 @@ describe('EntitySetBuilderImpl', () => {
       .build();
 
     expect(set).toBeTruthy();
-    expect((set as any)["options"]["adapter"]).toBe(adapter);
+    expect((set as any)["options"]["rootOptions"]["http"]["adapter"]).toBe(adapter);
   });
 });

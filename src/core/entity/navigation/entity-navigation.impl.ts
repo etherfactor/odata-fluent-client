@@ -11,10 +11,10 @@ export interface EntityNavigationClientImplOptions {
   navigation: string;
   fromSet: EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>;
   toSet: EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>;
-  add: HttpMethod | undefined;
-  remove: HttpMethod | undefined;
-  set: HttpMethod | undefined;
-  unset: HttpMethod | undefined;
+  add?: HttpMethod;
+  remove?: HttpMethod;
+  set?: HttpMethod;
+  unset?: HttpMethod;
 }
 
 export class EntityNavigationClientImpl<TKey1, TKey2> implements EntityNavigationFull<TKey1, TKey2> {

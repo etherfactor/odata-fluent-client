@@ -13,11 +13,12 @@ describe("EntitySetClientImpl", () => {
 
   beforeEach(() => {
     options = {
-      serviceUrl: "http://example.com",
+      rootOptions: {
+        serviceUrl: "http://example.com",
+        routingType: "parentheses",
+        http: { adapter: { invoke: jest.fn() } },
+      },
       entitySet: "users",
-      routingType: "slash",
-      adapter: { invoke: jest.fn() },
-      headers: { "Content-Type": "application/json" },
       key: "id",
       keyType: o.int as (value: unknown) => Value<unknown>,
       validator: (value: unknown) => value,
@@ -37,7 +38,7 @@ describe("EntitySetClientImpl", () => {
       expect((setInstance as SafeAny)["worker"]).toMatchObject({
         options: {
           method: options.readSet,
-          url: `${options.serviceUrl}/${options.entitySet}`,
+          url: `${options.rootOptions.serviceUrl}/${options.entitySet}`,
         },
       });
     });
@@ -57,8 +58,8 @@ describe("EntitySetClientImpl", () => {
       const singleInstance = client.read(key);
       expect(singleInstance).toBeInstanceOf(EntitySingleImpl);
       const expectedUrl = extendEntityUrl(
-        `${options.serviceUrl}/${options.entitySet}`,
-        options.routingType,
+        `${options.rootOptions.serviceUrl}/${options.entitySet}`,
+        options.rootOptions.routingType,
         options.key,
         key,
         options.keyType
@@ -88,7 +89,7 @@ describe("EntitySetClientImpl", () => {
       expect((singleInstance as SafeAny)["worker"]).toMatchObject({
         options: {
           method: options.create,
-          url: `${options.serviceUrl}/${options.entitySet}`,
+          url: `${options.rootOptions.serviceUrl}/${options.entitySet}`,
           payload: entity,
         },
       });
@@ -110,8 +111,8 @@ describe("EntitySetClientImpl", () => {
       const singleInstance = client.update(key, entity);
       expect(singleInstance).toBeInstanceOf(EntitySingleImpl);
       const expectedUrl = extendEntityUrl(
-        `${options.serviceUrl}/${options.entitySet}`,
-        options.routingType,
+        `${options.rootOptions.serviceUrl}/${options.entitySet}`,
+        options.rootOptions.routingType,
         options.key,
         key,
         options.keyType

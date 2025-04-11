@@ -2,11 +2,15 @@ import { HttpMethod } from "../../../../utils/http";
 import { SafeAny } from "../../../../utils/types";
 import { Value } from "../../../../values/base";
 import { ODataClientOptions } from "../../../client/odata-client";
-import { DefaultHttpClientAdapter } from "../../../http/http-client-adapter";
 import { EntitySelectExpand } from "../../expand/entity-select-expand";
 import { EntitySetClient } from "../entity-set-client";
 import { EntitySetClientImpl, EntitySetClientImplOptions } from "../entity-set-client.impl";
 import { EntityKey, EntityKeyValue, EntityPropertyType, EntitySetBuilderAddKey, EntitySetBuilderAddMethod, EntitySetBuilderAddMethodFull, EntitySetBuilderAddValue } from "./entity-set-client-builder";
+
+export interface EntitySetBuilderImplOptions {
+  rootOptions: ODataClientOptions;
+  entitySet: string;
+}
 
 export class EntitySetBuilderImpl<
   TEntity,
@@ -20,15 +24,12 @@ export class EntitySetBuilderImpl<
   EntitySetBuilderAddValue<TEntity, TKey>,
   EntitySetBuilderAddMethodFull<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>
 {
-  private readonly options: ODataClientOptions;
-  private readonly entitySet: string;
+  private readonly options;
 
   constructor(
-    options: ODataClientOptions,
-    entitySet: string,
+    options: EntitySetBuilderImplOptions,
   ) {
     this.options = options;
-    this.entitySet = entitySet;
   }
 
   private key!: TKey;
@@ -80,15 +81,9 @@ export class EntitySetBuilderImpl<
   }
 
   build(): EntitySetClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete> {
-    const adapter = this.options.http.adapter
-      ?? DefaultHttpClientAdapter;
-
     const options: EntitySetClientImplOptions = {
-      serviceUrl: this.options.serviceUrl,
-      entitySet: this.entitySet,
-      routingType: this.options.routingType,
-      adapter: adapter,
-      headers: this.options.http.headers ?? {},
+      rootOptions: this.options.rootOptions,
+      entitySet: this.options.entitySet,
       key: this.key,
       keyType: this.keyType as ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[],
       validator: this.validator,

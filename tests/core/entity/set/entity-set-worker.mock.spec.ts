@@ -18,7 +18,18 @@ describe("EntitySetWorkerMock", () => {
 
   beforeEach(() => {
     const options: EntitySetWorkerMockOptions<TestEntity> = {
-      getData: () => sampleData,
+      rootOptions: {
+        entitySets: {
+          models: {
+            data: () => sampleData,
+            id: "id",
+            idGenerator: () => 0,
+          }
+        },
+        actions: {},
+        functions: {},
+      },
+      entitySet: "models",
     };
     worker = new EntitySetWorkerMock(options);
   });

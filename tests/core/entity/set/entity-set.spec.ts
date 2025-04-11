@@ -442,16 +442,27 @@ describe('EntitySetImpl', () => {
 
   it('should execute using the provided worker', async () => {
     const worker = new EntitySetWorkerMock<Model>({
-      getData: () => ({
-        "5bf73a02-3be5-40fc-be60-b038549d993e": {
-          id: "5bf73a02-3be5-40fc-be60-b038549d993e" as Guid,
-          quantity: 1,
-          isActive: true,
-          name: "Test",
-          values: [],
-          altValues: [],
+      rootOptions: {
+        entitySets: {
+          models: {
+            data: () => ({
+              "5bf73a02-3be5-40fc-be60-b038549d993e": {
+                id: "5bf73a02-3be5-40fc-be60-b038549d993e" as Guid,
+                quantity: 1,
+                isActive: true,
+                name: "Test",
+                values: [],
+                altValues: [],
+              },
+            }),
+            id: "id",
+            idGenerator: () => 0,
+          }
         },
-      }),
+        actions: {},
+        functions: {},
+      },
+      entitySet: "models",
     });
     set = new EntitySetImpl<Model>(worker);
 
