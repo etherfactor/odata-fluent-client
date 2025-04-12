@@ -7,6 +7,12 @@ import { EntityNavigation } from "../entity-navigation";
 import { EntityNavigationClientImpl } from "../entity-navigation.impl";
 import { NavigationBuilderAddCardinality, NavigationBuilderAddMethod, NavigationBuilderAddMethodFull, NavigationBuilderAddReference } from "./entity-navigation-builder";
 
+export interface EntityNavigationBuilderImplOptions {
+  rootOptions: ODataClientOptions;
+  entitySet: EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>;
+  navigation: string;
+}
+
 export class EntityNavigationBuilderImpl<
   TEntity,
   TKey extends EntityKey<TEntity>,
@@ -22,18 +28,12 @@ export class EntityNavigationBuilderImpl<
   NavigationBuilderAddReference<TEntity, TKey, TNavProperty, TCollection>,
   NavigationBuilderAddMethodFull<TEntity, TKey, TNavProperty, TNavEntity, TNavKey, TCollection, TAdd, TRemove, TSet, TUnset>
 {
-  private readonly options: ODataClientOptions;
-  private readonly fromSet: EntitySetClient<TEntity, TKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>;
-  private readonly navigation: string;
+  private readonly options;
 
   constructor(
-    options: ODataClientOptions,
-    entitySet: EntitySetClient<TEntity, TKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>,
-    navigation: string,
+    options: EntityNavigationBuilderImplOptions,
   ) {
     this.options = options;
-    this.fromSet = entitySet;
-    this.navigation = navigation;
   }
 
   withCollection(): NavigationBuilderAddReference<TEntity, TKey, TNavProperty, true> {
@@ -44,31 +44,31 @@ export class EntityNavigationBuilderImpl<
     return this as SafeAny;
   }
 
-  private navSet!: EntitySetClient<TNavEntity, TNavKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>;
+  navSet!: EntitySetClient<TNavEntity, TNavKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>;
   withReference<TNavEntity, TNavKey extends EntityKey<TNavEntity>>(entitySet: EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>): NavigationBuilderAddMethod<TEntity, TKey, TNavProperty, TNavEntity, TNavKey, TCollection, undefined, undefined, undefined, undefined> {
     this.navSet = entitySet;
     return this as SafeAny;
   }
 
-  private add?: HttpMethod;
+  add?: HttpMethod;
   withAdd<TMethod extends HttpMethod>(method: TMethod): NavigationBuilderAddMethod<TEntity, TKey, TNavProperty, TNavEntity, TNavKey, TCollection, TMethod, TRemove, TSet, TUnset> {
     this.add = method;
     return this as SafeAny;
   }
 
-  private remove?: HttpMethod;
+  remove?: HttpMethod;
   withRemove<TMethod extends HttpMethod>(method: TMethod): NavigationBuilderAddMethod<TEntity, TKey, TNavProperty, TNavEntity, TNavKey, TCollection, TAdd, TMethod, TSet, TUnset> {
     this.remove = method;
     return this as SafeAny;
   }
 
-  private set?: HttpMethod;
+  set?: HttpMethod;
   withSet<TMethod extends HttpMethod>(method: TMethod): NavigationBuilderAddMethod<TEntity, TKey, TNavProperty, TNavEntity, TNavKey, TCollection, TAdd, TRemove, TMethod, TUnset> {
     this.set = method;
     return this as SafeAny;
   }
 
-  private unset?: HttpMethod;
+  unset?: HttpMethod;
   withUnset<TMethod extends HttpMethod>(method: TMethod): NavigationBuilderAddMethod<TEntity, TKey, TNavProperty, TNavEntity, TNavKey, TCollection, TAdd, TRemove, TSet, TMethod> {
     this.unset = method;
     return this as SafeAny;
@@ -76,9 +76,9 @@ export class EntityNavigationBuilderImpl<
 
   build(): EntityNavigation<EntityKeyType<TEntity, TKey>, EntityKeyType<TNavEntity, TNavKey>, TAdd, TRemove, TSet, TUnset> {
     return new EntityNavigationClientImpl({
-      rootOptions: this.options,
-      navigation: this.navigation,
-      fromSet: this.fromSet,
+      rootOptions: this.options.rootOptions,
+      navigation: this.options.navigation,
+      fromSet: this.options.entitySet,
       toSet: this.navSet,
       add: this.add,
       remove: this.remove,

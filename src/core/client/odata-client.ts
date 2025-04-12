@@ -8,8 +8,8 @@ import { EntitySetClient } from "../entity/client/entity-set-client";
 import { NavigationBuilderAddCardinality } from "../entity/navigation/builder/entity-navigation-builder";
 import { EntityNavigationBuilderImpl } from "../entity/navigation/builder/entity-navigation-builder.impl";
 import { EntityNavigation } from "../entity/navigation/entity-navigation";
+import { EntityFunctionBuilderAddMethod, FunctionBuilderAddMethod } from "../function/builder/function-builder";
 import { EntityFunction } from "../function/function";
-import { EntityFunctionBuilderAddMethod, FunctionBuilderAddMethod } from "../function/function-builder";
 import { HttpClientAdapter } from "../http/http-client-adapter";
 
 export interface ODataClientOptions {
@@ -45,7 +45,11 @@ export class ODataClient {
     fromSet: EntitySetClient<TEntity, TKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>,
     property: TNavProperty
   ): NavigationBuilderAddCardinality<TEntity, TKey, TNavProperty> {
-    return new EntityNavigationBuilderImpl(this.options, fromSet, property);
+    return new EntityNavigationBuilderImpl({
+      rootOptions: this.options,
+      entitySet: fromSet,
+      navigation: property,
+    });
   }
 
   action(name: string): ActionBuilderAddMethod;
@@ -53,7 +57,7 @@ export class ODataClient {
   action(
     arg1: unknown,
     arg2?: unknown
-  ): any {
+  ): SafeAny {
     if (typeof arg1 === "string") {
       return new ActionBuilderImpl({
         rootOptions: this.options,
@@ -71,9 +75,9 @@ export class ODataClient {
   function(name: string): FunctionBuilderAddMethod;
   function<TEntity, TKey extends EntityKey<TEntity>>(set: EntitySetClient<TEntity, TKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>, name: string): EntityFunctionBuilderAddMethod<TEntity, TKey>;
   function(
-    set: unknown,
-    name?: unknown
-  ): any {
+    arg1: unknown,
+    arg2?: unknown
+  ): SafeAny {
     return undefined!;
   }
 

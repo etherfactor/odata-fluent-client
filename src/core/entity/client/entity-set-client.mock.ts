@@ -51,7 +51,7 @@ export class EntitySetClientMock<TEntity, TKey extends EntityKey<TEntity>> imple
   }
   
   get name(): string {
-    throw new Error("Method not implemented.");
+    return this.options.entitySet;
   }
 
   buildUrl(key: EntityPropertyType<TEntity, TKey>): string {

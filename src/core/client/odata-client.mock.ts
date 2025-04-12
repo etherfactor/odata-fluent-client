@@ -1,4 +1,6 @@
 import { SafeAny } from "../../utils/types";
+import { ActionBuilderAddMethod, EntityActionBuilderAddMethod } from "../action/builder/action-builder";
+import { ActionBuilderMock, EntityActionBuilderMock } from "../action/builder/action-builder.mock";
 import { EntityKey, EntitySetBuilderAddKey } from "../entity/client/builder/entity-set-client-builder";
 import { EntitySetBuilderMock } from "../entity/client/builder/entity-set-client-builder.mock";
 import { EntitySetClient } from "../entity/client/entity-set-client";
@@ -71,6 +73,29 @@ export class MockODataClient extends ODataClient {
     fromSet: EntitySetClient<TEntity, TKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>,
     property: TNavProperty
   ): NavigationBuilderAddCardinality<TEntity, TKey, TNavProperty> {
-    return new EntityNavigationBuilderMock(this.mockOptions, fromSet, property);
+    return new EntityNavigationBuilderMock({
+      rootOptions: this.mockOptions,
+      entitySet: fromSet,
+      navigation: property,
+    });
+  }
+
+  override action(name: string): ActionBuilderAddMethod;
+  override action<TEntity, TKey extends EntityKey<TEntity>>(set: EntitySetClient<TEntity, TKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>, name: string): EntityActionBuilderAddMethod<TEntity, TKey>;
+  override action(
+    arg1: unknown,
+    arg2?: unknown
+  ): SafeAny {
+    if (typeof arg1 === "string") {
+      return new ActionBuilderMock({
+        rootOptions: this.mockOptions,
+        name: arg1,
+      });
+    } else {
+      return new EntityActionBuilderMock({
+        rootOptions: this.mockOptions,
+        name: arg2 as string,
+      });
+    }
   }
 }
