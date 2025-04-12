@@ -9,11 +9,6 @@ import { EntityNavigationBuilderMock } from "../entity/navigation/builder/entity
 import { ODataClient } from "./odata-client";
 
 export interface MockODataClientOptions {
-  getEntitySet(name: string): Record<string, object>;
-  addIdToEntity: Record<string, (entity: any) => string>;
-}
-
-export interface NewMockODataClientOptions {
   entitySets: {
     [name: string]: {
       data: () => Record<string, SafeAny>;
@@ -52,7 +47,7 @@ export class MockODataClient extends ODataClient {
   private readonly mockOptions;
 
   constructor(
-    options: NewMockODataClientOptions,
+    options: MockODataClientOptions,
   ) {
     super({
       serviceUrl: "http://localhost",

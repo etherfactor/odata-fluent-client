@@ -1,8 +1,8 @@
-import { HttpMethod } from "../../utils/http";
-import { SafeAny } from "../../utils/types";
-import { Value } from "../../values/base";
-import { EntityKey, EntityKeyType } from "../entity/client/builder/entity-set-client-builder";
-import { EntityInvokable, Invokable } from "./invokable";
+import { HttpMethod } from "../../../utils/http";
+import { SafeAny } from "../../../utils/types";
+import { Value } from "../../../values/base";
+import { EntityKey, EntityKeyType } from "../../entity/client/builder/entity-set-client-builder";
+import { EntityInvokable, Invokable } from "../invokable";
 
 export interface InvokableBuilderAddMethod {
   withDefaultMethod(): InvokableBuilderAddParameters;

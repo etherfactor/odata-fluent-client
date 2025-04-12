@@ -1,5 +1,5 @@
 import { toPromise } from "../../../utils/promise";
-import { NewMockODataClientOptions } from "../../client/odata-client.mock";
+import { MockODataClientOptions } from "../../client/odata-client.mock";
 import { ODataOptions } from "../../parameters/odata-options";
 import { Select } from "../../parameters/select";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
@@ -7,7 +7,7 @@ import { EntityResponse } from "../response/entity-response";
 import { EntitySingleWorker } from "./entity-single-worker";
 
 export interface EntitySingleWorkerMockOptions<TEntity> {
-  rootOptions: NewMockODataClientOptions;
+  rootOptions: MockODataClientOptions;
   getData: () => TEntity;
   validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
 }

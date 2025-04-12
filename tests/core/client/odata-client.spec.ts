@@ -33,4 +33,9 @@ describe('ODataClient', () => {
     const builder = client.action({} as SafeAny, "myEntityAction");
     expect(builder).toBeInstanceOf(EntityActionBuilderImpl);
   });
+
+  // it('should return a function builder', () => {
+  //   const builder = client.function("myFunction");
+  //   expect(builder).toBeInstanceOf(FunctionBuilderImpl);
+  // });
 });

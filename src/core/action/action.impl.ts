@@ -9,7 +9,7 @@ import { EntitySetWorkerImpl } from "../entity/set/entity-set-worker.impl";
 import { EntitySingle, EntitySingleImpl } from "../entity/single/entity-single";
 import { EntitySingleWorker } from "../entity/single/entity-single-worker";
 import { EntitySingleWorkerImpl } from "../entity/single/entity-single-worker.impl";
-import { ParameterValue } from "../invokable/invokable-builder";
+import { ParameterValue } from "../invokable/builder/invokable-builder";
 import { Action, EntityAction } from "./action";
 
 export interface ActionImplOptions {

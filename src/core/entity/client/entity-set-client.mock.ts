@@ -1,6 +1,6 @@
 import { HttpMethod } from "../../../utils/http";
 import { toIdString } from "../../../utils/id";
-import { NewMockODataClientOptions } from "../../client/odata-client.mock";
+import { MockODataClientOptions } from "../../client/odata-client.mock";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
 import { EntitySet, EntitySetImpl } from "../set/entity-set";
 import { EntitySetWorker } from "../set/entity-set-worker";
@@ -12,7 +12,7 @@ import { EntityKey, EntityPropertyType } from "./builder/entity-set-client-build
 import { EntitySetClientFull } from "./entity-set-client";
 
 export interface EntitySetClientMockOptions {
-  rootOptions: NewMockODataClientOptions;
+  rootOptions: MockODataClientOptions;
   entitySet: string;
   addIdToEntity?: (entity: any) => string;
   validator?: (value: unknown, selectExpand: EntitySelectExpand) => unknown | Error;

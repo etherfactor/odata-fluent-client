@@ -1,5 +1,5 @@
 import { createOperatorFactory, MockODataClient } from "../../../../src";
-import { NewMockODataClientOptions } from "../../../../src/core/client/odata-client.mock";
+import { MockODataClientOptions } from "../../../../src/core/client/odata-client.mock";
 import { EntityNavigationBuilderMock, EntityNavigationBuilderMockOptions } from "../../../../src/core/entity/navigation/builder/entity-navigation-builder.mock";
 import { EntityNavigationClientMock } from "../../../../src/core/entity/navigation/entity-navigation.mock";
 import { SafeAny } from "../../../../src/utils/types";
@@ -18,7 +18,7 @@ interface DummyNavEntity {
 const o = createOperatorFactory();
 
 describe("EntityNavigationBuilderMock", () => {
-  const dummyRootOptions: NewMockODataClientOptions = {
+  const dummyRootOptions: MockODataClientOptions = {
     actions: {},
     entitySets: {},
     functions: {},

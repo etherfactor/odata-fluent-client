@@ -1,14 +1,14 @@
 import { HttpMethod } from "../../../utils/http";
 import { SafeAny } from "../../../utils/types";
-import { NewMockODataClientOptions } from "../../client/odata-client.mock";
+import { MockODataClientOptions } from "../../client/odata-client.mock";
 import { EntityKey, EntityKeyType } from "../../entity/client/builder/entity-set-client-builder";
+import { EntityInvokableBuilderAddParameters, EntityInvokableBuilderAddReturnType, EntityInvokableBuilderFinal, InvokableBuilderAddParameters, InvokableBuilderAddReturnType, InvokableBuilderFinal } from "../../invokable/builder/invokable-builder";
 import { EntityInvokable, Invokable } from "../../invokable/invokable";
-import { EntityInvokableBuilderAddParameters, EntityInvokableBuilderAddReturnType, EntityInvokableBuilderFinal, InvokableBuilderAddParameters, InvokableBuilderAddReturnType, InvokableBuilderFinal } from "../../invokable/invokable-builder";
 import { ActionMock, EntityActionMock } from "../action.mock";
 import { ActionBuilderAddMethod, ActionBuilderAddParameters, ActionBuilderAddReturnType, ActionBuilderFinal, EntityActionBuilderAddMethod, EntityActionBuilderAddParameters, EntityActionBuilderAddReturnType, EntityActionBuilderFinal } from "./action-builder";
 
 export interface ActionBuilderMockOptions {
-  rootOptions: NewMockODataClientOptions;
+  rootOptions: MockODataClientOptions;
   name: string;
 }
 

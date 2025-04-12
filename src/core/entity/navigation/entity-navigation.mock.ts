@@ -1,11 +1,11 @@
 import { HttpMethod } from "../../../utils/http";
 import { SafeAny } from "../../../utils/types";
-import { NewMockODataClientOptions } from "../../client/odata-client.mock";
+import { MockODataClientOptions } from "../../client/odata-client.mock";
 import { EntitySetClient } from "../client/entity-set-client";
 import { EntityNavigationAction, EntityNavigationFull } from "./entity-navigation";
 
 export interface EntityNavigationClientMockOptions {
-  rootOptions: NewMockODataClientOptions;
+  rootOptions: MockODataClientOptions;
   navigation: string;
   fromSet: EntitySetClient<SafeAny, SafeAny, "GET", "GET", SafeAny, SafeAny, SafeAny>;
   toSet: EntitySetClient<SafeAny, SafeAny, "GET", "GET", SafeAny, SafeAny, SafeAny>;

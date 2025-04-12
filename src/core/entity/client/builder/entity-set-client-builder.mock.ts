@@ -1,13 +1,13 @@
 import { HttpMethod } from "../../../../utils/http";
 import { SafeAny } from "../../../../utils/types";
-import { NewMockODataClientOptions } from "../../../client/odata-client.mock";
+import { MockODataClientOptions } from "../../../client/odata-client.mock";
 import { EntitySelectExpand } from "../../expand/entity-select-expand";
 import { EntitySetClient } from "../entity-set-client";
 import { EntitySetClientMock, EntitySetClientMockOptions } from "../entity-set-client.mock";
 import { EntityKey, EntityKeyValue, EntityPropertyType, EntitySetBuilderAddKey, EntitySetBuilderAddMethod, EntitySetBuilderAddMethodFull, EntitySetBuilderAddValue } from "./entity-set-client-builder";
 
 export interface EntitySetBuilderMockOptions {
-  rootOptions: NewMockODataClientOptions;
+  rootOptions: MockODataClientOptions;
   entitySet: string;
 }
 

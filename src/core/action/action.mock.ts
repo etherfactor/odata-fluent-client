@@ -1,5 +1,5 @@
 import { SafeAny } from "../../utils/types";
-import { NewMockODataClientOptions } from "../client/odata-client.mock";
+import { MockODataClientOptions } from "../client/odata-client.mock";
 import { EntitySet, EntitySetImpl } from "../entity/set/entity-set";
 import { EntitySetWorker } from "../entity/set/entity-set-worker";
 import { EntitySetWorkerMock } from "../entity/set/entity-set-worker.mock";
@@ -9,7 +9,7 @@ import { EntitySingleWorkerMock } from "../entity/single/entity-single-worker.mo
 import { Action, EntityAction } from "./action";
 
 export interface ActionMockOptions {
-  rootOptions: NewMockODataClientOptions;
+  rootOptions: MockODataClientOptions;
   name: string;
   isCollection: boolean;
 }

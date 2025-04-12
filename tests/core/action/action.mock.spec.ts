@@ -1,10 +1,10 @@
 import { ActionMock, ActionMockOptions, EntityActionMock } from "../../../src/core/action/action.mock";
-import { NewMockODataClientOptions } from "../../../src/core/client/odata-client.mock";
+import { MockODataClientOptions } from "../../../src/core/client/odata-client.mock";
 import { EntitySetImpl } from "../../../src/core/entity/set/entity-set";
 import { EntitySingleImpl } from "../../../src/core/entity/single/entity-single";
 
 describe("ActionMock", () => {
-  let dummyRootOptions: NewMockODataClientOptions;
+  let dummyRootOptions: MockODataClientOptions;
   beforeEach(() => {
     dummyRootOptions = {
       entitySets: {},
@@ -63,7 +63,7 @@ describe("ActionMock", () => {
 });
 
 describe("EntityActionMock", () => {
-  let dummyRootOptions: NewMockODataClientOptions;
+  let dummyRootOptions: MockODataClientOptions;
   beforeEach(() => {
     dummyRootOptions = {
       entitySets: {},

@@ -1,6 +1,6 @@
 import { toIterable, toPromise } from "../../../utils/promise";
 import { SafeAny } from "../../../utils/types";
-import { NewMockODataClientOptions } from "../../client/odata-client.mock";
+import { MockODataClientOptions } from "../../client/odata-client.mock";
 import { Filter } from "../../parameters/filter";
 import { ODataOptions } from "../../parameters/odata-options";
 import { OrderBy } from "../../parameters/orderby";
@@ -12,7 +12,7 @@ import { EntitySetResponse } from "../response/entity-response";
 import { EntitySetWorker } from "./entity-set-worker";
 
 export interface EntitySetWorkerMockOptions<TEntity> {
-  rootOptions: NewMockODataClientOptions;
+  rootOptions: MockODataClientOptions;
   getData: () => Record<string, TEntity>;
   validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
 }

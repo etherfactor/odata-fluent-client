@@ -3,8 +3,8 @@ import { SafeAny } from "../../../utils/types";
 import { ODataClientOptions } from "../../client/odata-client";
 import { EntityKey, EntityKeyType } from "../../entity/client/builder/entity-set-client-builder";
 import { EntitySetClient } from "../../entity/client/entity-set-client";
+import { EntityInvokableBuilderAddReturnType, EntityInvokableBuilderFinal, InvokableBuilderAddParameters, InvokableBuilderAddReturnType, InvokableBuilderFinal, ParameterValue } from "../../invokable/builder/invokable-builder";
 import { EntityInvokable, Invokable } from "../../invokable/invokable";
-import { EntityInvokableBuilderAddReturnType, EntityInvokableBuilderFinal, InvokableBuilderAddParameters, InvokableBuilderAddReturnType, InvokableBuilderFinal, ParameterValue } from "../../invokable/invokable-builder";
 import { ActionImpl, EntityActionImpl } from "../action.impl";
 import { ActionBuilderAddMethod, ActionBuilderAddParameters, ActionBuilderAddReturnType, ActionBuilderFinal, EntityActionBuilderAddParameters, EntityActionBuilderAddReturnType, EntityActionBuilderFinal } from "./action-builder";
 
