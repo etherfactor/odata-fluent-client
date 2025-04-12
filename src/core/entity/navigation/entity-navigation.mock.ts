@@ -26,6 +26,9 @@ export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigatio
   }
 
   add(from: TKey1, to: TKey2): EntityNavigationAction {
+    if (!this.options.add)
+      throw new Error("This resource does not support adding navigations");
+
     return {
       execute: () => ({
         result: (async () => {
@@ -62,6 +65,9 @@ export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigatio
   }
 
   remove(from: TKey1, to: TKey2): EntityNavigationAction {
+    if (!this.options.remove)
+      throw new Error("This resource does not support removing navigations");
+
     return {
       execute: () => ({
         result: (async () => {
@@ -100,6 +106,9 @@ export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigatio
   }
 
   set(from: TKey1, to: TKey2): EntityNavigationAction {
+    if (!this.options.set)
+      throw new Error("This resource does not support setting navigations");
+
     return {
       execute: () => ({
         result: (async () => {
@@ -135,6 +144,9 @@ export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigatio
   }
 
   unset(from: TKey1, to: TKey2): EntityNavigationAction {
+    if (!this.options.unset)
+      throw new Error("This resource does not support unsetting navigations");
+    
     return {
       execute: () => ({
         result: (async () => {

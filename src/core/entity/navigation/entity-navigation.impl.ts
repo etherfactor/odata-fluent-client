@@ -76,7 +76,7 @@ export class EntityNavigationClientImpl<TKey1, TKey2> implements EntityNavigatio
   }
 
   set(from: TKey1, to: TKey2): EntityNavigationAction {
-    if (!this.options.add)
+    if (!this.options.set)
       throw new Error("This resource does not support setting navigations");
 
     const fromEntityUrl = extendEntityUrl(this.fromEntitySetUrl, this.options.rootOptions.routingType, this.fromSetOptions.key, from, this.fromSetOptions.keyType);
@@ -85,7 +85,7 @@ export class EntityNavigationClientImpl<TKey1, TKey2> implements EntityNavigatio
     const toEntityUrl = extendEntityUrl(this.toEntitySetUrl, this.options.rootOptions.routingType, this.toSetOptions.key, to, this.toSetOptions.keyType);
 
     return this.generateResponse(
-      this.options.add,
+      this.options.set,
       fromNavUrl,
       toEntityUrl,
       {},
@@ -94,7 +94,7 @@ export class EntityNavigationClientImpl<TKey1, TKey2> implements EntityNavigatio
   }
 
   unset(from: TKey1, to: TKey2): EntityNavigationAction {
-    if (!this.options.remove)
+    if (!this.options.unset)
       throw new Error("This resource does not support unsetting navigations");
 
     const fromEntityUrl = extendEntityUrl(this.fromEntitySetUrl, this.options.rootOptions.routingType, this.fromSetOptions.key, from, this.fromSetOptions.keyType);
@@ -103,7 +103,7 @@ export class EntityNavigationClientImpl<TKey1, TKey2> implements EntityNavigatio
     const toEntityUrl = extendEntityUrl(this.toEntitySetUrl, this.options.rootOptions.routingType, this.toSetOptions.key, to, this.toSetOptions.keyType);
 
     return this.generateResponse(
-      this.options.remove,
+      this.options.unset,
       fromNavUrl,
       toEntityUrl,
       {},
@@ -139,7 +139,7 @@ export class EntityNavigationClientImpl<TKey1, TKey2> implements EntityNavigatio
         for await (const _ of response.data) { }
       }
       return true;
-    } catch {
+    } catch (ex) {
       return false;
     }
   }
