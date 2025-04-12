@@ -133,8 +133,8 @@ export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigatio
   
           fromEntity[this.options.navigation] = toEntity;
   
-          if (navOptions && navOptions.onAdd) {
-            navOptions.onAdd(fromEntity, toEntity);
+          if (navOptions && navOptions.onSet) {
+            navOptions.onSet(fromEntity, toEntity);
           }
   
           return true;
@@ -171,8 +171,8 @@ export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigatio
   
           fromEntity[this.options.navigation] = null;
   
-          if (navOptions && navOptions.onAdd) {
-            navOptions.onAdd(fromEntity, toEntity);
+          if (navOptions && navOptions.onUnset) {
+            navOptions.onUnset(fromEntity, toEntity);
           }
   
           return true;

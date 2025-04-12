@@ -17,15 +17,20 @@ interface NavEntity {
 const o = createOperatorFactory();
 
 describe("EntitySetClientMock", () => {
+  let rootOptions: NewMockODataClientOptions;
   let options: EntityNavigationClientMockOptions;
   let client: EntityNavigationClientMock<SafeAny, SafeAny>;
 
   let fromSet: EntitySetClient<SafeAny, SafeAny, "GET", "GET", SafeAny, SafeAny, SafeAny>;
   let toSet: EntitySetClient<SafeAny, SafeAny, "GET", "GET", SafeAny, SafeAny, SafeAny>;
 
+  let onAdd = jest.fn();
+  let onRemove = jest.fn();
+  let onSet = jest.fn();
+  let onUnset = jest.fn();
   beforeEach(() => {
     let id = 1000;
-    const rootOptions: NewMockODataClientOptions = {
+    rootOptions = {
       actions: {},
       entitySets: {
         entities: {
@@ -34,6 +39,16 @@ describe("EntitySetClientMock", () => {
           }),
           id: "id",
           idGenerator: () => ++id,
+          navigations: {
+            models: {
+              targetEntitySet: "navEntities",
+              type: undefined!,
+              onAdd: (onAdd = jest.fn()),
+              onRemove: (onRemove = jest.fn()),
+              onSet: (onSet = jest.fn()),
+              onUnset: (onUnset = jest.fn()),
+            },
+          },
         },
         navEntities: {
           data: () => ({
@@ -85,6 +100,35 @@ describe("EntitySetClientMock", () => {
 
       const result = await singleInstance.execute().result;
       expect(result).toBeTruthy();
+      expect(onAdd).toHaveBeenCalled();
+    });
+
+    it("should return false when from entity set does not exist", async () => {
+      options.fromSet = new MockODataClient(rootOptions)
+        .entitySet<Entity>("invalid")
+        .withKey("id")
+        .withKeyType(o.int)
+        .withReadSet("GET")
+        .withRead("GET")
+        .build();
+
+      client = new EntityNavigationClientMock(options);
+      const result = await client.add(123, 123).execute().result;
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false when to entity set does not exist", async () => {
+      options.toSet = new MockODataClient(rootOptions)
+        .entitySet<Entity>("invalid")
+        .withKey("id")
+        .withKeyType(o.int)
+        .withReadSet("GET")
+        .withRead("GET")
+        .build();
+
+      client = new EntityNavigationClientMock(options);
+      const result = await client.add(123, 123).execute().result;
+      expect(result).toBeFalsy();
     });
 
     it("should throw error when add option is not provided", () => {
@@ -105,6 +149,35 @@ describe("EntitySetClientMock", () => {
 
       const result = await singleInstance.execute().result;
       expect(result).toBeTruthy();
+      expect(onRemove).toHaveBeenCalled();
+    });
+
+    it("should return false when from entity set does not exist", async () => {
+      options.fromSet = new MockODataClient(rootOptions)
+        .entitySet<Entity>("invalid")
+        .withKey("id")
+        .withKeyType(o.int)
+        .withReadSet("GET")
+        .withRead("GET")
+        .build();
+
+      client = new EntityNavigationClientMock(options);
+      const result = await client.remove(123, 123).execute().result;
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false when to entity set does not exist", async () => {
+      options.toSet = new MockODataClient(rootOptions)
+        .entitySet<Entity>("invalid")
+        .withKey("id")
+        .withKeyType(o.int)
+        .withReadSet("GET")
+        .withRead("GET")
+        .build();
+
+      client = new EntityNavigationClientMock(options);
+      const result = await client.remove(123, 123).execute().result;
+      expect(result).toBeFalsy();
     });
 
     it("should throw error when remove option is not provided", () => {
@@ -125,6 +198,35 @@ describe("EntitySetClientMock", () => {
 
       const result = await singleInstance.execute().result;
       expect(result).toBeTruthy();
+      expect(onSet).toHaveBeenCalled();
+    });
+
+    it("should return false when from entity set does not exist", async () => {
+      options.fromSet = new MockODataClient(rootOptions)
+        .entitySet<Entity>("invalid")
+        .withKey("id")
+        .withKeyType(o.int)
+        .withReadSet("GET")
+        .withRead("GET")
+        .build();
+
+      client = new EntityNavigationClientMock(options);
+      const result = await client.set(123, 123).execute().result;
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false when to entity set does not exist", async () => {
+      options.toSet = new MockODataClient(rootOptions)
+        .entitySet<Entity>("invalid")
+        .withKey("id")
+        .withKeyType(o.int)
+        .withReadSet("GET")
+        .withRead("GET")
+        .build();
+
+      client = new EntityNavigationClientMock(options);
+      const result = await client.set(123, 123).execute().result;
+      expect(result).toBeFalsy();
     });
 
     it("should throw error when set option is not provided", () => {
@@ -145,6 +247,35 @@ describe("EntitySetClientMock", () => {
 
       const result = await singleInstance.execute().result;
       expect(result).toBeTruthy();
+      expect(onUnset).toHaveBeenCalled();
+    });
+
+    it("should return false when from entity set does not exist", async () => {
+      options.fromSet = new MockODataClient(rootOptions)
+        .entitySet<Entity>("invalid")
+        .withKey("id")
+        .withKeyType(o.int)
+        .withReadSet("GET")
+        .withRead("GET")
+        .build();
+
+      client = new EntityNavigationClientMock(options);
+      const result = await client.unset(123, 123).execute().result;
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false when to entity set does not exist", async () => {
+      options.toSet = new MockODataClient(rootOptions)
+        .entitySet<Entity>("invalid")
+        .withKey("id")
+        .withKeyType(o.int)
+        .withReadSet("GET")
+        .withRead("GET")
+        .build();
+
+      client = new EntityNavigationClientMock(options);
+      const result = await client.unset(123, 123).execute().result;
+      expect(result).toBeFalsy();
     });
 
     it("should throw error when unset option is not provided", () => {
