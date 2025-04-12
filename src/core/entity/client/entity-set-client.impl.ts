@@ -61,6 +61,11 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
     return this.options.entitySet;
   }
 
+  buildUrl(key: EntityPropertyType<TEntity, TKey>): string {
+    const url = extendEntityUrl(this.entitySetUrl, this.options.rootOptions.routingType, this.options.key, key, this.options.keyType);
+    return url;
+  }
+
   get set(): EntitySet<TEntity> {
     if (!this.options.readSet)
       throw new Error("This resource does not support querying the entity set");

@@ -22,10 +22,15 @@ describe("EntitySingleWorkerImpl", () => {
     };
 
     const workerOpt: EntitySingleWorkerImplOptions<TestEntity> = {
-      adapter: mockAdapter,
+      rootOptions: {
+        http: {
+          adapter: mockAdapter,
+        },
+        routingType: "parentheses",
+        serviceUrl: "http://example.com",
+      },
       method: "GET",
       url: "http://example.com/entity",
-      headers: { "Content-Type": "application/json" },
       payload: undefined,
       validator: (value, selectExpand) => value as TestEntity
     };
@@ -55,10 +60,15 @@ describe("EntitySingleWorkerImpl", () => {
     };
 
     const workerOpt: EntitySingleWorkerImplOptions<TestEntity> = {
-      adapter: mockAdapter,
+      rootOptions: {
+        http: {
+          adapter: mockAdapter,
+        },
+        routingType: "parentheses",
+        serviceUrl: "http://example.com",
+      },
       method: "GET",
       url: "http://example.com/entity",
-      headers: { "Content-Type": "application/json" },
       payload: undefined,
       validator: (value, selectExpand) => value as TestEntity
     };
@@ -87,10 +97,15 @@ describe("EntitySingleWorkerImpl", () => {
     };
 
     const workerOpt: EntitySingleWorkerImplOptions<TestEntity> = {
-      adapter: mockAdapter,
+      rootOptions: {
+        http: {
+          adapter: mockAdapter,
+        },
+        routingType: "parentheses",
+        serviceUrl: "http://example.com",
+      },
       method: "GET",
       url: "http://example.com/entity",
-      headers: { "Content-Type": "application/json" },
       payload: undefined,
       validator: undefined
     };
@@ -120,10 +135,15 @@ describe("EntitySingleWorkerImpl", () => {
     };
 
     const workerOpt: EntitySingleWorkerImplOptions<TestEntity> = {
-      adapter: mockAdapter,
+      rootOptions: {
+        http: {
+          adapter: mockAdapter,
+        },
+        routingType: "parentheses",
+        serviceUrl: "http://example.com",
+      },
       method: "GET",
       url: "http://example.com/entity",
-      headers: { "Content-Type": "application/json" },
       payload: undefined,
       validator: undefined
     };
@@ -155,10 +175,15 @@ describe("EntitySingleWorkerImpl", () => {
     };
 
     const workerOpt: EntitySingleWorkerImplOptions<TestEntity> = {
-      adapter: mockAdapter,
+      rootOptions: {
+        http: {
+          adapter: mockAdapter,
+        },
+        routingType: "parentheses",
+        serviceUrl: "http://example.com",
+      },
       method: "GET",
       url: "http://example.com/entity",
-      headers: { "Content-Type": "application/json" },
       payload: undefined,
       validator: errorValidator
     };
@@ -191,10 +216,15 @@ describe("EntitySingleWorkerImpl", () => {
     };
 
     const workerOpt: EntitySingleWorkerImplOptions<TestEntity> = {
-      adapter: mockAdapter,
+      rootOptions: {
+        http: {
+          adapter: mockAdapter,
+        },
+        routingType: "parentheses",
+        serviceUrl: "http://example.com",
+      },
       method: "GET",
       url: "http://example.com/entity",
-      headers: { "Content-Type": "application/json" },
       payload: undefined,
       validator: errorValidator
     };
@@ -218,10 +248,16 @@ describe("EntitySingleWorkerImpl", () => {
     };
 
     const workerOpt: EntitySingleWorkerImplOptions<TestEntity> = {
-      adapter: mockAdapter,
+      rootOptions: {
+        http: {
+          adapter: mockAdapter,
+          headers: { Authorization: "Bearer token" },
+        },
+        routingType: "parentheses",
+        serviceUrl: "http://example.com",
+      },
       method: "GET",
       url: "http://example.com/resource",
-      headers: { Authorization: "Bearer token" },
       payload: { extra: "data" } as unknown as TestEntity,
       validator: (value, selectExpand) => value as TestEntity
     };

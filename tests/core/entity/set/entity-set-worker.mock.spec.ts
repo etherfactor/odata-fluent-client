@@ -29,7 +29,7 @@ describe("EntitySetWorkerMock", () => {
         actions: {},
         functions: {},
       },
-      entitySet: "models",
+      getData: () => sampleData,
     };
     worker = new EntitySetWorkerMock(options);
   });

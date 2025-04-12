@@ -35,15 +35,13 @@ export interface NewMockODataClientOptions {
   actions: {
     [name: string]: {
       entitySet?: string;
-      handler: ((parameters: SafeAny) => SafeAny) |
-        ((entityKey: SafeAny, parameters: SafeAny) => SafeAny);
+      handler: ((entityKey: SafeAny, parameters: SafeAny) => SafeAny);
     }
   };
   functions: {
     [name: string]: {
       entitySet?: string;
-      handler: ((parameters: SafeAny) => SafeAny) |
-        ((entityKey: SafeAny, parameters: SafeAny) => SafeAny);
+      handler: ((entityKey: SafeAny, parameters: SafeAny) => SafeAny);
     }
   };
 }

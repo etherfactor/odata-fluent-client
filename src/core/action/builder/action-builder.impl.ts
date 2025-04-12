@@ -2,9 +2,10 @@ import { HttpMethod } from "../../../utils/http";
 import { SafeAny } from "../../../utils/types";
 import { ODataClientOptions } from "../../client/odata-client";
 import { EntityKey, EntityKeyType } from "../../entity/client/builder/entity-set-client-builder";
+import { EntitySetClient } from "../../entity/client/entity-set-client";
 import { EntityInvokable, Invokable } from "../../invokable/invokable";
-import { EntityInvokableBuilderAddReturnType, EntityInvokableBuilderFinal, InvokableBuilderAddParameters, InvokableBuilderAddReturnType, InvokableBuilderFinal } from "../../invokable/invokable-builder";
-import { ActionImpl } from "../action.impl";
+import { EntityInvokableBuilderAddReturnType, EntityInvokableBuilderFinal, InvokableBuilderAddParameters, InvokableBuilderAddReturnType, InvokableBuilderFinal, ParameterValue } from "../../invokable/invokable-builder";
+import { ActionImpl, EntityActionImpl } from "../action.impl";
 import { ActionBuilderAddMethod, ActionBuilderAddParameters, ActionBuilderAddReturnType, ActionBuilderFinal, EntityActionBuilderAddParameters, EntityActionBuilderAddReturnType, EntityActionBuilderFinal } from "./action-builder";
 
 export interface ActionBuilderImplOptions {
@@ -29,7 +30,13 @@ export class ActionBuilderImpl<
     this.options = options;
   }
 
-  method!: HttpMethod;
+  method: HttpMethod = "POST";
+
+  withDefaultMethod(): InvokableBuilderAddParameters {
+    this.method = "POST";
+    return this as SafeAny;
+  }
+
   withMethod<TMethod extends HttpMethod>(method: TMethod): InvokableBuilderAddParameters {
     this.method = method;
     return this as SafeAny;
@@ -37,13 +44,17 @@ export class ActionBuilderImpl<
 
   isBody = true;
 
-  withParameters<TParameter extends {}>(): InvokableBuilderAddReturnType<TParameter> {
+  values?: ParameterValue<TParameter>;
+  withParameters<TParameter extends {}>(values: ParameterValue<TParameter>): InvokableBuilderAddReturnType<TParameter> {
     this.isBody = false;
+    this.values = values as SafeAny;
     return this as SafeAny;
   }
 
-  withBody<TParameter extends {}>(): InvokableBuilderAddReturnType<TParameter> {
+  converter?: (body: TParameter) => SafeAny;
+  withBody<TParameter extends {}>(body?: (body: TParameter) => SafeAny): InvokableBuilderAddReturnType<TParameter> {
     this.isBody = true;
+    this.converter = body as SafeAny;
     return this as SafeAny;
   }
 
@@ -65,12 +76,16 @@ export class ActionBuilderImpl<
       name: this.options.name,
       method: this.method,
       isBody: this.isBody,
+      values: this.values,
+      converter: this.converter,
       isCollection: this.isCollection,
     });
   }
 }
 
-export interface EntityActionBuilderImplOptions extends ActionBuilderImplOptions { }
+export interface EntityActionBuilderImplOptions extends ActionBuilderImplOptions {
+  entitySet: EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>;
+}
 
 export class EntityActionBuilderImpl<
   TEntity,
@@ -91,17 +106,30 @@ export class EntityActionBuilderImpl<
     this.options = options;
   }
 
-  method!: HttpMethod;
+  method: HttpMethod = "POST";
+
+  withDefaultMethod(): InvokableBuilderAddParameters {
+    this.method = "POST";
+    return this as SafeAny;
+  }
+
   withMethod<TMethod extends HttpMethod>(method: TMethod): InvokableBuilderAddParameters {
     this.method = method;
     return this as SafeAny;
   }
 
-  withParameters<TParameter extends {}>(): EntityInvokableBuilderAddReturnType<TEntity, TKey, TParameter> {
+  isBody = false;
+
+  values?: ParameterValue<TParameter>;
+  withParameters<TParameter extends {}>(values: ParameterValue<TParameter>): EntityInvokableBuilderAddReturnType<TEntity, TKey, TParameter> {
+    this.isBody = false;
+    this.values = values as SafeAny;
     return this as SafeAny;
   }
 
-  withBody<TParameter extends {}>(): EntityInvokableBuilderAddReturnType<TEntity, TKey, TParameter> {
+  converter?: (body: TParameter) => SafeAny;
+  withBody<TParameter extends {}>(body?: (body: TParameter) => SafeAny): EntityInvokableBuilderAddReturnType<TEntity, TKey, TParameter> {
+    this.isBody = true;
     return this as SafeAny;
   }
 
@@ -118,6 +146,15 @@ export class EntityActionBuilderImpl<
   }
   
   build(): EntityInvokable<EntityKeyType<TEntity, TKey>, TParameter, TCollection, TReturn> {
-    throw new Error("Method not implemented.");
+    return new EntityActionImpl({
+      rootOptions: this.options.rootOptions,
+      entitySet: this.options.entitySet,
+      name: this.options.name,
+      method: this.method,
+      isBody: this.isBody,
+      values: this.values,
+      converter: this.converter,
+      isCollection: this.isCollection,
+    });
   }
 }

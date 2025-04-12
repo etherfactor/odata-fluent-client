@@ -13,24 +13,22 @@ import { EntitySetWorker } from "./entity-set-worker";
 
 export interface EntitySetWorkerMockOptions<TEntity> {
   rootOptions: NewMockODataClientOptions;
-  entitySet: string;
+  getData: () => Record<string, TEntity>;
   validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
 }
 
 export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
 
   private readonly options;
-  private readonly entitySet;
 
   constructor(
     options: EntitySetWorkerMockOptions<TEntity>,
   ) {
     this.options = options;
-    this.entitySet = options.rootOptions.entitySets[options.entitySet];
   }
 
   execute(options: ODataOptions): EntitySetResponse<TEntity> {
-    const allData = this.entitySet.data();
+    const allData = this.options.getData();
     const data = {
       "@odata.count": undefined as number | undefined,
       value: Object.values(allData)

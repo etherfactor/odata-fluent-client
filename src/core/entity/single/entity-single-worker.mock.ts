@@ -1,4 +1,3 @@
-import { toIdString } from "../../../utils/id";
 import { toPromise } from "../../../utils/promise";
 import { NewMockODataClientOptions } from "../../client/odata-client.mock";
 import { ODataOptions } from "../../parameters/odata-options";
@@ -9,28 +8,22 @@ import { EntitySingleWorker } from "./entity-single-worker";
 
 export interface EntitySingleWorkerMockOptions<TEntity> {
   rootOptions: NewMockODataClientOptions;
-  entitySet: string;
-  id: unknown | unknown[];
+  getData: () => TEntity;
   validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
 }
 
 export class EntitySingleWorkerMock<TEntity> implements EntitySingleWorker<TEntity> {
 
   private readonly options;
-  private readonly entitySet;
 
   constructor(
     options: EntitySingleWorkerMockOptions<TEntity>,
   ) {
     this.options = options;
-    this.entitySet = options.rootOptions.entitySets[options.entitySet];
   }
 
   execute(options: ODataOptions): EntityResponse<TEntity> {
-    const useId = toIdString(this.options.id);
-    const allData = this.entitySet.data();
-
-    let data: TEntity = allData[useId];
+    let data = this.options.getData();
     data = this.applySelect(data, options.select ?? []);
 
     return {

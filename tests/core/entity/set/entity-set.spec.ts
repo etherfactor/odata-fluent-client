@@ -28,10 +28,13 @@ describe('EntitySetImpl', () => {
 
   beforeEach(() => {
     const worker = new EntitySetWorkerImpl<Model>({
-      adapter: undefined!,
+      rootOptions: {
+        http: {},
+        routingType: "parentheses",
+        serviceUrl: "https://localhost"
+      },
       method: "GET",
       url: "/v1/models",
-      headers: {},
     });
     set = new EntitySetImpl<Model>(worker);
   });
@@ -441,20 +444,22 @@ describe('EntitySetImpl', () => {
   });
 
   it('should execute using the provided worker', async () => {
+    const allData = {
+      "5bf73a02-3be5-40fc-be60-b038549d993e": {
+        id: "5bf73a02-3be5-40fc-be60-b038549d993e" as Guid,
+        quantity: 1,
+        isActive: true,
+        name: "Test",
+        values: [],
+        altValues: [],
+      },
+    };
+
     const worker = new EntitySetWorkerMock<Model>({
       rootOptions: {
         entitySets: {
           models: {
-            data: () => ({
-              "5bf73a02-3be5-40fc-be60-b038549d993e": {
-                id: "5bf73a02-3be5-40fc-be60-b038549d993e" as Guid,
-                quantity: 1,
-                isActive: true,
-                name: "Test",
-                values: [],
-                altValues: [],
-              },
-            }),
+            data: () => allData,
             id: "id",
             idGenerator: () => 0,
           }
@@ -462,7 +467,7 @@ describe('EntitySetImpl', () => {
         actions: {},
         functions: {},
       },
-      entitySet: "models",
+      getData: () => allData,
     });
     set = new EntitySetImpl<Model>(worker);
 

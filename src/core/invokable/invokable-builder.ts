@@ -1,14 +1,17 @@
 import { HttpMethod } from "../../utils/http";
+import { SafeAny } from "../../utils/types";
+import { Value } from "../../values/base";
 import { EntityKey, EntityKeyType } from "../entity/client/builder/entity-set-client-builder";
 import { EntityInvokable, Invokable } from "./invokable";
 
 export interface InvokableBuilderAddMethod {
+  withDefaultMethod(): InvokableBuilderAddParameters;
   withMethod<TMethod extends HttpMethod>(method: TMethod): InvokableBuilderAddParameters;
 }
 
 export interface InvokableBuilderAddParameters {
-  withParameters<TParameter extends {}>(): InvokableBuilderAddReturnType<TParameter>;
-  withBody<TParameter extends {}>(): InvokableBuilderAddReturnType<TParameter>;
+  withParameters<TParameter extends {}>(values: ParameterValue<TParameter>): InvokableBuilderAddReturnType<TParameter>;
+  withBody<TParameter extends {}>(body?: (body: TParameter) => SafeAny): InvokableBuilderAddReturnType<TParameter>;
 }
 
 export interface InvokableBuilderAddReturnType<
@@ -30,6 +33,7 @@ export interface EntityInvokableBuilderAddMethod<
   TEntity,
   TKey extends EntityKey<TEntity>,
 > {
+  withDefaultMethod(): EntityInvokableBuilderAddParameters<TEntity, TKey>;
   withMethod<TMethod extends HttpMethod>(method: TMethod): EntityInvokableBuilderAddParameters<TEntity, TKey>;
 }
 
@@ -37,7 +41,7 @@ export interface EntityInvokableBuilderAddParameters<
   TEntity,
   TKey extends EntityKey<TEntity>,
 > {
-  withParameters<TParameter extends {}>(): EntityInvokableBuilderAddReturnType<TEntity, TKey, TParameter>;
+  withParameters<TParameter extends {}>(values: ParameterValue<TParameter>): EntityInvokableBuilderAddReturnType<TEntity, TKey, TParameter>;
   withBody<TParameter extends {}>(): EntityInvokableBuilderAddReturnType<TEntity, TKey, TParameter>;
 }
 
@@ -59,3 +63,5 @@ export interface EntityInvokableBuilderFinal<
 > {
   build(): EntityInvokable<EntityKeyType<TEntity, TKey>, TParameter, TCollection, TReturn>;
 }
+
+export type ParameterValue<TParameter extends {}> = { [K in keyof TParameter]: (value: TParameter[K]) => Value<TParameter[K]> };

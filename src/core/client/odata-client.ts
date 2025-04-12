@@ -1,6 +1,7 @@
 import { SafeAny } from "../../utils/types";
 import { EntityAction } from "../action/action";
 import { ActionBuilderAddMethod, EntityActionBuilderAddMethod } from "../action/builder/action-builder";
+import { ActionBuilderImpl, EntityActionBuilderImpl } from "../action/builder/action-builder.impl";
 import { EntityKey, EntitySetBuilderAddKey } from "../entity/client/builder/entity-set-client-builder";
 import { EntitySetBuilderImpl } from "../entity/client/builder/entity-set-client-builder.impl";
 import { EntitySetClient } from "../entity/client/entity-set-client";
@@ -50,10 +51,21 @@ export class ODataClient {
   action(name: string): ActionBuilderAddMethod;
   action<TEntity, TKey extends EntityKey<TEntity>>(set: EntitySetClient<TEntity, TKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>, name: string): EntityActionBuilderAddMethod<TEntity, TKey>;
   action(
-    set: unknown,
-    name?: unknown
+    arg1: unknown,
+    arg2?: unknown
   ): any {
-    return undefined!;
+    if (typeof arg1 === "string") {
+      return new ActionBuilderImpl({
+        rootOptions: this.options,
+        name: arg1,
+      });
+    } else {
+      return new EntityActionBuilderImpl({
+        rootOptions: this.options,
+        name: arg2 as string,
+        entitySet: arg1 as EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>,
+      });
+    }
   }
 
   function(name: string): FunctionBuilderAddMethod;

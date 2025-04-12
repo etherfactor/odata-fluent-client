@@ -36,22 +36,26 @@ export class EntitySetClientMock<TEntity, TKey extends EntityKey<TEntity>> imple
   private createSetWorker(): EntitySetWorker<TEntity> {
     return new EntitySetWorkerMock({
       rootOptions: this.options.rootOptions,
-      entitySet: this.options.entitySet,
+      getData: () => this.options.rootOptions.entitySets[this.options.entitySet].data(),
       validator: this.options.validator as any,
     });
   }
 
   private createSingleWorker(id: unknown | unknown[]): EntitySingleWorker<TEntity> {
+    const idString = toIdString(id);
     return new EntitySingleWorkerMock({
       rootOptions: this.options.rootOptions,
-      entitySet: this.options.entitySet,
-      id: id,
+      getData: () => this.options.rootOptions.entitySets[this.options.entitySet].data()[idString],
       validator: this.options.validator as any,
     });
   }
   
   get name(): string {
     throw new Error("Method not implemented.");
+  }
+
+  buildUrl(key: EntityPropertyType<TEntity, TKey>): string {
+    throw new Error("Mock clients do not support urls");
   }
 
   get set(): EntitySet<TEntity> {

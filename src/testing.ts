@@ -71,14 +71,14 @@ const moreNewModels = client.bind.action(newModels, { act2: act2Action });
 const func1Function = client
   .function("func1")
   .withMethod("GET")
-  .withParameters<{ value: string }>()
+  .withParameters<{ value: string }>({ value: o.string })
   .withCollectionResponse<{ result: boolean }>()
   .build();
 
 const func2Function = client
   .function(models, "func2")
   .withMethod("GET")
-  .withParameters<{ value: string }>()
+  .withParameters<{ value: string }>({ value: o.string })
   .withCollectionResponse<{ result: boolean }>()
   .build();
 

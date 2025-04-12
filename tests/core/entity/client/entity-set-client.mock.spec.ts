@@ -67,7 +67,7 @@ describe("EntitySetClientMock", () => {
       const key = 1;
       const singleInstance = client.read(key);
       expect(singleInstance).toBeInstanceOf(EntitySingleImpl);
-      expect((singleInstance as SafeAny)["worker"].options.id).toEqual(key);
+      expect((singleInstance as SafeAny)["worker"].options.getData()).toEqual(entitySet["1"]);
     });
 
     it("should throw error when read option is not provided", () => {
@@ -85,7 +85,7 @@ describe("EntitySetClientMock", () => {
       const singleInstance = client.create(newEntity);
       expect(singleInstance).toBeInstanceOf(EntitySingleImpl);
       expect(entitySet["2"]).toEqual(newEntity);
-      expect((singleInstance as SafeAny)["worker"].options.id).toEqual(2);
+      expect((singleInstance as SafeAny)["worker"].options.getData()).toEqual(entitySet["2"]);
     });
 
     it("should throw error when create option is not provided", () => {
@@ -108,7 +108,7 @@ describe("EntitySetClientMock", () => {
         name: "Alice Updated",
         extra: "data",
       });
-      expect((singleInstance as SafeAny)["worker"].options.id).toEqual(1);
+      expect((singleInstance as SafeAny)["worker"].options.getData()).toEqual(entitySet["1"]);
     });
 
     it("should throw error when update option is not provided", () => {

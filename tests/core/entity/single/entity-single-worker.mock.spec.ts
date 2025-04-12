@@ -27,8 +27,7 @@ describe("EntitySingleWorkerMock", () => {
         actions: {},
         functions: {},
       },
-      entitySet: "models",
-      id: "1",
+      getData: () => sampleData["1"],
     };
     const worker = new EntitySingleWorkerMock(workerOpt);
 
@@ -53,8 +52,7 @@ describe("EntitySingleWorkerMock", () => {
         actions: {},
         functions: {},
       },
-      entitySet: "models",
-      id: "2",
+      getData: () => sampleData["2"],
     };
     const worker = new EntitySingleWorkerMock(workerOpt);
     
@@ -83,8 +81,7 @@ describe("EntitySingleWorkerMock", () => {
         actions: {},
         functions: {},
       },
-      entitySet: "models",
-      id: "non-existent",
+      getData: () => sampleData["non-existent"],
     };
     const worker = new EntitySingleWorkerMock(workerOpt);
 
@@ -114,8 +111,7 @@ describe("EntitySingleWorkerMock", () => {
         actions: {},
         functions: {},
       },
-      entitySet: "models",
-      id: arrayId,
+      getData: () => sampleDataWithArrayId[arrayIdString],
     };
     const worker = new EntitySingleWorkerMock(workerOpt);
 

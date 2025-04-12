@@ -1,9 +1,16 @@
 import { HttpMethod } from "../../../utils/http";
 import { SafeAny } from "../../../utils/types";
+import { NewMockODataClientOptions } from "../../client/odata-client.mock";
 import { EntityKey, EntityKeyType } from "../../entity/client/builder/entity-set-client-builder";
 import { EntityInvokable, Invokable } from "../../invokable/invokable";
-import { EntityInvokableBuilderAddReturnType, EntityInvokableBuilderFinal, InvokableBuilderAddParameters, InvokableBuilderAddReturnType, InvokableBuilderFinal } from "../../invokable/invokable-builder";
-import { ActionBuilderAddMethod, ActionBuilderAddParameters, ActionBuilderAddReturnType, ActionBuilderFinal, EntityActionBuilderAddParameters, EntityActionBuilderAddReturnType, EntityActionBuilderFinal } from "./action-builder";
+import { EntityInvokableBuilderAddParameters, EntityInvokableBuilderAddReturnType, EntityInvokableBuilderFinal, InvokableBuilderAddParameters, InvokableBuilderAddReturnType, InvokableBuilderFinal } from "../../invokable/invokable-builder";
+import { ActionMock, EntityActionMock } from "../action.mock";
+import { ActionBuilderAddMethod, ActionBuilderAddParameters, ActionBuilderAddReturnType, ActionBuilderFinal, EntityActionBuilderAddMethod, EntityActionBuilderAddParameters, EntityActionBuilderAddReturnType, EntityActionBuilderFinal } from "./action-builder";
+
+export interface ActionBuilderMockOptions {
+  rootOptions: NewMockODataClientOptions;
+  name: string;
+}
 
 export class ActionBuilderMock<
   TParameter extends {},
@@ -14,17 +21,35 @@ export class ActionBuilderMock<
   ActionBuilderAddReturnType<TParameter>,
   ActionBuilderFinal<TParameter, TCollection, TReturn>
 {
-  method!: HttpMethod;
+  private readonly options;
+
+  constructor(
+    options: ActionBuilderMockOptions,
+  ) {
+    this.options = options;
+  }
+
+  method: HttpMethod = "POST";
+
+  withDefaultMethod(): InvokableBuilderAddParameters {
+    this.method = "POST";
+    return this as SafeAny;
+  }
+
   withMethod<TMethod extends HttpMethod>(method: TMethod): InvokableBuilderAddParameters {
     this.method = method;
     return this as SafeAny;
   }
 
+  isBody = false;
+
   withParameters<TParameter extends {}>(): InvokableBuilderAddReturnType<TParameter> {
+    this.isBody = false;
     return this as SafeAny;
   }
 
   withBody<TParameter extends {}>(): InvokableBuilderAddReturnType<TParameter> {
+    this.isBody = true;
     return this as SafeAny;
   }
 
@@ -41,9 +66,15 @@ export class ActionBuilderMock<
   }
   
   build(): Invokable<TParameter, TCollection, TReturn> {
-    throw new Error("Method not implemented.");
+    return new ActionMock({
+      rootOptions: this.options.rootOptions,
+      name: this.options.name,
+      isCollection: this.isCollection,
+    });
   }
 }
+
+export interface EntityActionBuilderMockOptions extends ActionBuilderMockOptions { }
 
 export class EntityActionBuilderMock<
   TEntity,
@@ -51,13 +82,27 @@ export class EntityActionBuilderMock<
   TParameter extends {},
   TCollection extends boolean,
   TReturn,
-> implements ActionBuilderAddMethod,
+> implements EntityActionBuilderAddMethod<TEntity, TKey>,
   EntityActionBuilderAddParameters<TEntity, TKey>,
   EntityActionBuilderAddReturnType<TEntity, TKey, TParameter>,
   EntityActionBuilderFinal<TEntity, TKey, TParameter, TCollection, TReturn>
 {
-  method!: HttpMethod;
-  withMethod<TMethod extends HttpMethod>(method: TMethod): InvokableBuilderAddParameters {
+  private readonly options;
+
+  constructor(
+    options: EntityActionBuilderMockOptions,
+  ) {
+    this.options = options;
+  }
+
+  method: HttpMethod = "POST";
+  
+  withDefaultMethod(): EntityInvokableBuilderAddParameters<TEntity, TKey> {
+    this.method = "POST";
+    return this as SafeAny;
+  }
+
+  withMethod<TMethod extends HttpMethod>(method: TMethod): EntityInvokableBuilderAddParameters<TEntity, TKey> {
     this.method = method;
     return this as SafeAny;
   }
@@ -87,6 +132,10 @@ export class EntityActionBuilderMock<
   }
   
   build(): EntityInvokable<EntityKeyType<TEntity, TKey>, TParameter, TCollection, TReturn> {
-    throw new Error("Method not implemented.");
+    return new EntityActionMock({
+      rootOptions: this.options.rootOptions,
+      name: this.options.name,
+      isCollection: this.isCollection,
+    });
   }
 }
