@@ -5,40 +5,40 @@ import { EntitySetClient } from "../../entity/client/entity-set-client";
 import { InvokableBuilderAddParameters } from "../../invokable/builder/invokable-builder";
 import { EntityInvokableBuilderImpl, EntityInvokableBuilderImplOptions, InvokableBuilderImpl, InvokableBuilderImplOptions } from "../../invokable/builder/invokable-builder.impl";
 import { EntityInvokable, Invokable } from "../../invokable/invokable";
-import { ActionImpl, EntityActionImpl } from "../action.impl";
-import { ActionBuilderAddMethod, ActionBuilderAddParameters, ActionBuilderAddReturnType, ActionBuilderFinal, EntityActionBuilderAddParameters, EntityActionBuilderAddReturnType, EntityActionBuilderFinal } from "./action-builder";
+import { EntityFunctionImpl, FunctionImpl } from "../function.impl";
+import { EntityFunctionBuilderAddParameters, EntityFunctionBuilderAddReturnType, EntityFunctionBuilderFinal, FunctionBuilderAddMethod, FunctionBuilderAddParameters, FunctionBuilderAddReturnType, FunctionBuilderFinal } from "./function-builder";
 
-export interface ActionBuilderImplOptions extends InvokableBuilderImplOptions {
+export interface FunctionBuilderImplOptions extends InvokableBuilderImplOptions {
   rootOptions: ODataClientOptions;
   name: string;
 }
 
-export class ActionBuilderImpl<
+export class FunctionBuilderImpl<
   TParameter extends {},
   TCollection extends boolean,
   TReturn,
 > extends InvokableBuilderImpl<TParameter, TCollection, TReturn>
-  implements ActionBuilderAddMethod,
-  ActionBuilderAddParameters,
-  ActionBuilderAddReturnType<TParameter>,
-  ActionBuilderFinal<TParameter, TCollection, TReturn>
+  implements FunctionBuilderAddMethod,
+  FunctionBuilderAddParameters,
+  FunctionBuilderAddReturnType<TParameter>,
+  FunctionBuilderFinal<TParameter, TCollection, TReturn>
 {
   private readonly options;
 
   constructor(
-    options: ActionBuilderImplOptions,
+    options: FunctionBuilderImplOptions,
   ) {
     super();
     this.options = options;
   }
 
   override withDefaultMethod(): InvokableBuilderAddParameters {
-    this.method = "POST";
+    this.method = "GET";
     return this as SafeAny;
   }
 
   override build(): Invokable<TParameter, TCollection, TReturn> {
-    return new ActionImpl({
+    return new FunctionImpl({
       rootOptions: this.options.rootOptions,
       name: this.options.name,
       method: this.method,
@@ -50,38 +50,38 @@ export class ActionBuilderImpl<
   }
 }
 
-export interface EntityActionBuilderImplOptions extends ActionBuilderImplOptions, EntityInvokableBuilderImplOptions {
+export interface EntityFunctionBuilderImplOptions extends FunctionBuilderImplOptions, EntityInvokableBuilderImplOptions {
   entitySet: EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>;
 }
 
-export class EntityActionBuilderImpl<
+export class EntityFunctionBuilderImpl<
   TEntity,
   TKey extends EntityKey<TEntity>,
   TParameter extends {},
   TCollection extends boolean,
   TReturn,
 > extends EntityInvokableBuilderImpl<TEntity, TKey, TParameter, TCollection, TReturn>
-  implements ActionBuilderAddMethod,
-  EntityActionBuilderAddParameters<TEntity, TKey>,
-  EntityActionBuilderAddReturnType<TEntity, TKey, TParameter>,
-  EntityActionBuilderFinal<TEntity, TKey, TParameter, TCollection, TReturn>
+  implements FunctionBuilderAddMethod,
+  EntityFunctionBuilderAddParameters<TEntity, TKey>,
+  EntityFunctionBuilderAddReturnType<TEntity, TKey, TParameter>,
+  EntityFunctionBuilderFinal<TEntity, TKey, TParameter, TCollection, TReturn>
 {
   private readonly options;
 
   constructor(
-    options: EntityActionBuilderImplOptions,
+    options: EntityFunctionBuilderImplOptions,
   ) {
     super();
     this.options = options;
   }
 
   override withDefaultMethod(): InvokableBuilderAddParameters {
-    this.method = "POST";
+    this.method = "GET";
     return this as SafeAny;
   }
 
   override build(): EntityInvokable<EntityKeyType<TEntity, TKey>, TParameter, TCollection, TReturn> {
-    return new EntityActionImpl({
+    return new EntityFunctionImpl({
       rootOptions: this.options.rootOptions,
       entitySet: this.options.entitySet,
       name: this.options.name,

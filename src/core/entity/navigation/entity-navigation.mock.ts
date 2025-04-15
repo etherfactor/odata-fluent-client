@@ -91,9 +91,7 @@ export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigatio
           }
   
           fromEntity[this.options.navigation] ??= [];
-          const fromCount = fromEntity[this.options.navigation].length;
           fromEntity[this.options.navigation] = fromEntity[this.options.navigation].filter((item: SafeAny) => item !== toEntity);
-          const toCount = fromEntity[this.options.navigation];
 
           if (navOptions && navOptions.onRemove) {
             navOptions.onRemove(fromEntity, toEntity);

@@ -1,9 +1,10 @@
 import { JSONParser } from "@streamparser/json";
-import { DefaultHttpClientAdapter, ODataClientOptions, ODataOptions } from "../../..";
 import { HttpMethod } from "../../../utils/http";
 import { SafeAny } from "../../../utils/types";
+import { ODataClientOptions } from "../../client/odata-client";
+import { DefaultHttpClientAdapter } from "../../http/http-client-adapter";
 import { selectExpandToObject } from "../../parameters/expand";
-import { getParams } from "../../parameters/odata-options";
+import { getParams, ODataOptions } from "../../parameters/odata-options";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
 import { EntityResponse } from "../response/entity-response";
 import { EntitySingleWorker } from "./entity-single-worker";

@@ -4,40 +4,40 @@ import { EntityKey, EntityKeyType } from "../../entity/client/builder/entity-set
 import { EntityInvokableBuilderAddParameters, InvokableBuilderAddParameters } from "../../invokable/builder/invokable-builder";
 import { EntityInvokableBuilderMock, EntityInvokableBuilderMockOptions, InvokableBuilderMock, InvokableBuilderMockOptions } from "../../invokable/builder/invokable-builder.mock";
 import { EntityInvokable, Invokable } from "../../invokable/invokable";
-import { ActionMock, EntityActionMock } from "../action.mock";
-import { ActionBuilderAddMethod, ActionBuilderAddParameters, ActionBuilderAddReturnType, ActionBuilderFinal, EntityActionBuilderAddMethod, EntityActionBuilderAddParameters, EntityActionBuilderAddReturnType, EntityActionBuilderFinal } from "./action-builder";
+import { EntityFunctionMock, FunctionMock } from "../function.mock";
+import { EntityFunctionBuilderAddMethod, EntityFunctionBuilderAddParameters, EntityFunctionBuilderAddReturnType, EntityFunctionBuilderFinal, FunctionBuilderAddMethod, FunctionBuilderAddParameters, FunctionBuilderAddReturnType, FunctionBuilderFinal } from "./function-builder";
 
-export interface ActionBuilderMockOptions extends InvokableBuilderMockOptions {
+export interface FunctionBuilderMockOptions extends InvokableBuilderMockOptions {
   rootOptions: MockODataClientOptions;
   name: string;
 }
 
-export class ActionBuilderMock<
+export class FunctionBuilderMock<
   TParameter extends {},
   TCollection extends boolean,
   TReturn,
 > extends InvokableBuilderMock<TParameter, TCollection, TReturn>
-  implements ActionBuilderAddMethod,
-  ActionBuilderAddParameters,
-  ActionBuilderAddReturnType<TParameter>,
-  ActionBuilderFinal<TParameter, TCollection, TReturn>
+  implements FunctionBuilderAddMethod,
+  FunctionBuilderAddParameters,
+  FunctionBuilderAddReturnType<TParameter>,
+  FunctionBuilderFinal<TParameter, TCollection, TReturn>
 {
   private readonly options;
 
   constructor(
-    options: ActionBuilderMockOptions,
+    options: FunctionBuilderMockOptions,
   ) {
     super();
     this.options = options;
   }
 
   override withDefaultMethod(): InvokableBuilderAddParameters {
-    this.method = "POST";
+    this.method = "GET";
     return this as SafeAny;
   }
 
   override build(): Invokable<TParameter, TCollection, TReturn> {
-    return new ActionMock({
+    return new FunctionMock({
       rootOptions: this.options.rootOptions,
       name: this.options.name,
       isCollection: this.isCollection,
@@ -45,36 +45,36 @@ export class ActionBuilderMock<
   }
 }
 
-export interface EntityActionBuilderMockOptions extends ActionBuilderMockOptions, EntityInvokableBuilderMockOptions { }
+export interface EntityFunctionBuilderMockOptions extends FunctionBuilderMockOptions, EntityInvokableBuilderMockOptions { }
 
-export class EntityActionBuilderMock<
+export class EntityFunctionBuilderMock<
   TEntity,
   TKey extends EntityKey<TEntity>,
   TParameter extends {},
   TCollection extends boolean,
   TReturn,
 > extends EntityInvokableBuilderMock<TEntity, TKey, TParameter, TCollection, TReturn>
-  implements EntityActionBuilderAddMethod<TEntity, TKey>,
-  EntityActionBuilderAddParameters<TEntity, TKey>,
-  EntityActionBuilderAddReturnType<TEntity, TKey, TParameter>,
-  EntityActionBuilderFinal<TEntity, TKey, TParameter, TCollection, TReturn>
+  implements EntityFunctionBuilderAddMethod<TEntity, TKey>,
+  EntityFunctionBuilderAddParameters<TEntity, TKey>,
+  EntityFunctionBuilderAddReturnType<TEntity, TKey, TParameter>,
+  EntityFunctionBuilderFinal<TEntity, TKey, TParameter, TCollection, TReturn>
 {
   private readonly options;
 
   constructor(
-    options: EntityActionBuilderMockOptions,
+    options: EntityFunctionBuilderMockOptions,
   ) {
     super();
     this.options = options;
   }
 
   override withDefaultMethod(): EntityInvokableBuilderAddParameters<TEntity, TKey> {
-    this.method = "POST";
+    this.method = "GET";
     return this as SafeAny;
   }
 
   override build(): EntityInvokable<EntityKeyType<TEntity, TKey>, TParameter, TCollection, TReturn> {
-    return new EntityActionMock({
+    return new EntityFunctionMock({
       rootOptions: this.options.rootOptions,
       name: this.options.name,
       isCollection: this.isCollection,
