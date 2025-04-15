@@ -6,6 +6,8 @@ import { EntitySetBuilderMock } from "../entity/client/builder/entity-set-client
 import { EntitySetClient } from "../entity/client/entity-set-client";
 import { NavigationBuilderAddCardinality } from "../entity/navigation/builder/entity-navigation-builder";
 import { EntityNavigationBuilderMock } from "../entity/navigation/builder/entity-navigation-builder.mock";
+import { EntityFunctionBuilderAddMethod, FunctionBuilderAddMethod } from "../function/builder/function-builder";
+import { EntityFunctionBuilderMock, FunctionBuilderMock } from "../function/builder/function-builder.mock";
 import { ODataClient } from "./odata-client";
 
 export interface MockODataClientOptions {
@@ -88,6 +90,25 @@ export class MockODataClient extends ODataClient {
       });
     } else {
       return new EntityActionBuilderMock({
+        rootOptions: this.mockOptions,
+        name: arg2 as string,
+      });
+    }
+  }
+
+  override function(name: string): FunctionBuilderAddMethod;
+  override function<TEntity, TKey extends EntityKey<TEntity>>(set: EntitySetClient<TEntity, TKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>, name: string): EntityFunctionBuilderAddMethod<TEntity, TKey>;
+  override function(
+    arg1: unknown,
+    arg2?: unknown
+  ): SafeAny {
+    if (typeof arg1 === "string") {
+      return new FunctionBuilderMock({
+        rootOptions: this.mockOptions,
+        name: arg1,
+      });
+    } else {
+      return new EntityFunctionBuilderMock({
         rootOptions: this.mockOptions,
         name: arg2 as string,
       });

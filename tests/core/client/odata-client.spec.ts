@@ -1,6 +1,8 @@
-import { ODataClient } from "../../../src";
+import { createOperatorFactory, ODataClient } from "../../../src";
 import { ActionBuilderImpl, EntityActionBuilderImpl } from "../../../src/core/action/builder/action-builder.impl";
 import { EntitySetBuilderImpl } from "../../../src/core/entity/client/builder/entity-set-client-builder.impl";
+import { EntityNavigationBuilderImpl } from "../../../src/core/entity/navigation/builder/entity-navigation-builder.impl";
+import { EntityFunctionBuilderImpl, FunctionBuilderImpl } from "../../../src/core/function/builder/function-builder.impl";
 import { SafeAny } from "../../../src/utils/types";
 
 interface Model {
@@ -8,7 +10,9 @@ interface Model {
   name: string;
 }
 
-describe('ODataClient', () => {
+const o = createOperatorFactory();
+
+describe("ODataClient", () => {
   let client: ODataClient;
 
   beforeEach(() => {
@@ -19,23 +23,73 @@ describe('ODataClient', () => {
     });
   });
 
-  it('should return an entity set builder', () => {
+  it("should return an entity set builder", () => {
     const builder = client.entitySet<Model>("models");
     expect(builder).toBeInstanceOf(EntitySetBuilderImpl);
   });
 
-  it('should return an action builder', () => {
+  it("should return a navigation builder", () => {
+    const set = client.entitySet<Model>("models").withKey("id").withKeyType(o.int).build();
+    const builder = client.navigation(set, "name");
+    expect(builder).toBeInstanceOf(EntityNavigationBuilderImpl);
+  });
+
+  it("should return an action builder", () => {
     const builder = client.action("myAction");
     expect(builder).toBeInstanceOf(ActionBuilderImpl);
   });
 
-  it('should return an entity action builder', () => {
+  it("should return an entity action builder", () => {
     const builder = client.action({} as SafeAny, "myEntityAction");
     expect(builder).toBeInstanceOf(EntityActionBuilderImpl);
   });
 
-  // it('should return a function builder', () => {
-  //   const builder = client.function("myFunction");
-  //   expect(builder).toBeInstanceOf(FunctionBuilderImpl);
-  // });
+  it("should return a function builder", () => {
+    const builder = client.function("myFunction");
+    expect(builder).toBeInstanceOf(FunctionBuilderImpl);
+  });
+  
+  it("should return an entity function builder", () => {
+    const builder = client.function({} as SafeAny, "myEntityFunction");
+    expect(builder).toBeInstanceOf(EntityFunctionBuilderImpl);
+  });
+
+  it("should bind navigations", () => {
+    const set = client.entitySet<Model>("models").withKey("id").withKeyType(o.int).build();
+    const nav = client.navigation(set, "name").withSingle().withReference(set).build();
+    expect(set).not.toHaveProperty("navigations");
+
+    const newSet = client.bind.navigation(set, { name: nav });
+    expect(newSet).toHaveProperty("navigations");
+    expect(newSet.navigations).toHaveProperty("name");
+
+    const newNewSet = client.bind.navigation(newSet, { other: nav });
+    expect(newNewSet.navigations).toHaveProperty("other");
+  });
+
+  it("should bind actions", () => {
+    const set = client.entitySet<Model>("models").withKey("id").withKeyType(o.int).build();
+    const act = client.action(set, "myAction").withDefaultMethod().withBody<{ param: string }>().withSingleResponse().build();
+    expect(set).not.toHaveProperty("actions");
+
+    const newSet = client.bind.action(set, { myAction: act });
+    expect(newSet).toHaveProperty("actions");
+    expect(newSet.actions).toHaveProperty("myAction");
+
+    const newNewSet = client.bind.action(newSet, { other: act });
+    expect(newNewSet.actions).toHaveProperty("other");
+  });
+
+  it("should bind functions", () => {
+    const set = client.entitySet<Model>("models").withKey("id").withKeyType(o.int).build();
+    const func = client.function(set, "myFunction").withDefaultMethod().withBody<{ param: string }>().withSingleResponse().build();
+    expect(set).not.toHaveProperty("functions");
+
+    const newSet = client.bind.function(set, { myFunction: func });
+    expect(newSet).toHaveProperty("functions");
+    expect(newSet.functions).toHaveProperty("myFunction");
+
+    const newNewSet = client.bind.function(newSet, { other: func });
+    expect(newNewSet.functions).toHaveProperty("other");
+  });
 });

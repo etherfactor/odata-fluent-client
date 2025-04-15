@@ -9,6 +9,7 @@ import { NavigationBuilderAddCardinality } from "../entity/navigation/builder/en
 import { EntityNavigationBuilderImpl } from "../entity/navigation/builder/entity-navigation-builder.impl";
 import { EntityNavigation } from "../entity/navigation/entity-navigation";
 import { EntityFunctionBuilderAddMethod, FunctionBuilderAddMethod } from "../function/builder/function-builder";
+import { EntityFunctionBuilderImpl, FunctionBuilderImpl } from "../function/builder/function-builder.impl";
 import { EntityFunction } from "../function/function";
 import { HttpClientAdapter } from "../http/http-client-adapter";
 
@@ -78,7 +79,18 @@ export class ODataClient {
     arg1: unknown,
     arg2?: unknown
   ): SafeAny {
-    return undefined!;
+    if (typeof arg1 === "string") {
+      return new FunctionBuilderImpl({
+        rootOptions: this.options,
+        name: arg1,
+      });
+    } else {
+      return new EntityFunctionBuilderImpl({
+        rootOptions: this.options,
+        name: arg2 as string,
+        entitySet: arg1 as EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>,
+      });
+    }
   }
 
   readonly bind = {
@@ -102,8 +114,9 @@ function bindNavigation<
   } else {
     use = {...navigations};
   }
-  (set as SafeAny).navigations = use;
-  return use;
+  const newSet: TSet & { navigations: TNavigation } = set as TSet & { navigations: TNavigation };
+  newSet.navigations = use;
+  return newSet;
 };
 
 function bindAction<
@@ -120,8 +133,9 @@ function bindAction<
   } else {
     use = {...actions};
   }
-  (set as SafeAny).actions = use;
-  return use;
+  const newSet: TSet & { actions: TAction } = set as TSet & { actions: TAction };
+  newSet.actions = use;
+  return newSet;
 };
 
 function bindFunction<
@@ -138,6 +152,7 @@ function bindFunction<
   } else {
     use = {...functions};
   }
-  (set as SafeAny).functions = use;
-  return use;
+  const newSet: TSet & { functions: TFunction } = set as TSet & { functions: TFunction };
+  newSet.functions = use;
+  return newSet;
 };
