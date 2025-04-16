@@ -5,8 +5,8 @@ import { ODataClientOptions } from "../../client/odata-client";
 import { DefaultHttpClientAdapter } from "../../http/http-client-adapter";
 import { selectExpandToObject } from "../../parameters/expand";
 import { getParams, ODataOptions } from "../../parameters/odata-options";
+import { EntityResponse } from "../../response/entity-response";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
-import { EntityResponse } from "../response/entity-response";
 import { EntitySingleWorker } from "./entity-single-worker";
 
 export interface EntitySingleWorkerImplOptions<TEntity> {
@@ -107,6 +107,10 @@ export class EntitySingleWorkerImpl<TEntity> implements EntitySingleWorker<TEnti
 
     return {
       data: dataPromise,
+      result: dataPromise.then(
+        () => true,
+        () => false,
+      ),
     };
   }
 }

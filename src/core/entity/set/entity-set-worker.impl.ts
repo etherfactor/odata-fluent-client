@@ -6,8 +6,8 @@ import { ODataClientOptions } from "../../client/odata-client";
 import { DefaultHttpClientAdapter } from "../../http/http-client-adapter";
 import { selectExpandToObject } from "../../parameters/expand";
 import { getParams, ODataOptions } from "../../parameters/odata-options";
+import { EntitySetResponse } from "../../response/entity-response";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
-import { EntitySetResponse } from "../response/entity-response";
 import { EntitySetWorker } from "./entity-set-worker";
 
 export interface EntitySetWorkerImplOptions<TEntity> {
@@ -134,6 +134,10 @@ export class EntitySetWorkerImpl<TEntity> implements EntitySetWorker<TEntity> {
       count: countPromise,
       data: dataPromise,
       iterator: queue,
+      result: countPromise.then(
+        () => true,
+        () => false,
+      ),
     }
   }
 }

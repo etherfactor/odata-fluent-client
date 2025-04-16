@@ -1,7 +1,7 @@
 import { extendUrl, HttpMethod } from "../../../utils/http";
 import { SafeAny } from "../../../utils/types";
 import { ODataClientOptions } from "../../client/odata-client";
-import { DefaultHttpClientAdapter, HttpResponseData } from "../../http/http-client-adapter";
+import { DefaultHttpClientAdapter } from "../../http/http-client-adapter";
 import { EntitySetClient } from "../client/entity-set-client";
 import { EntitySetClientImplOptions, extendEntityUrl } from "../client/entity-set-client.impl";
 import { EntityNavigationAction, EntityNavigationFull } from "./entity-navigation";
@@ -113,34 +113,28 @@ export class EntityNavigationClientImpl<TKey1, TKey2> implements EntityNavigatio
 
   private generateResponse(method: HttpMethod, fromUrl: string, toUrl: string, query: SafeAny, body: SafeAny) {
     return {
-      execute: () => ({
-        result: (async () => {
-          const adapter = this.options.rootOptions.http.adapter ?? DefaultHttpClientAdapter;
-          const result = adapter.invoke({
-            method: method,
-            url: fromUrl,
-            headers: this.options.rootOptions.http.headers ?? {},
-            query: query,
-            body: body,
-          });
+      execute: () => {
+        const adapter = this.options.rootOptions.http.adapter ?? DefaultHttpClientAdapter;
+        const result = adapter.invoke({
+          method: method,
+          url: fromUrl,
+          headers: this.options.rootOptions.http.headers ?? {},
+          query: query,
+          body: body,
+        });
 
-          const response = await result;
-          return await this.awaitResponse(response);
-        })()
-      })
-    };
-  }
+        const response = (async () => {
+          await (await result).data;
+        })();
 
-  private async awaitResponse(response: HttpResponseData) {
-    try {
-      if (response.data instanceof Promise) {
-        await response.data;
-      } else {
-        for await (const _ of response.data) { }
+        return {
+          response: response,
+          result: response.then(
+            () => true,
+            () => false,
+          ),
+        };
       }
-      return true;
-    } catch (ex) {
-      return false;
-    }
+    };
   }
 }

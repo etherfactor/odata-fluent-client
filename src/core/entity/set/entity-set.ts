@@ -9,9 +9,9 @@ import { OrderBy, SortDirection } from "../../parameters/orderby";
 import { Select } from "../../parameters/select";
 import { Skip } from "../../parameters/skip";
 import { Top } from "../../parameters/top";
+import { EntitySetResponse } from "../../response/entity-response";
 import { EntityAccessor, EntityAccessorImpl } from "../expand/entity-accessor";
 import { EntityExpand, EntityExpandImpl } from "../expand/entity-expand";
-import { EntitySetResponse } from "../response/entity-response";
 import { EntitySetWorker } from "./entity-set-worker";
 
 export interface EntitySet<TEntity> {

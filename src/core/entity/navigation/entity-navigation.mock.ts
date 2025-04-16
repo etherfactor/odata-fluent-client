@@ -30,11 +30,11 @@ export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigatio
       throw new Error("This resource does not support adding navigations");
 
     return {
-      execute: () => ({
-        result: (async () => {
+      execute: () => {
+        const response = (async () => {
           const setOptions = this.options.rootOptions.entitySets[this.options.fromSet.name];
           if (!setOptions) {
-            return false;
+            throw new Error(`Entity set ${this.options.fromSet.name} is not configured`);
           }
   
           const navOptions = setOptions.navigations?.[this.options.navigation];
@@ -44,23 +44,26 @@ export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigatio
   
           let fromEntity: SafeAny;
           let toEntity: SafeAny;
-          try {
-            fromEntity = await fromSet.read(from).execute().data;
-            toEntity = await toSet.read(to).execute().data;
-          } catch {
-            return false;
-          }
-  
+          
+          fromEntity = await fromSet.read(from).execute().data;
+          toEntity = await toSet.read(to).execute().data;
+
           fromEntity[this.options.navigation] ??= [];
           fromEntity[this.options.navigation].push(toEntity);
   
           if (navOptions && navOptions.onAdd) {
             navOptions.onAdd(fromEntity, toEntity);
           }
-  
-          return true;
-        })()
-      })
+        })();
+
+        return {
+          response: response,
+          result: response.then(
+            () => true,
+            () => false,
+          ),
+        };
+      }
     };
   }
 
@@ -69,11 +72,11 @@ export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigatio
       throw new Error("This resource does not support removing navigations");
 
     return {
-      execute: () => ({
-        result: (async () => {
+      execute: () => {
+        const response = (async () => {
           const setOptions = this.options.rootOptions.entitySets[this.options.fromSet.name];
           if (!setOptions) {
-            return false;
+            throw new Error(`Entity set ${this.options.fromSet.name} is not configured`);
           }
   
           const navOptions = setOptions.navigations?.[this.options.navigation];
@@ -83,12 +86,9 @@ export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigatio
   
           let fromEntity: SafeAny;
           let toEntity: SafeAny;
-          try {
-            fromEntity = await fromSet.read(from).execute().data;
-            toEntity = await toSet.read(to).execute().data;
-          } catch {
-            return false;
-          }
+          
+          fromEntity = await fromSet.read(from).execute().data;
+          toEntity = await toSet.read(to).execute().data;
   
           fromEntity[this.options.navigation] ??= [];
           fromEntity[this.options.navigation] = fromEntity[this.options.navigation].filter((item: SafeAny) => item !== toEntity);
@@ -96,10 +96,16 @@ export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigatio
           if (navOptions && navOptions.onRemove) {
             navOptions.onRemove(fromEntity, toEntity);
           }
-  
-          return true;
-        })()
-      })
+        })();
+
+        return {
+          response: response,
+          result: response.then(
+            () => true,
+            () => false,
+          ),
+        }
+      }
     };
   }
 
@@ -108,11 +114,11 @@ export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigatio
       throw new Error("This resource does not support setting navigations");
 
     return {
-      execute: () => ({
-        result: (async () => {
+      execute: () => {
+        const response = (async () => {
           const setOptions = this.options.rootOptions.entitySets[this.options.fromSet.name];
           if (!setOptions) {
-            return false;
+            throw new Error(`Entity set ${this.options.fromSet.name} is not configured`);
           }
   
           const navOptions = setOptions.navigations?.[this.options.navigation];
@@ -122,22 +128,25 @@ export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigatio
   
           let fromEntity: SafeAny;
           let toEntity: SafeAny;
-          try {
-            fromEntity = await fromSet.read(from).execute().data;
-            toEntity = await toSet.read(to).execute().data;
-          } catch {
-            return false;
-          }
+          
+          fromEntity = await fromSet.read(from).execute().data;
+          toEntity = await toSet.read(to).execute().data;
   
           fromEntity[this.options.navigation] = toEntity;
   
           if (navOptions && navOptions.onSet) {
             navOptions.onSet(fromEntity, toEntity);
           }
-  
-          return true;
-        })()
-      })
+        })();
+
+        return {
+          response: response,
+          result: response.then(
+            () => true,
+            () => false,
+          ),
+        }
+      }
     };
   }
 
@@ -146,36 +155,39 @@ export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigatio
       throw new Error("This resource does not support unsetting navigations");
     
     return {
-      execute: () => ({
-        result: (async () => {
+      execute: () => {
+        const response = (async () => {
           const setOptions = this.options.rootOptions.entitySets[this.options.fromSet.name];
           if (!setOptions) {
-            return false;
+            throw new Error(`Entity set ${this.options.fromSet.name} is not configured`);
           }
-  
+
           const navOptions = setOptions.navigations?.[this.options.navigation];
-  
+
           const fromSet = this.options.fromSet;
           const toSet = this.options.toSet;
-  
+
           let fromEntity: SafeAny;
           let toEntity: SafeAny;
-          try {
-            fromEntity = await fromSet.read(from).execute().data;
-            toEntity = await toSet.read(to).execute().data;
-          } catch {
-            return false;
-          }
-  
+          
+          fromEntity = await fromSet.read(from).execute().data;
+          toEntity = await toSet.read(to).execute().data;
+
           fromEntity[this.options.navigation] = null;
-  
+
           if (navOptions && navOptions.onUnset) {
             navOptions.onUnset(fromEntity, toEntity);
           }
-  
-          return true;
-        })()
-      })
+        })();
+
+        return {
+          response: response,
+          result: response.then(
+            () => true,
+            () => false,
+          ),
+        };
+      }
     };
   }
 }

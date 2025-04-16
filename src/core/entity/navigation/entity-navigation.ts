@@ -1,4 +1,5 @@
 import { HttpMethod } from "../../../utils/http";
+import { EntityNavigationResponse } from "../../response/entity-response";
 
 export interface EntityNavigationFull<
   TKey1,
@@ -25,8 +26,4 @@ export type EntityNavigation<
 
 export interface EntityNavigationAction {
   execute(): EntityNavigationResponse;
-}
-
-export interface EntityNavigationResponse {
-  result: Promise<boolean>;
 }

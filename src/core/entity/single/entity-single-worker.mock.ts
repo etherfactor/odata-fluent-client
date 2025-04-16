@@ -2,8 +2,8 @@ import { toPromise } from "../../../utils/promise";
 import { MockODataClientOptions } from "../../client/odata-client.mock";
 import { ODataOptions } from "../../parameters/odata-options";
 import { Select } from "../../parameters/select";
+import { EntityResponse } from "../../response/entity-response";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
-import { EntityResponse } from "../response/entity-response";
 import { EntitySingleWorker } from "./entity-single-worker";
 
 export interface EntitySingleWorkerMockOptions<TEntity> {
@@ -28,6 +28,7 @@ export class EntitySingleWorkerMock<TEntity> implements EntitySingleWorker<TEnti
 
     return {
       data: toPromise(data),
+      result: toPromise(true),
     };
   }
 

@@ -7,8 +7,8 @@ import { OrderBy } from "../../parameters/orderby";
 import { Select } from "../../parameters/select";
 import { Skip } from "../../parameters/skip";
 import { Top } from "../../parameters/top";
+import { EntitySetResponse } from "../../response/entity-response";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
-import { EntitySetResponse } from "../response/entity-response";
 import { EntitySetWorker } from "./entity-set-worker";
 
 export interface EntitySetWorkerMockOptions<TEntity> {
@@ -46,6 +46,7 @@ export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
       count: toPromise(data["@odata.count"]!),
       data: toPromise(data.value),
       iterator: toIterable(data.value),
+      result: toPromise(true),
     };
   }
 

@@ -5,9 +5,9 @@ export { DefaultHttpClientAdapter, HttpClientAdapter, HttpRequestData, HttpRespo
 
 export { EntitySetClient } from "./core/entity/client/entity-set-client";
 export { EntityExpand } from "./core/entity/expand/entity-expand";
-export { EntityResponse, EntitySetResponse } from "./core/entity/response/entity-response";
 export { EntitySet } from "./core/entity/set/entity-set";
 export { EntitySingle } from "./core/entity/single/entity-single";
+export { EntityResponse, EntitySetResponse } from "./core/response/entity-response";
 
 export { Count } from "./core/parameters/count";
 export { Expand } from "./core/parameters/expand";

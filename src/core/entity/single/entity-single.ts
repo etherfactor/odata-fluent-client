@@ -2,8 +2,8 @@ import { InferArrayType, SafeAny } from "../../../utils/types";
 import { Expand } from "../../parameters/expand";
 import { ODataOptions } from "../../parameters/odata-options";
 import { Select } from "../../parameters/select";
+import { EntityResponse } from "../../response/entity-response";
 import { EntityExpand, EntityExpandImpl } from "../expand/entity-expand";
-import { EntityResponse } from "../response/entity-response";
 import { EntitySingleWorker } from "./entity-single-worker";
 import { EntitySingleWorkerImpl } from "./entity-single-worker.impl";
 
