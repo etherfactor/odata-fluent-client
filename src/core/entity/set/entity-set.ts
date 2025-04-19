@@ -14,24 +14,74 @@ import { EntityAccessor, EntityAccessorImpl } from "../expand/entity-accessor";
 import { EntityExpand, EntityExpandImpl } from "../expand/entity-expand";
 import { EntitySetWorker } from "./entity-set-worker";
 
+/**
+ * A builder for query options against a collection of entities.
+ */
 export interface EntitySet<TEntity> {
+  /**
+   * Counts the entities.
+   */
   count(): EntitySet<TEntity>;
+  /**
+   * Executes the specified query options against the collection of entities.
+   */
   execute(): EntitySetResponse<TEntity>;
+  /**
+   * Includes an associated entity or entities.
+   * @param property The navigation property.
+   * @param builder The expansion builder.
+   */
   expand<TExpanded extends keyof TEntity & string, TNewExpanded>(
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
     builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntitySet<TEntity>;
+  /**
+   * Filters the returned entities to the ones matching the provided condition.
+   * @param builder The filter builder.
+   */
   filter(builder: (entity: EntityAccessor<TEntity>) => Value<boolean>): EntitySet<TEntity>;
+  /**
+   * Sorts the returned entities.
+   * @param property The property by which to sort.
+   * @param direction The direction in which to sort.
+   */
   orderBy(property: keyof TEntity & string, direction?: SortDirection): OrderedEntitySet<TEntity>;
+  /**
+   * Selects a subset of properties to be returned on the entity or entities.
+   * @param properties The properties to be returned.
+   */
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySet<Pick<TEntity, TSelected>>;
+  /**
+   * Skips over the specified number of entities before returning any.
+   * @param count The number of entities to skip.
+   */
   skip(count: number): EntitySet<TEntity>;
+  /**
+   * Returns up to the specified number of entities.
+   * @param count The number of entities to return.
+   */
   top(count: number): EntitySet<TEntity>;
+  /**
+   * Gets the options produced in this builder.
+   */
   getOptions(): ODataOptions;
 }
 
+/**
+ * A builder for query options against a collection of entities, which has sorting applied.
+ */
 export interface OrderedEntitySet<TEntity> extends EntitySet<TEntity> {
+  /**
+   * Continues sorting by a second property.
+   * @param property The property by which to sort.
+   * @param direction The direction in which to sort.
+   */
   thenBy(property: keyof TEntity & string, direction?: SortDirection): EntitySet<TEntity>;
 }
 
+/**
+ * The entity set implementation. Relies on an underlying worker to do the actual work; as a result, there is only one
+ * implementation. This is ideal given the complexity.
+ */
 export class EntitySetImpl<TEntity> implements EntitySet<TEntity>, OrderedEntitySet<TEntity> {
 
   protected readonly worker: EntitySetWorker<TEntity>;
@@ -57,6 +107,9 @@ export class EntitySetImpl<TEntity> implements EntitySet<TEntity>, OrderedEntity
     this.topValue = options?.top;
   }
 
+  /**
+   * These things are immutable, so calling any method returns a new instance with the new options.
+   */
   protected new<TNewEntity = TEntity>(worker: EntitySetWorker<TNewEntity>, options?: ODataOptions): EntitySetImpl<TNewEntity> {
     return new EntitySetImpl(this.worker as unknown as EntitySetImpl<TNewEntity>, options);
   }

@@ -12,6 +12,9 @@ export interface EntitySingleWorkerMockOptions<TEntity> {
   validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
 }
 
+/**
+ * A mock entity single worker.
+ */
 export class EntitySingleWorkerMock<TEntity> implements EntitySingleWorker<TEntity> {
 
   private readonly options;
@@ -32,6 +35,12 @@ export class EntitySingleWorkerMock<TEntity> implements EntitySingleWorker<TEnti
     };
   }
 
+  /**
+   * Selects the specified properties.
+   * @param data The data to trim.
+   * @param select The properties to select.
+   * @returns The selected properties.
+   */
   private applySelect(data: TEntity, select: Select[]) {
     if (select.length === 0)
       return data;

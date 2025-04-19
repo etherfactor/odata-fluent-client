@@ -16,6 +16,9 @@ export interface FunctionImplOptions extends InvokableImplOptions {
   isCollection: boolean;
 }
 
+/**
+ * A physical function.
+ */
 export class FunctionImpl<
   TParameter extends {},
   TCollection extends boolean,
@@ -34,6 +37,9 @@ export interface EntityFunctionImplOptions extends FunctionImplOptions, EntityIn
   entitySet: EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>;
 }
 
+/**
+ * A physical function, targeting an entity set.
+ */
 export class EntityFunctionImpl<
   TKey,
   TParameter extends {},

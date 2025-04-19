@@ -17,6 +17,9 @@ export interface EntitySetWorkerMockOptions<TEntity> {
   validator?: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error;
 }
 
+/**
+ * A mock entity set worker.
+ */
 export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
 
   private readonly options;
@@ -28,12 +31,14 @@ export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
   }
 
   execute(options: ODataOptions): EntitySetResponse<TEntity> {
+    //Load the mock data and build a wrapper
     const allData = this.options.getData();
     const data = {
       "@odata.count": undefined as number | undefined,
       value: Object.values(allData)
     };
     
+    //Apply query options in order
     data.value = this.applyFilters(data.value, options.filter ?? []);
     if (options.count) {
       data["@odata.count"] = data.value.length;
@@ -50,6 +55,12 @@ export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
     };
   }
 
+  /**
+   * Applies filters to the entity set.
+   * @param data The data to filter.
+   * @param filters The filters to apply.
+   * @returns The filtered data.
+   */
   private applyFilters(data: TEntity[], filters: Filter[]): TEntity[] {
     let finalData = data;
     for (const filter of filters) {
@@ -59,6 +70,12 @@ export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
     return finalData;
   }
   
+  /**
+   * Applies sorting to the entity set.
+   * @param data The data to sort.
+   * @param orderBy The sorting to apply.
+   * @returns The sorted data.
+   */
   private applyOrderBy(data: TEntity[], orderBy: OrderBy[]): TEntity[] {
     const sortedData = [...data];
     sortedData.sort((a, b) => {
@@ -90,6 +107,13 @@ export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
     return sortedData;
   }
 
+  /**
+   * Skips over a certain number of records and returns a certain number of them.
+   * @param data The data to skip.
+   * @param skip The number of records to skip.
+   * @param top The number of records to return.
+   * @returns The skipped/topped records.
+   */
   private applySkipTop(data: TEntity[], skip: Skip, top: Top) {
     const startAt = skip;
     const endAt = startAt + top;
@@ -98,6 +122,12 @@ export class EntitySetWorkerMock<TEntity> implements EntitySetWorker<TEntity> {
     return finalData;
   }
 
+  /**
+   * Selects the specified properties.
+   * @param data The data to trim.
+   * @param select The properties to select.
+   * @returns The selected properties.
+   */
   private applySelect(data: TEntity[], select: Select[]) {
     if (select.length === 0)
       return data;

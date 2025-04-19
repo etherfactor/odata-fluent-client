@@ -5,10 +5,18 @@ import { EntitySelectExpand } from "../../expand/entity-select-expand";
 import { EntitySetClient } from "../entity-set-client";
 
 export interface EntitySetBuilderAddKey<TEntity> {
+  /**
+   * Specifies the key property of the entity. In the case of a composite key, provide an array of keys.
+   * @param key The key of the entity.
+   */
   withKey<TKey extends EntityKey<TEntity>>(key: TKey) : EntitySetBuilderAddValue<TEntity, TKey>;
 }
 
 export interface EntitySetBuilderAddValue<TEntity, TKey extends EntityKey<TEntity>> {
+  /**
+   * Provides a mapping between key properties and their value converters, which are needed for building the url.
+   * @param builder The value converters.
+   */
   withKeyType(builder: EntityKeyValue<EntityPropertyType<TEntity, TKey>>): EntitySetBuilderAddMethod<TEntity, TKey>;
 }
 
@@ -23,12 +31,39 @@ export interface EntitySetBuilderAddMethodFull<
   TValidator extends true | undefined = undefined,
   TNavigation extends {} = {},
 > {
+  /**
+   * Indicates that the entity set supports querying the entity set.
+   * @param method The method used when querying the entity set.
+   */
   withReadSet<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TMethod, TRead, TCreate, TUpdate, TDelete, TValidator, TNavigation>;
+  /**
+   * Indicates that the entity set supports retrieving individual entities.
+   * @param method The method used when retrieving entities.
+   */
   withRead<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TMethod, TCreate, TUpdate, TDelete, TValidator, TNavigation>;
+  /**
+   * Indicates that the entity set supports creating entities.
+   * @param method The method used when creating entities.
+   */
   withCreate<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TMethod, TUpdate, TDelete, TValidator, TNavigation>;
+  /**
+   * Indicates that the entity set supports updating entities.
+   * @param method The method used when updating entities.
+   */
   withUpdate<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TMethod, TDelete, TValidator, TNavigation>;
+  /**
+   * Indicates that the entity set supports deleting entities.
+   * @param method The method used when deleting entities.
+   */
   withDelete<TMethod extends HttpMethod>(method: TMethod): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TMethod, TValidator, TNavigation>;
+  /**
+   * Specifies a validator, which will be executed against each returned entity individually. If the validator returns an error, it will be thrown.
+   * @param validator The validator.
+   */
   withValidator(validator: (value: unknown, selectExpand: EntitySelectExpand) => TEntity | Error): EntitySetBuilderAddMethod<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete, true, TNavigation>;
+  /**
+   * Builds the entity set.
+   */
   build(): EntitySetClient<TEntity, TKey, TReadSet, TRead, TCreate, TUpdate, TDelete>;
 }
 

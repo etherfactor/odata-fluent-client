@@ -12,6 +12,9 @@ export interface EntitySetBuilderImplOptions {
   entitySet: string;
 }
 
+/**
+ * A builder for a physical entity set.
+ */
 export class EntitySetBuilderImpl<
   TEntity,
   TKey extends EntityKey<TEntity>,

@@ -8,6 +8,9 @@ export interface ActionMockOptions extends InvokableMockOptions {
   isCollection: boolean;
 }
 
+/**
+ * A mock action.
+ */
 export class ActionMock<
   TParameter extends {},
   TCollection extends boolean,
@@ -28,6 +31,9 @@ export class ActionMock<
 
 export interface EntityActionMockOptions extends ActionMockOptions { }
 
+/**
+ * A mock action, targeting an entity set.
+ */
 export class EntityActionMock<
   TKey,
   TParameter extends {},

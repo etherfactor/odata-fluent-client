@@ -13,19 +13,46 @@ import { EntityFunctionBuilderImpl, FunctionBuilderImpl } from "../function/buil
 import { EntityFunction } from "../function/function";
 import { HttpClientAdapter } from "../http/http-client-adapter";
 
+/**
+ * Options to configure an OData client.
+ */
 export interface ODataClientOptions {
+  /**
+   * The HTTP options.
+   */
   http: ODataClientHttpOptions;
+  /**
+   * The root service url.
+   */
   serviceUrl: string;
+  /**
+   * The routing type used when constructing urls. For example, entities(1) vs. entities/1.
+   */
   routingType: ODataPathRoutingType;
 }
 
+/**
+ * Routing types used when forming OData urls.
+ */
 export type ODataPathRoutingType = "parentheses" | "slash";
 
+/**
+ * The HTTP options.
+ */
 interface ODataClientHttpOptions {
+  /**
+   * A custom HTTP adapter. Responsible for fetching data and returning the result.
+   */
   adapter?: HttpClientAdapter;
+  /**
+   * The headers to include, if any. Allows adding an authorization or api key header to the default HTTP adapter.
+   */
   headers?: Record<string, string>;
 }
 
+/**
+ * A fluent OData client.
+ */
 export class ODataClient {
   private readonly options;
   
@@ -35,6 +62,11 @@ export class ODataClient {
     this.options = options;
   }
 
+  /**
+   * Fluently builds an entity set.
+   * @param name The name of the entity set.
+   * @returns The entity set builder.
+   */
   entitySet<TEntity>(name: string): EntitySetBuilderAddKey<TEntity> {
     return new EntitySetBuilderImpl({
       rootOptions: this.options,
@@ -42,6 +74,12 @@ export class ODataClient {
     });
   }
 
+  /**
+   * Fluently builds a navigation property between two entity sets.
+   * @param fromSet The entity set containing the navigation property.
+   * @param property The referenced entity set.
+   * @returns The navigation property builder.
+   */
   navigation<TEntity, TKey extends EntityKey<TEntity>, TNavProperty extends keyof TEntity & string>(
     fromSet: EntitySetClient<TEntity, TKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>,
     property: TNavProperty
@@ -53,7 +91,18 @@ export class ODataClient {
     });
   }
 
+  /**
+   * Fluently builds an action at the service root.
+   * @param name The name of the action.
+   * @returns The action builder.
+   */
   action(name: string): ActionBuilderAddMethod;
+  /**
+   * Fluently builds an action on an entity.
+   * @param set The entity set on which the action can be invoked.
+   * @param name The name of the action.
+   * @returns The action builder.
+   */
   action<TEntity, TKey extends EntityKey<TEntity>>(set: EntitySetClient<TEntity, TKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>, name: string): EntityActionBuilderAddMethod<TEntity, TKey>;
   action(
     arg1: unknown,
@@ -73,7 +122,18 @@ export class ODataClient {
     }
   }
 
+  /**
+   * Fluently builds a function at the service root.
+   * @param name The name of the function.
+   * @returns The function builder.
+   */
   function(name: string): FunctionBuilderAddMethod;
+  /**
+   * Fluently builds a function on an entity.
+   * @param set The entity set on which the function can be invoked.
+   * @param name The name of the function.
+   * @returns The function builder.
+   */
   function<TEntity, TKey extends EntityKey<TEntity>>(set: EntitySetClient<TEntity, TKey, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>, name: string): EntityFunctionBuilderAddMethod<TEntity, TKey>;
   function(
     arg1: unknown,
@@ -93,13 +153,28 @@ export class ODataClient {
     }
   }
 
+  /**
+   * Provides methods for binding additional methods to an entity set client.
+   */
   readonly bind = {
     navigation: bindNavigation,
+    /**
+     * Binds actions to an entity set client.
+     */
     action: bindAction,
+    /**
+     * Binds functions to an entity set client.
+     */
     function: bindFunction,
   };
 }
 
+/**
+ * Binds navigation properties to an entity set client.
+ * @param set The entity set.
+ * @param navigations An object containing the navigation properties that should be bound.
+ * @returns The entity set, with the added navigation properties.
+ */
 function bindNavigation<
   TSet extends EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>,
   TNavigation extends { [key: string]: EntityNavigation<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny> }
@@ -119,6 +194,12 @@ function bindNavigation<
   return newSet;
 };
 
+/**
+ * Binds actions to an entity set client.
+ * @param set The entity set.
+ * @param actions An object containing the actions that should be bound.
+ * @returns The entity set, with the added actions.
+ */
 function bindAction<
   TSet extends EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>,
   TAction extends { [key: string]: EntityAction<SafeAny, SafeAny, SafeAny, SafeAny> }
@@ -138,6 +219,12 @@ function bindAction<
   return newSet;
 };
 
+/**
+ * Binds functions to an entity set client.
+ * @param set The entity set.
+ * @param functions An object containing the functions that should be bound.
+ * @returns The entity set, with the added functions.
+ */
 function bindFunction<
   TSet extends EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>,
   TFunction extends { [key: string]: EntityFunction<SafeAny, SafeAny, SafeAny, SafeAny> }

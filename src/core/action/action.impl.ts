@@ -16,6 +16,9 @@ export interface ActionImplOptions extends InvokableImplOptions {
   isCollection: boolean;
 }
 
+/**
+ * A physical action.
+ */
 export class ActionImpl<
   TParameter extends {},
   TCollection extends boolean,
@@ -34,6 +37,9 @@ export interface EntityActionImplOptions extends ActionImplOptions, EntityInvoka
   entitySet: EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>;
 }
 
+/**
+ * A physical action, targeting an entity set.
+ */
 export class EntityActionImpl<
   TKey,
   TParameter extends {},

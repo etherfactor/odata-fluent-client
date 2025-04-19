@@ -1,3 +1,8 @@
+/**
+ * Converts an id or set of its into a string. Only really used for mocks, so we can use composite keys.
+ * @param id The id to convert.
+ * @returns The id as a pipe-delimited string.
+ */
 export function toIdString(id: unknown | unknown[]) {
   if (id === undefined || id === null) {
     throw new Error("Id must be non-null");

@@ -10,6 +10,9 @@ export interface InvokableBuilderMockOptions {
   name: string;
 }
 
+/**
+ * A builder for a mock invokable.
+ */
 export abstract class InvokableBuilderMock<
   TParameter extends {},
   TCollection extends boolean,
@@ -57,6 +60,9 @@ export abstract class InvokableBuilderMock<
 
 export interface EntityInvokableBuilderMockOptions extends InvokableBuilderMockOptions { }
 
+/**
+ * A builder for a mock invokable, targeting an entity.
+ */
 export abstract class EntityInvokableBuilderMock<
   TEntity,
   TKey extends EntityKey<TEntity>,

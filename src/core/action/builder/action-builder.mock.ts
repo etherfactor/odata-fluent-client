@@ -12,6 +12,9 @@ export interface ActionBuilderMockOptions extends InvokableBuilderMockOptions {
   name: string;
 }
 
+/**
+ * A builder for a mock action.
+ */
 export class ActionBuilderMock<
   TParameter extends {},
   TCollection extends boolean,
@@ -47,6 +50,9 @@ export class ActionBuilderMock<
 
 export interface EntityActionBuilderMockOptions extends ActionBuilderMockOptions, EntityInvokableBuilderMockOptions { }
 
+/**
+ * A builder for a mock action, targeting an entity set.
+ */
 export class EntityActionBuilderMock<
   TEntity,
   TKey extends EntityKey<TEntity>,

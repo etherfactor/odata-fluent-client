@@ -13,6 +13,9 @@ export interface EntityNavigationBuilderImplOptions {
   navigation: string;
 }
 
+/**
+ * A builder for a physical navigation client.
+ */
 export class EntityNavigationBuilderImpl<
   TEntity,
   TKey extends EntityKey<TEntity>,

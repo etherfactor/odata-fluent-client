@@ -22,6 +22,9 @@ export interface InvokableImplOptions {
   isCollection: boolean;
 }
 
+/**
+ * A physical invokable.
+ */
 export abstract class InvokableImpl<
   TParameter extends {},
   TCollection extends boolean,
@@ -36,6 +39,11 @@ export abstract class InvokableImpl<
     this.options = options;
   }
 
+  /**
+   * Creates the body to send to the invokable.
+   * @param parameters The user-provided invokable parameters.
+   * @returns The body to send.
+   */
   private getBody(parameters: TParameter) {
     if (!this.options.isBody)
       return undefined;
@@ -46,6 +54,11 @@ export abstract class InvokableImpl<
     return parameters;
   }
 
+  /**
+   * Creates the query string to send to the invokable.
+   * @param parameters The user-provided invokable parameters.
+   * @returns The query string to send.
+   */
   private getQuery(parameters: TParameter) {
     if (this.options.isBody)
       return undefined;
@@ -63,6 +76,11 @@ export abstract class InvokableImpl<
     return values;
   }
 
+  /**
+   * Creates a worker for a collection response.
+   * @param parameters The user-provided invokable parameters.
+   * @returns The worker.
+   */
   private createSetWorker(parameters: TParameter): EntitySetWorker<TReturn> {
     const body = this.getBody(parameters);
     const query = this.getQuery(parameters);
@@ -77,6 +95,11 @@ export abstract class InvokableImpl<
     });
   }
 
+  /**
+   * Creates a worker for a single response.
+   * @param parameters The user-provided invokable parameters.
+   * @returns The worker.
+   */
   private createSingleWorker(parameters: TParameter): EntitySingleWorker<TReturn> {
     const body = this.getBody(parameters);
     const query = this.getQuery(parameters);
@@ -106,6 +129,9 @@ export interface EntityInvokableImplOptions extends InvokableImplOptions {
   entitySet: EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>;
 }
 
+/**
+ * A physical invokable, targeting an entity.
+ */
 export abstract class EntityInvokableImpl<
   TKey,
   TParameter extends {},
@@ -121,6 +147,11 @@ export abstract class EntityInvokableImpl<
     this.options = options;
   }
 
+  /**
+   * Creates the body to send to the invokable.
+   * @param parameters The user-provided invokable parameters.
+   * @returns The body to send.
+   */
   private getBody(parameters: TParameter) {
     if (!this.options.isBody)
       return undefined;
@@ -131,6 +162,11 @@ export abstract class EntityInvokableImpl<
     return parameters;
   }
 
+  /**
+   * Creates the query string to send to the invokable.
+   * @param parameters The user-provided invokable parameters.
+   * @returns The query string to send.
+   */
   private getQuery(parameters: TParameter) {
     if (this.options.isBody)
       return undefined;
@@ -148,6 +184,12 @@ export abstract class EntityInvokableImpl<
     return values;
   }
 
+  /**
+   * Creates a worker for a collection response.
+   * @param key The id of the entity upon which this invokable is executed.
+   * @param parameters The user-provided invokable parameters.
+   * @returns The worker.
+   */
   private createSetWorker(key: TKey, parameters: TParameter): EntitySetWorker<TReturn> {
     const body = this.getBody(parameters);
     const query = this.getQuery(parameters);
@@ -163,6 +205,12 @@ export abstract class EntityInvokableImpl<
     });
   }
 
+  /**
+   * Creates a worker for a single response.
+   * @param key The id of the entity upon which this invokable is executed.
+   * @param parameters The user-provided invokable parameters.
+   * @returns The worker.
+   */
   private createSingleWorker(key: TKey, parameters: TParameter): EntitySingleWorker<TReturn> {
     const body = this.getBody(parameters);
     const query = this.getQuery(parameters);

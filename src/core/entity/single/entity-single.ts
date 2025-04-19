@@ -7,15 +7,37 @@ import { EntityExpand, EntityExpandImpl } from "../expand/entity-expand";
 import { EntitySingleWorker } from "./entity-single-worker";
 import { EntitySingleWorkerImpl } from "./entity-single-worker.impl";
 
+/**
+ * A builder for query options against a single entity.
+ */
 export interface EntitySingle<TEntity> {
+  /**
+   * Executes the specified query options against the single entity.
+   */
   execute(): EntityResponse<TEntity>;
+  /**
+   * Includes an associated entity or entities.
+   * @param property The navigation property.
+   * @param builder The expansion builder.
+   */
   expand<TExpanded extends keyof TEntity & string, TNewExpanded>(
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
     builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntitySingle<TEntity>;
+  /**
+   * Selects a subset of properties to be returned on the entity or entities.
+   * @param properties The properties to be returned.
+   */
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntitySingle<Pick<TEntity, TSelected>>;
+  /**
+   * Gets the options produced in this builder.
+   */
   getOptions(): ODataOptions;
 }
 
+/**
+ * The entity single implementation. Relies on an underlying worker to do the actual work; as a result, there is only one
+ * implementation. This is ideal given the complexity.
+ */
 export class EntitySingleImpl<TEntity> implements EntitySingle<TEntity> {
 
   protected readonly worker: EntitySingleWorker<TEntity>;
@@ -31,6 +53,9 @@ export class EntitySingleImpl<TEntity> implements EntitySingle<TEntity> {
     this.selectValue = options?.select;
   }
 
+  /**
+   * These things are immutable, so calling any method returns a new instance with the new options.
+   */
   protected new<TNewEntity = TEntity>(worker: EntitySingleWorker<TNewEntity>, options?: ODataOptions): EntitySingleImpl<TNewEntity> {
     return new EntitySingleImpl(this.worker as unknown as EntitySingleWorkerImpl<TNewEntity>, options);
   }

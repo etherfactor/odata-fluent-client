@@ -23,6 +23,9 @@ export interface EntitySetClientMockOptions {
   delete?: HttpMethod;
 }
 
+/**
+ * A mock entity set client.
+ */
 export class EntitySetClientMock<TEntity, TKey extends EntityKey<TEntity>> implements EntitySetClientFull<TEntity, TKey> {
   
   private readonly options: EntitySetClientMockOptions;

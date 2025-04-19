@@ -4,12 +4,33 @@ import { Value } from "../../../values/base";
 import { AllCollectionValue, AnyCollectionValue } from "../../../values/collection";
 import { EntityPropertyValue } from "../../../values/property";
 
+/**
+ * Provides access to an entity's properties.
+ */
 export interface EntityAccessor<TEntity> {
+  /**
+   * Selects a single property from an entity.
+   * @param property The name of the property.
+   */
   prop<TKey extends keyof TEntity & string>(property: TKey): Value<TEntity[TKey]>;
+  /**
+   * Tests if all items in a collection on the entity match a condition.
+   * @param property The name of the collection property.
+   * @param builder The condition builder.
+   */
   all<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<InferArrayType<TEntity[TKey]>>) => Value<boolean>): Value<boolean>;
+  /**
+   * Tests if any item in a collection on the entity matches a condition.
+   * @param property The name of the collection property.
+   * @param builder The condition builder.
+   */
   any<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<InferArrayType<TEntity[TKey]>>) => Value<boolean>): Value<boolean>;
 }
 
+/**
+ * The entity accessor implementation. There isn't a distinction between a physical and mock accessor. Really, this thing
+ * just acts as a helper.
+ */
 export class EntityAccessorImpl<TEntity> {
 
   private readonly path?: string;

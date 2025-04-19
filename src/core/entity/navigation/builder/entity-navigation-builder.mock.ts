@@ -13,6 +13,9 @@ export interface EntityNavigationBuilderMockOptions {
   navigation: string;
 }
 
+/**
+ * A builder for a mock navigation client.
+ */
 export class EntityNavigationBuilderMock<
   TEntity,
   TKey extends EntityKey<TEntity>,

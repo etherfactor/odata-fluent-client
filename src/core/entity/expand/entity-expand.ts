@@ -11,24 +11,74 @@ import { Skip, skipToString } from "../../parameters/skip";
 import { Top, topToString } from "../../parameters/top";
 import { EntityAccessor, EntityAccessorImpl } from "./entity-accessor";
 
+/**
+ * Configures an entity expansion.
+ */
 export interface EntityExpand<TEntity> {
+  /**
+   * Counts the entities.
+   */
   count(): EntityExpand<TEntity>;
+  /**
+   * Includes an associated entity or entities.
+   * @param property The navigation property.
+   * @param builder The expansion builder.
+   */
   expand<TExpanded extends keyof TEntity & string, TNewExpanded>(
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
     builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntityExpand<TEntity>;
+  /**
+   * Filters the returned entities to the ones matching the provided condition.
+   * @param builder The filter builder.
+   */
   filter(builder: (entity: EntityAccessor<TEntity>) => Value<boolean>): EntityExpand<TEntity>;
+  /**
+   * Sorts the returned entities.
+   * @param property The property by which to sort.
+   * @param direction The direction in which to sort.
+   */
   orderBy(property: keyof TEntity & string, direction?: SortDirection): OrderedEntityExpand<TEntity>;
+  /**
+   * Selects a subset of properties to be returned on the entity or entities.
+   * @param properties The properties to be returned.
+   */
   select<TSelected extends keyof TEntity & string>(...properties: TSelected[]): EntityExpand<Pick<TEntity, TSelected>>;
+  /**
+   * Skips over the specified number of entities before returning any.
+   * @param count The number of entities to skip.
+   */
   skip(count: number): EntityExpand<TEntity>;
+  /**
+   * Returns up to the specified number of entities.
+   * @param count The number of entities to return.
+   */
   top(count: number): EntityExpand<TEntity>;
+  /**
+   * Converts this builder into a string that could be used in $expand.
+   */
   toString(): string;
+  /**
+   * Gets the options produced in this builder.
+   */
   getOptions(): ODataOptions;
 }
 
+/**
+ * Configures an entity expansion, which has sorting applied.
+ */
 export interface OrderedEntityExpand<TEntity> extends EntityExpand<TEntity> {
+  /**
+   * Continues sorting by a second property.
+   * @param property The property by which to sort.
+   * @param direction The direction in which to sort.
+   */
   thenBy(property: keyof TEntity & string, direction?: SortDirection): OrderedEntityExpand<TEntity>;
 }
 
+/**
+ * The entity expand implementation. This really is just a fancy helper, so it doesn't care if the actual client is physical
+ * or a mock.
+ */
 export class EntityExpandImpl<TEntity> implements EntityExpand<TEntity>, OrderedEntityExpand<TEntity> {
 
   private readonly property: string;

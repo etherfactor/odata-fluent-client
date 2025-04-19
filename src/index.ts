@@ -3,11 +3,18 @@ export { MockODataClient, MockODataClientOptions } from "./core/client/odata-cli
 
 export { DefaultHttpClientAdapter, HttpClientAdapter, HttpRequestData, HttpResponseData } from "./core/http/http-client-adapter";
 
-export { EntitySetClient } from "./core/entity/client/entity-set-client";
 export { EntityExpand } from "./core/entity/expand/entity-expand";
 export { EntitySet } from "./core/entity/set/entity-set";
 export { EntitySingle } from "./core/entity/single/entity-single";
 export { EntityResponse, EntitySetResponse } from "./core/response/entity-response";
+
+export { EntitySetClient } from "./core/entity/client/entity-set-client";
+
+export { EntityNavigation } from "./core/entity/navigation/entity-navigation";
+
+export { Action } from "./core/action/action";
+
+export { Function } from "./core/function/function";
 
 export { Count } from "./core/parameters/count";
 export { Expand } from "./core/parameters/expand";

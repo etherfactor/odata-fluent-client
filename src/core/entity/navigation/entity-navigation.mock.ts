@@ -15,6 +15,9 @@ export interface EntityNavigationClientMockOptions {
   unset?: HttpMethod;
 }
 
+/**
+ * A mock navigation client.
+ */
 export class EntityNavigationClientMock<TKey1, TKey2> implements EntityNavigationFull<TKey1, TKey2> {
 
   private readonly options: EntityNavigationClientMockOptions;

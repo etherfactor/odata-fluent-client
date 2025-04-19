@@ -13,6 +13,9 @@ export interface ActionBuilderImplOptions extends InvokableBuilderImplOptions {
   name: string;
 }
 
+/**
+ * A builder for a physical action.
+ */
 export class ActionBuilderImpl<
   TParameter extends {},
   TCollection extends boolean,
@@ -54,6 +57,9 @@ export interface EntityActionBuilderImplOptions extends ActionBuilderImplOptions
   entitySet: EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>;
 }
 
+/**
+ * A builder for a physical action, targeting an entity set.
+ */
 export class EntityActionBuilderImpl<
   TEntity,
   TKey extends EntityKey<TEntity>,

@@ -14,6 +14,9 @@ export interface InvokableMockOptions {
   isCollection: boolean;
 }
 
+/**
+ * A mock invokable.
+ */
 export abstract class InvokableMock<
   TParameter extends {},
   TCollection extends boolean,
@@ -28,8 +31,17 @@ export abstract class InvokableMock<
     this.options = options;
   }
 
+  /**
+   * Calls the invokable and returns the resulting data.
+   * @param parameters The user-provided parameters.
+   */
   abstract getData(parameters: TParameter): SafeAny;
 
+  /**
+   * Creates a worker for a collection response.
+   * @param parameters The user-provided invokable parameters.
+   * @returns The worker.
+   */
   private createSetWorker(parameters: TParameter): EntitySetWorker<TReturn> {
     return new EntitySetWorkerMock({
       rootOptions: this.options.rootOptions,
@@ -38,6 +50,11 @@ export abstract class InvokableMock<
     });
   }
 
+  /**
+   * Creates a worker for a single response.
+   * @param parameters The user-provided invokable parameters.
+   * @returns The worker.
+   */
   private createSingleWorker(parameters: TParameter): EntitySingleWorker<TReturn> {
     return new EntitySingleWorkerMock({
       rootOptions: this.options.rootOptions,
@@ -59,6 +76,9 @@ export abstract class InvokableMock<
 
 export interface EntityInvokableMockOptions extends InvokableMockOptions { }
 
+/**
+ * A mock invokable, targeting an entity.
+ */
 export abstract class EntityInvokableMock<
   TKey,
   TParameter extends {},
@@ -74,8 +94,19 @@ export abstract class EntityInvokableMock<
     this.options = options;
   }
 
+  /**
+   * Calls the invokable and returns the resulting data.
+   * @param key The id of the entity upon which this invokable is executed.
+   * @param parameters The user-provided parameters.
+   */
   abstract getData(key: TKey, parameters: TParameter): SafeAny;
 
+  /**
+   * Creates a worker for a collection response.
+   * @param key The id of the entity upon which this invokable is executed.
+   * @param parameters The user-provided invokable parameters.
+   * @returns The worker.
+   */
   private createSetWorker(key: TKey, parameters: TParameter): EntitySetWorker<TReturn> {
     return new EntitySetWorkerMock({
       rootOptions: this.options.rootOptions,
@@ -84,6 +115,12 @@ export abstract class EntityInvokableMock<
     });
   }
 
+  /**
+   * Creates a worker for a single response.
+   * @param key The id of the entity upon which this invokable is executed.
+   * @param parameters The user-provided invokable parameters.
+   * @returns The worker.
+   */
   private createSingleWorker(key: TKey, parameters: TParameter): EntitySingleWorker<TReturn> {
     return new EntitySingleWorkerMock({
       rootOptions: this.options.rootOptions,

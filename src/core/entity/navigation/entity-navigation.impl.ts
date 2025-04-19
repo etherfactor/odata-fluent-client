@@ -17,6 +17,9 @@ export interface EntityNavigationClientImplOptions {
   unset?: HttpMethod;
 }
 
+/**
+ * A physical navigation client.
+ */
 export class EntityNavigationClientImpl<TKey1, TKey2> implements EntityNavigationFull<TKey1, TKey2> {
   
   private readonly options: EntityNavigationClientImplOptions;
@@ -111,6 +114,9 @@ export class EntityNavigationClientImpl<TKey1, TKey2> implements EntityNavigatio
     );
   }
 
+  /**
+   * Builds a response for the action. Mostly just to reduce repeating the same code.
+   */
   private generateResponse(method: HttpMethod, fromUrl: string, toUrl: string, query: SafeAny, body: SafeAny) {
     return {
       execute: () => {

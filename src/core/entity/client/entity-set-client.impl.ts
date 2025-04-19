@@ -25,6 +25,9 @@ export interface EntitySetClientImplOptions {
   delete?: HttpMethod;
 }
 
+/**
+ * A physical entity set client.
+ */
 export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> implements EntitySetClientFull<TEntity, TKey> {
   
   private readonly options: EntitySetClientImplOptions;
@@ -111,20 +114,33 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
   }
 }
 
+/**
+ * Extends a url for an entity set (or similar).
+ * @param url The initial url.
+ * @param routingType The configured routing type.
+ * @param keyName The name(s) of the key(s).
+ * @param key The value(s) of the key(s)
+ * @param keyType The value converter(s) of the key(s).
+ * @returns The extended url.
+ */
 export function extendEntityUrl(url: string, routingType: ODataPathRoutingType, keyName: unknown | unknown[], key: unknown | unknown[], keyType: ((value: unknown) => Value<unknown>) | ((value: unknown) => Value<unknown>)[]) {
   let useId: string;
+  //If the provided id is an array
   if (Array.isArray(keyName) && Array.isArray(key) && Array.isArray(keyType)) {
+    //Map the ids to a set of key=value pairs, separated by commas
     useId = key.map((item, i) => {
       const origKeyName = keyName[i] as string;
       const useKeyName = origKeyName.substring(0, 1).toUpperCase() + origKeyName.substring(1);
       return `${useKeyName}=${keyType[i](item).toString()}`;
     }).join(",");
   } else if (!Array.isArray(keyName) && !Array.isArray(key) && !Array.isArray(keyType)) {
+    //Convert the key to a string
     useId = keyType(key).toString();
   } else {
     throw new Error("The ids and value builders must both be arrays or non-arrays");
   }
 
+  //Append the ids to the url based on the routing type
   if (routingType === "slash") {
     return `${url}/${useId}`;
   } else {

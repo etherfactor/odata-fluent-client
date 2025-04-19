@@ -10,6 +10,9 @@ import { EntityFunctionBuilderAddMethod, FunctionBuilderAddMethod } from "../fun
 import { EntityFunctionBuilderMock, FunctionBuilderMock } from "../function/builder/function-builder.mock";
 import { ODataClient } from "./odata-client";
 
+/**
+ * Options to configure an in-memory mock of an OData client.
+ */
 export interface MockODataClientOptions {
   entitySets: {
     [name: string]: {
@@ -45,6 +48,9 @@ export interface MockODataClientOptions {
   };
 }
 
+/**
+ * A fluent OData client mock.
+ */
 export class MockODataClient extends ODataClient {
   private readonly mockOptions;
 

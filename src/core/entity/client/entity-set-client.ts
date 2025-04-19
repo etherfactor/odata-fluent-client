@@ -7,15 +7,44 @@ export interface EntitySetClientFull<
   TEntity,
   TKey extends EntityKey<TEntity>,
 > {
+  /**
+   * The name of the entity set.
+   */
   get name(): string;
+  /**
+   * [[This is currently an internal API and should not be called.]]
+   */
   buildUrl(key: EntityPropertyType<TEntity, TKey>): string;
+  /**
+   * The entity set, for querying.
+   */
   get set(): EntitySet<TEntity>;
+  /**
+   * Retrieves a single entity.
+   * @param key The id of the entity.
+   */
   read(key: EntityPropertyType<TEntity, TKey>): EntitySingle<TEntity>;
+  /**
+   * Creates a new entity.
+   * @param entity The data of the entity.
+   */
   create(entity: Partial<TEntity>): EntitySingle<TEntity>;
+  /**
+   * Updates an existing entity.
+   * @param key The id of the entity.
+   * @param entity The new data of the entity.
+   */
   update(key: EntityPropertyType<TEntity, TKey>, entity: Partial<TEntity>): EntitySingle<TEntity>;
+  /**
+   * Deletes an existing entity.
+   * @param key The id of the entity.
+   */
   delete(key: EntityPropertyType<TEntity, TKey>): Promise<void>;
 }
 
+/**
+ * A client that executes against an entity set.
+ */
 export type EntitySetClient<
   TEntity,
   TKey extends EntityKey<TEntity>,

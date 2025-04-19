@@ -13,6 +13,9 @@ export interface FunctionBuilderImplOptions extends InvokableBuilderImplOptions 
   name: string;
 }
 
+/**
+ * A builder for a physical function.
+ */
 export class FunctionBuilderImpl<
   TParameter extends {},
   TCollection extends boolean,
@@ -54,6 +57,9 @@ export interface EntityFunctionBuilderImplOptions extends FunctionBuilderImplOpt
   entitySet: EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>;
 }
 
+/**
+ * A builder for a physical function, targeting an entity set.
+ */
 export class EntityFunctionBuilderImpl<
   TEntity,
   TKey extends EntityKey<TEntity>,

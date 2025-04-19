@@ -11,6 +11,9 @@ export interface EntitySetBuilderMockOptions {
   entitySet: string;
 }
 
+/**
+ * A builder for a mock entity set.
+ */
 export class EntitySetBuilderMock<
   TEntity,
   TKey extends EntityKey<TEntity>,

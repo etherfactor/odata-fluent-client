@@ -11,6 +11,9 @@ export interface InvokableBuilderImplOptions {
   name: string;
 }
 
+/**
+ * A builder for a physical invokable.
+ */
 export abstract class InvokableBuilderImpl<
   TParameter extends {},
   TCollection extends boolean,
@@ -64,6 +67,9 @@ export interface EntityInvokableBuilderImplOptions extends InvokableBuilderImplO
   entitySet: EntitySetClient<SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny, SafeAny>;
 }
 
+/**
+ * A builder for a physical invokable, targeting an entity.
+ */
 export abstract class EntityInvokableBuilderImpl<
   TEntity,
   TKey extends EntityKey<TEntity>,
