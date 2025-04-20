@@ -27,7 +27,7 @@ export { Top } from "./core/parameters/top";
 
 export { Guid } from "./types/guid";
 
-export { createOperatorFactory } from "./values/base";
+export { createOperatorFactory, Value } from "./values/base";
 
 export { toIdString } from "./utils/id";
 
