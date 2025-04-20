@@ -264,7 +264,7 @@ Of note, `$apply` is currently not supported due to its complexity.
 
 ### Utilizing Query Options
 
-With the exception of navigation and deletion responses, all responses are compatible with query options. For single object responses, only `$select` and `$expand` are available. Forr collection responses, all of the above query options are supported. These can be invoked fluently, similar to the below:
+With the exception of navigation and deletion responses, all responses are compatible with query options. For single object responses, only `$select` and `$expand` are available. For collection responses, all of the above query options are supported. These can be invoked fluently, similar to the below:
 
 ```ts
 const results = models
