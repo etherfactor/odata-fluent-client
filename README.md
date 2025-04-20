@@ -2,6 +2,24 @@
 
 This library provides a fluent and strongly-typed approach for interacting with OData APIs. It supports key OData operations like CRUD (Create, Read, Update, Delete), navigation, actions, functions, and more, with a focus on type-safety and query composition, via immutable query chaining.
 
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+    - [Minimal Example](#minimal-example)
+    - [Define Your Models](#define-your-models)
+    - [Create the OData Client](#create-the-odata-client)
+    - [Working with Entity Sets](#working-with-entity-sets)
+    - [Working with Navigation Properties](#working-with-navigation-properties)
+    - [Working with Actions and Functions](#working-with-actions-and-functions)
+    - [Binding Navigations, Actions, and Functions](#binding-navigations-actions-and-functions)
+- [Query Options](#query-options)
+    - [Utilizing Query Options](#utilizing-query-options)
+- [Supported Operations](#supported-operations)
+    - [Entity Sets](#entity-sets)
+    - [Navigation Properties](#navigation-properties)
+
 ## Features
 
 - **Entity Set Operations**: Provides fluent methods for working with OData entity sets, including reading, creating, updating, and deleting entities.
@@ -18,7 +36,35 @@ To install the library, run:
 npm i @ethergizmos/odata-fluent-client --save
 ```
 
-## Basic Usage
+## Usage
+
+### Minimal Example
+
+```ts
+import { ODataClient, createOperatorFactory } from "@ethergizmos/odata-fluent-client";
+
+const client = new ODataClient({
+  serviceUrl: "https://localhost/odata",
+  routingType: "parentheses",
+  http: {}
+});
+const o = createOperatorFactory();
+
+const widgets = client
+  .entitySet<Widget>("widgets")
+  .withKey("id")
+  .withKeyType(o.int)
+  .withRead("GET")
+  .build();
+
+const all = await widgets
+  .set
+  .top(3)
+  .execute()
+  .data;
+
+console.log(all);
+```
 
 ### Define Your Models
 
@@ -57,6 +103,38 @@ const client = new ODataClient({
 ```
 
 The library also includes a mock OData client, `MockODataClient`. Almost all functionality is supported, and it acts against in-memory entities. This is not intended for any production use, but it is intended for unit testing of services that rely on OData components or mock interfaces.
+
+```ts
+import { MockODataClient } from "@ethergizmos/odata-fluent-client";
+
+let modelId = 0;
+const modelData: Record<string, Model> = {};
+
+const client = new MockODataClient({
+  entitySets: {
+    models: {
+      data: () => modelData,
+      id: "id",
+      idGenerator: () => ++modelId,
+    },
+  },
+  actions: {
+    testAction: {
+      handler(_, parameters) {
+        return { result: true };
+      },
+    },
+  },
+  functions: {
+    testFunction: {
+      entitySet: "models",
+      handler(entityKey, parameters) {
+        return { result: true };
+      },
+    },
+  },
+})
+```
 
 In addition to creating a client, you will also need to create an operator factory. This is required to convert values from JavaScript to their OData equivalents. For example, `o.str` wraps the provided string in single quotes. An operator factory can be created by calling the following:
 
@@ -99,9 +177,20 @@ const subModels = client
   .withUpdate("PATCH")
   .withDelete("DELETE")
   .build();
-```
 
-Of note, if the entity has multiple keys, specify them in an array: ["id1", "id2"]. The key type will also need to be specified in an array: [o.int, o.int].
+//Of note, if the entity has multiple keys, specify them in an array: ["id1", "id2"].
+//The key type will also need to be specified in an array: [o.int, o.int].
+const iAmComposites = client
+  .entitySet<IAmComposite>("iAmComposites")
+  .withKey(["id1", "id2"])
+  .withKeyType([o.int, o.int])
+  .withReadSet("GET")
+  .withRead("GET")
+  .withCreate("POST")
+  .withUpdate("PATCH")
+  .withDelete("DELETE")
+  .build();
+```
 
 Once you have an entity set client, you can perform CRUD operations against the entity set:
 
@@ -148,6 +237,21 @@ for await (const entity of iterator) {
 ```
 
 In addition, every response contains a `result` property, which is a `Promise<boolean>`, returning `true` if the request succeeded and `false` otherwise. While other properties may throw an error when awaited, this property will always return a value.
+
+Single responses:
+
+| Property | Type                 | Description                                        |
+|----------|----------------------|----------------------------------------------------|
+| `data`   | `Promise<T>`         | Waits for the result before resolving              |
+| `result` | `Promise<boolean>`   | `true` if the request succeeded, `false` otherwise |
+
+Collection responses:
+
+| Property   | Type               | Description                                        |
+|------------|--------------------|----------------------------------------------------|
+| `data`     | `Promise<T[]>`     | Waits for all results before resolving             |
+| `iterator` | `AsyncIterator<T>` | Yields items as they are returned                  |
+| `result`   | `Promise<boolean>` | `true` if the request succeeded, `false` otherwise |
 
 ### Working with Navigation Properties
 
@@ -338,7 +442,7 @@ The first result set will find `models` whose name starts with 'Test', with an i
 - `delete(id)`
     - Deletes an existing entity
 
-## Navigation Properties
+### Navigation Properties
 
 - `add(fromId, toId)`
     - For one-to-many navigations, adds an entity
@@ -348,3 +452,7 @@ The first result set will find `models` whose name starts with 'Test', with an i
     - For one-to-one navigations, sets the entity
 - `unset(fromId, toId)`
     - For one-to-one navigations, unsets the entity
+
+## License
+
+This project is licensed under the **MIT License**.
