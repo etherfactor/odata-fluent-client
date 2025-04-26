@@ -3,6 +3,7 @@ import { SafeAny } from "../../utils/types";
 import { Value } from "../../values/base";
 import { ODataClientOptions } from "../client/odata-client";
 import { EntitySetClient } from "../entity/client/entity-set-client";
+import { EntitySelectExpand } from "../entity/expand/entity-select-expand";
 import { EntitySet, EntitySetImpl } from "../entity/set/entity-set";
 import { EntitySetWorker } from "../entity/set/entity-set-worker";
 import { EntitySetWorkerImpl } from "../entity/set/entity-set-worker.impl";
@@ -20,6 +21,7 @@ export interface InvokableImplOptions {
   values?: ParameterValue<SafeAny>;
   converter?: (value: SafeAny) => SafeAny;
   isCollection: boolean;
+  validator?: (value: unknown, selectExpand: EntitySelectExpand) => SafeAny;
 }
 
 /**
@@ -91,7 +93,7 @@ export abstract class InvokableImpl<
       method: this.options.method,
       url: url,
       payload: body,
-      validator: undefined, //TODO: add this
+      validator: this.options.validator,
     });
   }
 
@@ -110,7 +112,7 @@ export abstract class InvokableImpl<
       method: this.options.method,
       url: url,
       payload: body,
-      validator: undefined, //TODO: add this
+      validator: this.options.validator,
     });
   }
   

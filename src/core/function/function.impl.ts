@@ -1,20 +1,9 @@
-import { HttpMethod } from "../../utils/http";
 import { SafeAny } from "../../utils/types";
-import { ODataClientOptions } from "../client/odata-client";
 import { EntitySetClient } from "../entity/client/entity-set-client";
-import { ParameterValue } from "../invokable/builder/invokable-builder";
 import { EntityInvokableImpl, EntityInvokableImplOptions, InvokableImpl, InvokableImplOptions } from "../invokable/invokable.impl";
 import { EntityFunction, Function } from "./function";
 
-export interface FunctionImplOptions extends InvokableImplOptions {
-  rootOptions: ODataClientOptions;
-  name: string;
-  method: HttpMethod;
-  isBody: boolean;
-  values?: ParameterValue<SafeAny>;
-  converter?: (value: SafeAny) => SafeAny;
-  isCollection: boolean;
-}
+export interface FunctionImplOptions extends InvokableImplOptions { }
 
 /**
  * A physical function.

@@ -2,8 +2,9 @@ import { HttpMethod } from "../../../utils/http";
 import { SafeAny } from "../../../utils/types";
 import { MockODataClientOptions } from "../../client/odata-client.mock";
 import { EntityKey, EntityKeyType } from "../../entity/client/builder/entity-set-client-builder";
+import { EntitySelectExpand } from "../../entity/expand/entity-select-expand";
 import { EntityInvokable, Invokable } from "../invokable";
-import { EntityInvokableBuilderAddMethod, EntityInvokableBuilderAddParameters, EntityInvokableBuilderAddReturnType, EntityInvokableBuilderFinal, InvokableBuilderAddMethod, InvokableBuilderAddParameters, InvokableBuilderAddReturnType, InvokableBuilderFinal } from "./invokable-builder";
+import { EntityInvokableBuilderAddMethod, EntityInvokableBuilderAddParameters, EntityInvokableBuilderAddReturnType, EntityInvokableBuilderFinal, EntityInvokableBuilderFinalValidator, InvokableBuilderAddMethod, InvokableBuilderAddParameters, InvokableBuilderAddReturnType, InvokableBuilderFinal, InvokableBuilderFinalValidator } from "./invokable-builder";
 
 export interface InvokableBuilderMockOptions {
   rootOptions: MockODataClientOptions;
@@ -20,6 +21,7 @@ export abstract class InvokableBuilderMock<
 > implements InvokableBuilderAddMethod,
   InvokableBuilderAddParameters,
   InvokableBuilderAddReturnType<TParameter>,
+  InvokableBuilderFinalValidator<TParameter, TCollection, TReturn>,
   InvokableBuilderFinal<TParameter, TCollection, TReturn>
 {
   method: HttpMethod = "GET";
@@ -45,16 +47,22 @@ export abstract class InvokableBuilderMock<
 
   isCollection = false;
 
-  withCollectionResponse<TReturn>(): InvokableBuilderFinal<TParameter, true, TReturn> {
+  withCollectionResponse<TReturn>(): InvokableBuilderFinalValidator<TParameter, true, TReturn> {
     this.isCollection = true;
     return this as SafeAny;
   }
 
-  withSingleResponse<TReturn>(): InvokableBuilderFinal<TParameter, false, TReturn> {
+  withSingleResponse<TReturn>(): InvokableBuilderFinalValidator<TParameter, false, TReturn> {
     this.isCollection = false;
     return this as SafeAny;
   }
   
+  validator?: (value: unknown, selectExpand: EntitySelectExpand) => TReturn | Error;
+  withValidator(validator: (value: unknown, selectExpand: EntitySelectExpand) => TReturn | Error): InvokableBuilderFinal<TParameter, TCollection, TReturn> {
+    this.validator = validator;
+    return this as SafeAny;
+  }
+
   abstract build(): Invokable<TParameter, TCollection, TReturn>;
 }
 
@@ -72,6 +80,7 @@ export abstract class EntityInvokableBuilderMock<
 > implements EntityInvokableBuilderAddMethod<TEntity, TKey>,
   EntityInvokableBuilderAddParameters<TEntity, TKey>,
   EntityInvokableBuilderAddReturnType<TEntity, TKey, TParameter>,
+  EntityInvokableBuilderFinalValidator<TEntity, TKey, TParameter, TCollection, TReturn>,
   EntityInvokableBuilderFinal<TEntity, TKey, TParameter, TCollection, TReturn>
 {
   method: HttpMethod = "GET";
@@ -97,13 +106,19 @@ export abstract class EntityInvokableBuilderMock<
 
   isCollection = false;
 
-  withCollectionResponse<TReturn>(): EntityInvokableBuilderFinal<TEntity, TKey, TParameter, true, TReturn> {
+  withCollectionResponse<TReturn>(): EntityInvokableBuilderFinalValidator<TEntity, TKey, TParameter, true, TReturn> {
     this.isCollection = true;
     return this as SafeAny;
   }
 
-  withSingleResponse<TReturn>(): EntityInvokableBuilderFinal<TEntity, TKey, TParameter, false, TReturn> {
+  withSingleResponse<TReturn>(): EntityInvokableBuilderFinalValidator<TEntity, TKey, TParameter, false, TReturn> {
     this.isCollection = false;
+    return this as SafeAny;
+  }
+  
+  validator?: (value: unknown, selectExpand: EntitySelectExpand) => TReturn | Error;
+  withValidator(validator: (value: unknown, selectExpand: EntitySelectExpand) => TReturn | Error): EntityInvokableBuilderFinal<TEntity, TKey, TParameter, TCollection, TReturn> {
+    this.validator = validator;
     return this as SafeAny;
   }
   

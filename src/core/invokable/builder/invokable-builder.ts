@@ -2,6 +2,7 @@ import { HttpMethod } from "../../../utils/http";
 import { SafeAny } from "../../../utils/types";
 import { Value } from "../../../values/base";
 import { EntityKey, EntityKeyType } from "../../entity/client/builder/entity-set-client-builder";
+import { EntitySelectExpand } from "../../entity/expand/entity-select-expand";
 import { EntityInvokable, Invokable } from "../invokable";
 
 export interface InvokableBuilderAddMethod {
@@ -35,11 +36,23 @@ export interface InvokableBuilderAddReturnType<
   /**
    * Indicates that the invokable returns multiple items.
    */
-  withCollectionResponse<TReturn>(): InvokableBuilderFinal<TParameter, true, TReturn>;
+  withCollectionResponse<TReturn>(): InvokableBuilderFinalValidator<TParameter, true, TReturn>;
   /**
    * Indicates that the invokable returns exactly one item.
    */
-  withSingleResponse<TReturn>(): InvokableBuilderFinal<TParameter, false, TReturn>;
+  withSingleResponse<TReturn>(): InvokableBuilderFinalValidator<TParameter, false, TReturn>;
+}
+
+export interface InvokableBuilderFinalValidator<
+  TParameter extends {},
+  TCollection extends boolean,
+  TReturn,
+> extends InvokableBuilderFinal<TParameter, TCollection, TReturn> {
+  /**
+   * Specifies a validator, which will be executed against each returned entity individually. If the validator returns an error, it will be thrown.
+   * @param validator The validator.
+   */
+  withValidator(validator: (value: unknown, selectExpand: EntitySelectExpand) => TReturn | Error): InvokableBuilderFinal<TParameter, TCollection, TReturn>;
 }
 
 export interface InvokableBuilderFinal<
@@ -92,11 +105,25 @@ export interface EntityInvokableBuilderAddReturnType<
   /**
    * Indicates that the invokable returns multiple items.
    */
-  withCollectionResponse<TReturn>(): EntityInvokableBuilderFinal<TEntity, TKey, TParameter, true, TReturn>;
+  withCollectionResponse<TReturn>(): EntityInvokableBuilderFinalValidator<TEntity, TKey, TParameter, true, TReturn>;
   /**
    * Indicates that the invokable returns exactly one item.
    */
-  withSingleResponse<TReturn>(): EntityInvokableBuilderFinal<TEntity, TKey, TParameter, false, TReturn>;
+  withSingleResponse<TReturn>(): EntityInvokableBuilderFinalValidator<TEntity, TKey, TParameter, false, TReturn>;
+}
+
+export interface EntityInvokableBuilderFinalValidator<
+  TEntity,
+  TKey extends EntityKey<TEntity>,
+  TParameter extends {},
+  TCollection extends boolean,
+  TReturn,
+> extends EntityInvokableBuilderFinal<TEntity, TKey, TParameter, TCollection, TReturn> {
+  /**
+   * Specifies a validator, which will be executed against each returned entity individually. If the validator returns an error, it will be thrown.
+   * @param validator The validator.
+   */
+  withValidator(validator: (value: unknown, selectExpand: EntitySelectExpand) => TReturn | Error): EntityInvokableBuilderFinal<TEntity, TKey, TParameter, TCollection, TReturn>;
 }
 
 export interface EntityInvokableBuilderFinal<

@@ -1,12 +1,7 @@
-import { MockODataClientOptions } from "../client/odata-client.mock";
 import { EntityInvokableMock, InvokableMock, InvokableMockOptions } from "../invokable/invokable.mock";
 import { Action, EntityAction } from "./action";
 
-export interface ActionMockOptions extends InvokableMockOptions {
-  rootOptions: MockODataClientOptions;
-  name: string;
-  isCollection: boolean;
-}
+export interface ActionMockOptions extends InvokableMockOptions { }
 
 /**
  * A mock action.

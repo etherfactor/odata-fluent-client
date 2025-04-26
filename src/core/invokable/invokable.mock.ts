@@ -1,5 +1,6 @@
 import { SafeAny } from "../../utils/types";
 import { MockODataClientOptions } from "../client/odata-client.mock";
+import { EntitySelectExpand } from "../entity/expand/entity-select-expand";
 import { EntitySet, EntitySetImpl } from "../entity/set/entity-set";
 import { EntitySetWorker } from "../entity/set/entity-set-worker";
 import { EntitySetWorkerMock } from "../entity/set/entity-set-worker.mock";
@@ -12,6 +13,7 @@ export interface InvokableMockOptions {
   rootOptions: MockODataClientOptions;
   name: string;
   isCollection: boolean;
+  validator?: (value: unknown, selectExpand: EntitySelectExpand) => SafeAny;
 }
 
 /**
@@ -46,7 +48,7 @@ export abstract class InvokableMock<
     return new EntitySetWorkerMock({
       rootOptions: this.options.rootOptions,
       getData: () => this.getData(parameters),
-      validator: undefined, //TODO: add this
+      validator: this.options.validator,
     });
   }
 
@@ -59,7 +61,7 @@ export abstract class InvokableMock<
     return new EntitySingleWorkerMock({
       rootOptions: this.options.rootOptions,
       getData: () => this.getData(parameters),
-      validator: undefined, //TODO: add this
+      validator: this.options.validator,
     });
   }
   
