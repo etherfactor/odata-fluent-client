@@ -13,7 +13,7 @@ resources:
 stages:
 
 - stage: prep
-  displayName: 'Prep'
+  displayName: 'Prepare'
 
   jobs:
 
@@ -41,3 +41,18 @@ stages:
       - 'test-node-unit'
       dependsOn:
       - 'test_node'
+
+- stage: publish
+  displayName: 'Publish'
+
+  jobs:
+
+  - template: node/publish/library.yml@sharedTemplates
+    parameters:
+      name: 'publish_node'
+      vmImage: 'ubuntu-22.04'
+      nodeVersion: '22.x.x'
+      buildCommand: 'build'
+      distFolder: 'dist'
+      projectName: '@ethergizmos/odata-fluent-client'
+      artifactName: 'library'
