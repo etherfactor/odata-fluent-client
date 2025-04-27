@@ -1,0 +1,26 @@
+trigger:
+- main
+- release/*
+- develop
+
+variables:
+
+resources:
+  repositories:
+  - repository: sharedTemplates
+    type: git
+    name: 'Projects/PipelineTemplates'
+    ref: 'refs/heads/feature/initial'
+
+stages:
+
+- stage: test
+  displayName: 'Test'
+
+  jobs:
+  - template: node/test/unit-test.yml@sharedTemplates
+    parameters:
+      vmImage: 'ubuntu-22.04'
+      nodeVersion: '22.x.x'
+      testCommand: 'test'
+      artifactName: 'test-node-unit'
