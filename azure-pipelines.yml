@@ -12,6 +12,12 @@ resources:
 
 stages:
 
+- stage: prep
+  displayName: 'Prep'
+
+  jobs:
+  - template: shared/gitversion.yml
+
 - stage: test
   displayName: 'Test'
 
