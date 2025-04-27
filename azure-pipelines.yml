@@ -1,0 +1,62 @@
+trigger:
+- main
+- release/*
+- develop
+
+resources:
+  repositories:
+  - repository: sharedTemplates
+    type: git
+    name: 'Projects/PipelineTemplates'
+    ref: 'refs/tags/1.0.0'
+
+stages:
+
+- stage: prep
+  displayName: 'Prepare'
+
+  jobs:
+
+  # Execute gitversion
+  - template: shared/gitversion.yml@sharedTemplates
+    parameters:
+      name: 'prep'
+
+- stage: test
+  displayName: 'Test'
+
+  jobs:
+
+  # Perform node unit tests
+  - template: node/test/unit-test.yml@sharedTemplates
+    parameters:
+      name: 'test_node'
+      vmImage: 'ubuntu-22.04'
+      nodeVersion: '22.x.x'
+      testCommand: 'test'
+      artifactName: 'test-node-unit'
+
+  # Combine code coverage
+  - template: shared/combine-coverage.yml@sharedTemplates
+    parameters:
+      name: 'coverage'
+      artifacts:
+      - 'test-node-unit'
+      dependsOn:
+      - 'test_node'
+
+- stage: publish
+  displayName: 'Publish'
+
+  jobs:
+
+  # Publish node library
+  - template: node/publish/library.yml@sharedTemplates
+    parameters:
+      name: 'publish_node'
+      vmImage: 'ubuntu-22.04'
+      nodeVersion: '22.x.x'
+      buildCommand: 'build'
+      distFolder: 'dist'
+      projectName: '@ethergizmos/odata-fluent-client'
+      artifactName: 'library'

@@ -1,0 +1,35 @@
+{
+  "name": "@ethergizmos/odata-fluent-client",
+  "version": "0.1.0",
+  "description": "An OData V4 client built around fluent chaining.",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "prepublishOnly": "npm run build",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --coverage"
+  },
+  "keywords": [
+    "odata",
+    "client",
+    "fluent"
+  ],
+  "author": "Ryan Duffy",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.10",
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
+    "ts-jest": "^29.2.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@streamparser/json": "^0.0.22",
+    "uuid": "^11.1.0"
+  }
+}
