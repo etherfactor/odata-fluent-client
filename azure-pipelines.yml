@@ -16,7 +16,7 @@ stages:
   displayName: 'Prep'
 
   jobs:
-  - template: shared/gitversion.yml
+  - template: shared/gitversion.yml@sharedTemplates
 
 - stage: test
   displayName: 'Test'
