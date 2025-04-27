@@ -60,8 +60,3 @@ stages:
       distFolder: 'dist'
       projectName: '@ethergizmos/odata-fluent-client'
       artifactName: 'library'
-
-  # Tag commit
-  - template: shared/tag.yml@sharedTemplates
-    parameters:
-      name: 'tag'
