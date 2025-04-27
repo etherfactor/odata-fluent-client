@@ -16,15 +16,27 @@ stages:
   displayName: 'Prep'
 
   jobs:
+
   - template: shared/gitversion.yml@sharedTemplates
+    parameters:
+      name: 'prep'
 
 - stage: test
   displayName: 'Test'
 
   jobs:
+
   - template: node/test/unit-test.yml@sharedTemplates
     parameters:
+      name: 'test_node'
       vmImage: 'ubuntu-22.04'
       nodeVersion: '22.x.x'
       testCommand: 'test'
       artifactName: 'test-node-unit'
+
+  - template: shared/combine-coverage.yml@sharedTemplates
+    parameters:
+      artifacts:
+      - 'test-node-unit'
+      dependsOn:
+      - 'test_node'
