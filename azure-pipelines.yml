@@ -36,6 +36,7 @@ stages:
 
   - template: shared/combine-coverage.yml@sharedTemplates
     parameters:
+      name: 'coverage'
       artifacts:
       - 'test-node-unit'
       dependsOn:
