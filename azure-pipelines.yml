@@ -3,8 +3,6 @@ trigger:
 - release/*
 - develop
 
-variables:
-
 resources:
   repositories:
   - repository: sharedTemplates
