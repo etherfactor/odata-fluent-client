@@ -8,7 +8,7 @@ resources:
   - repository: sharedTemplates
     type: git
     name: 'Projects/PipelineTemplates'
-    ref: 'refs/heads/feature/initial'
+    ref: 'refs/tags/1.0.0'
 
 stages:
 
@@ -17,6 +17,7 @@ stages:
 
   jobs:
 
+  # Execute gitversion
   - template: shared/gitversion.yml@sharedTemplates
     parameters:
       name: 'prep'
@@ -26,6 +27,7 @@ stages:
 
   jobs:
 
+  # Perform node unit tests
   - template: node/test/unit-test.yml@sharedTemplates
     parameters:
       name: 'test_node'
@@ -34,6 +36,7 @@ stages:
       testCommand: 'test'
       artifactName: 'test-node-unit'
 
+  # Combine code coverage
   - template: shared/combine-coverage.yml@sharedTemplates
     parameters:
       name: 'coverage'
@@ -47,6 +50,7 @@ stages:
 
   jobs:
 
+  # Publish node library
   - template: node/publish/library.yml@sharedTemplates
     parameters:
       name: 'publish_node'
@@ -56,3 +60,8 @@ stages:
       distFolder: 'dist'
       projectName: '@ethergizmos/odata-fluent-client'
       artifactName: 'library'
+
+  # Tag commit
+  - template: shared/tag.yml@sharedTemplates
+    parameters:
+      name: 'tag'
