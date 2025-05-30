@@ -2,6 +2,7 @@ import { HttpMethod, extendUrl } from "../../../utils/http";
 import { SafeAny } from "../../../utils/types";
 import { Value } from "../../../values/base";
 import { ODataClientOptions, ODataPathRoutingType } from "../../client/odata-client";
+import { DefaultHttpClientAdapter } from "../../http/http-client-adapter";
 import { EntitySelectExpand } from "../expand/entity-select-expand";
 import { EntitySet, EntitySetImpl } from "../set/entity-set";
 import { EntitySetWorker } from "../set/entity-set-worker";
@@ -10,7 +11,7 @@ import { EntitySingle, EntitySingleImpl } from "../single/entity-single";
 import { EntitySingleWorker } from "../single/entity-single-worker";
 import { EntitySingleWorkerImpl } from "../single/entity-single-worker.impl";
 import { EntityKey, EntityPropertyType } from "./builder/entity-set-client-builder";
-import { EntitySetClientFull } from "./entity-set-client";
+import { EntityDeleteAction, EntitySetClientFull } from "./entity-set-client";
 
 export interface EntitySetClientImplOptions {
   rootOptions: ODataClientOptions;
@@ -105,12 +106,36 @@ export class EntitySetClientImpl<TEntity, TKey extends EntityKey<TEntity>> imple
     return new EntitySingleImpl(worker);
   }
 
-  async delete(key: EntityPropertyType<TEntity, TKey>): Promise<void> {
-    if (!this.options.update)
+  delete(key: EntityPropertyType<TEntity, TKey>): EntityDeleteAction {
+    if (!this.options.delete)
       throw new Error("This resource does not support deleting entities");
 
     const url = extendEntityUrl(this.entitySetUrl, this.options.rootOptions.routingType, this.options.key, key, this.options.keyType);
-    //TODO Add this
+    const method = this.options.delete;
+    return {
+      execute: () => {
+        const adapter = this.options.rootOptions.http.adapter ?? DefaultHttpClientAdapter;
+        const result = adapter.invoke({
+          method: method,
+          url: url,
+          headers: this.options.rootOptions.http.headers ?? {},
+          query: {},
+          body: undefined,
+        });
+
+        const response = (async () => {
+          await (await result).data;
+        })();
+
+        return {
+          response: response,
+          result: response.then(
+            () => true,
+            () => false,
+          ),
+        };
+      }
+    };
   }
 }
 

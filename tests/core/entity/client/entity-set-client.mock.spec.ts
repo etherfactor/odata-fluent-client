@@ -121,14 +121,22 @@ describe("EntitySetClientMock", () => {
   });
 
   describe("Method: delete", () => {
-    // it("should resolve without error when update option is provided", async () => {
-    //   await expect(client.delete(1)).resolves.toBeUndefined();
-    // });
+    it("should resolve without error when delete option is provided", async () => {
+      let newEntity = { id: 0, name: "Test" };
+      newEntity = await client.create(newEntity).execute().data;
 
-    it("should throw error when update option is not provided", async () => {
-      delete options.update;
+      const actionInstance = client.delete(newEntity.id);
+      expect(actionInstance).toHaveProperty("execute");
+
+      await actionInstance.execute().result;
+      const deletedEntity = entitySet[newEntity.id];
+      expect(deletedEntity).toBeFalsy();
+    });
+
+    it("should throw error when delete option is not provided", async () => {
+      delete options.delete;
       client = new EntitySetClientMock(options);
-      await expect(client.delete(1)).rejects.toThrow(
+      expect(() => client.delete(1)).toThrow(
         "This resource does not support deleting entities"
       );
     });
