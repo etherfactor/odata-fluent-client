@@ -1,5 +1,5 @@
 import { PrefixGenerator } from "../../../utils/prefix-generator";
-import { AnyArray, InferArrayType } from "../../../utils/types";
+import { AnyArray, SingleType } from "../../../utils/types";
 import { Value } from "../../../values/base";
 import { AllCollectionValue, AnyCollectionValue } from "../../../values/collection";
 import { EntityPropertyValue } from "../../../values/property";
@@ -18,13 +18,13 @@ export interface EntityAccessor<TEntity> {
    * @param property The name of the collection property.
    * @param builder The condition builder.
    */
-  all<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<InferArrayType<TEntity[TKey]>>) => Value<boolean>): Value<boolean>;
+  all<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<SingleType<TEntity[TKey]>>) => Value<boolean>): Value<boolean>;
   /**
    * Tests if any item in a collection on the entity matches a condition.
    * @param property The name of the collection property.
    * @param builder The condition builder.
    */
-  any<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<InferArrayType<TEntity[TKey]>>) => Value<boolean>): Value<boolean>;
+  any<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<SingleType<TEntity[TKey]>>) => Value<boolean>): Value<boolean>;
 }
 
 /**
@@ -46,19 +46,19 @@ export class EntityAccessorImpl<TEntity> {
     return new EntityPropertyValue<TEntity, TKey>(this.path, property);
   }
 
-  all<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<InferArrayType<TEntity[TKey]>>) => Value<boolean>): Value < boolean > {
+  all<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<SingleType<TEntity[TKey]>>) => Value<boolean>): Value < boolean > {
     const generator = this.generator;
     const path = generator.getPath();
-    const accessor = new EntityAccessorImpl<InferArrayType<TEntity[TKey]>>(generator, path);
+    const accessor = new EntityAccessorImpl<SingleType<TEntity[TKey]>>(generator, path);
 
     const value = builder(accessor);
     return new AllCollectionValue(property, path, value);
   }
 
-  any<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<InferArrayType<TEntity[TKey]>>) => Value<boolean>): Value<boolean> {
+  any<TKey extends keyof TEntity & string>(property: TKey extends keyof TEntity ? (TEntity[TKey] extends AnyArray ? TKey : never) : never, builder: (entity: EntityAccessor<SingleType<TEntity[TKey]>>) => Value<boolean>): Value<boolean> {
     const generator = this.generator;
     const path = generator.getPath();
-    const accessor = new EntityAccessorImpl<InferArrayType<TEntity[TKey]>>(generator, path);
+    const accessor = new EntityAccessorImpl<SingleType<TEntity[TKey]>>(generator, path);
 
     const value = builder(accessor);
     return new AnyCollectionValue(property, path, value);

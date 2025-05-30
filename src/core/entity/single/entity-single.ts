@@ -1,4 +1,4 @@
-import { InferArrayType, SafeAny } from "../../../utils/types";
+import { SafeAny, SingleType } from "../../../utils/types";
 import { Expand } from "../../parameters/expand";
 import { ODataOptions } from "../../parameters/odata-options";
 import { Select } from "../../parameters/select";
@@ -22,7 +22,7 @@ export interface EntitySingle<TEntity> {
    */
   expand<TExpanded extends keyof TEntity & string, TNewExpanded>(
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
-    builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntitySingle<TEntity>;
+    builder?: (expand: EntityExpand<SingleType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntitySingle<TEntity>;
   /**
    * Selects a subset of properties to be returned on the entity or entities.
    * @param properties The properties to be returned.
@@ -60,8 +60,8 @@ export class EntitySingleImpl<TEntity> implements EntitySingle<TEntity> {
     return new EntitySingleImpl(this.worker as unknown as EntitySingleWorkerImpl<TNewEntity>, options);
   }
 
-  expand<TExpanded extends keyof TEntity & string, TNewExpanded>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntitySingle<TEntity> {
-    let expander: SafeAny = new EntityExpandImpl<InferArrayType<TEntity[TExpanded]>>(property);
+  expand<TExpanded extends keyof TEntity & string, TNewExpanded>(property: TExpanded, builder?: (expand: EntityExpand<SingleType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntitySingle<TEntity> {
+    let expander: SafeAny = new EntityExpandImpl<SingleType<TEntity[TExpanded]>>(property);
     if (builder) {
       expander = builder(expander);
     }
