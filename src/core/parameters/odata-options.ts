@@ -79,7 +79,7 @@ export function getParams(options: ODataOptions): QueryParams {
     params["$skip"] = skipToString(options.skip);
   }
 
-  if (options.top) {
+  if (options.top !== undefined) {
     params["$top"] = topToString(options.top);
   }
 
