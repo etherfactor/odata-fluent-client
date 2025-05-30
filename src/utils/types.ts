@@ -6,7 +6,7 @@ export type AnyArray = Array<SafeAny>;
 /**
  * Extracts the type from an array, otherwise returns the initial type.
  */
-export type InferArrayType<TValue> = TValue extends (infer UValue)[] ? UValue : never;
+export type SingleType<TValue> = TValue extends (infer UValue)[] ? UValue : TValue;
 
 /**
  * Returns the initial type, only if it is an object or array.

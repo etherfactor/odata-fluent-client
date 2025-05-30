@@ -369,6 +369,13 @@ describe('EntitySetImpl', () => {
     expect(params['$top']).toBe("20");
   });
 
+  it('should top with 0', () => {
+    const topped = set.top(0);
+
+    const params = getParams(topped.getOptions());
+    expect(params['$top']).toBe("0");
+  });
+
   it('should process multiple options simultaneously', () => {
     const result = set
       .filter(e =>

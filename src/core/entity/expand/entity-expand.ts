@@ -1,5 +1,5 @@
 import { PrefixGenerator } from "../../../utils/prefix-generator";
-import { InferArrayType, SafeAny } from "../../../utils/types";
+import { SafeAny, SingleType } from "../../../utils/types";
 import { Value } from "../../../values/base";
 import { Count } from "../../parameters/count";
 import { Expand, expandToString } from "../../parameters/expand";
@@ -26,7 +26,7 @@ export interface EntityExpand<TEntity> {
    */
   expand<TExpanded extends keyof TEntity & string, TNewExpanded>(
     property: TExpanded /*& (TEntity[TExpanded] extends Array<any> | object ? TExpanded : never)*/,
-    builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntityExpand<TEntity>;
+    builder?: (expand: EntityExpand<SingleType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntityExpand<TEntity>;
   /**
    * Filters the returned entities to the ones matching the provided condition.
    * @param builder The filter builder.
@@ -110,8 +110,8 @@ export class EntityExpandImpl<TEntity> implements EntityExpand<TEntity>, Ordered
     return new EntityExpandImpl<TEntity>(this.property, options);
   }
 
-  expand<TExpanded extends keyof TEntity & string, TNewExpanded>(property: TExpanded, builder?: (expand: EntityExpand<InferArrayType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntityExpand<TEntity> {
-    let expander: SafeAny = new EntityExpandImpl<InferArrayType<TEntity[TExpanded]>>(property);
+  expand<TExpanded extends keyof TEntity & string, TNewExpanded>(property: TExpanded, builder?: (expand: EntityExpand<SingleType<TEntity[TExpanded]>>) => EntityExpand<TNewExpanded>): EntityExpand<TEntity> {
+    let expander: SafeAny = new EntityExpandImpl<SingleType<TEntity[TExpanded]>>(property);
     if (builder) {
       expander = builder(expander);
     }

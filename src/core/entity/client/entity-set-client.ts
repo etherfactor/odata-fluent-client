@@ -1,4 +1,5 @@
 import { HttpMethod } from "../../../utils/http";
+import { EntityDeleteResponse } from "../../response/entity-response";
 import { EntitySet } from "../set/entity-set";
 import { EntitySingle } from "../single/entity-single";
 import { EntityKey, EntityPropertyType } from "./builder/entity-set-client-builder";
@@ -39,7 +40,7 @@ export interface EntitySetClientFull<
    * Deletes an existing entity.
    * @param key The id of the entity.
    */
-  delete(key: EntityPropertyType<TEntity, TKey>): Promise<void>;
+  delete(key: EntityPropertyType<TEntity, TKey>): EntityDeleteAction;
 }
 
 /**
@@ -60,3 +61,10 @@ export type EntitySetClient<
   (TUpdate extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "update"> : {}) &
   (TDelete extends string ? Pick<EntitySetClientFull<TEntity, TKey>, "delete"> : {}) &
   Pick<EntitySetClientFull<TEntity, TKey>, "name" | "buildUrl">;
+
+export interface EntityDeleteAction {
+  /**
+   * Executes the entity delete action.
+   */
+  execute(): EntityDeleteResponse;
+}
