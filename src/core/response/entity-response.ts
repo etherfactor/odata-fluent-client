@@ -27,6 +27,16 @@ export interface EntitySetResponse<TEntity> extends BasicResponse {
 }
 
 /**
+ * A response for delete actions.
+ */
+export interface EntityDeleteResponse extends BasicResponse {
+  /**
+   * Allows awaiting the response to capture any exceptions. Otherwise, it may be worth using {@link result}.
+   */
+  response: Promise<void>;
+}
+
+/**
  * A response for navigation actions.
  */
 export interface EntityNavigationResponse extends BasicResponse {

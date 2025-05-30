@@ -1,4 +1,4 @@
-import { createOperatorFactory, ODataPathRoutingType } from "../../../../src";
+import { createOperatorFactory, HttpResponseData, ODataPathRoutingType } from "../../../../src";
 import { EntitySetClientImpl, EntitySetClientImplOptions, extendEntityUrl } from "../../../../src/core/entity/client/entity-set-client.impl";
 import { EntitySetImpl } from "../../../../src/core/entity/set/entity-set";
 import { EntitySingleImpl } from "../../../../src/core/entity/single/entity-single";
@@ -136,18 +136,29 @@ describe("EntitySetClientImpl", () => {
   });
 
   describe("Method: delete", () => {
-    // it("should throw error when update option is not provided", async () => {
-    //   delete options.update;
-    //   client = new EntitySetClientImpl(options);
-    //   await expect(client.delete(123)).rejects.toThrow(
-    //     "This resource does not support deleting entities"
-    //   );
-    // });
+    it("should throw error when delete option is not provided", async () => {
+      delete options.delete;
+      client = new EntitySetClientImpl(options);
+      expect(() => client.delete(123)).toThrow(
+        "This resource does not support deleting entities"
+      );
+    });
 
-    // it("resolves (does not throw) when update option is provided", async () => {
-    //   // Even though delete is not yet implemented, if update is provided, it should not throw.
-    //   await expect(client.delete(123)).resolves.toBeUndefined();
-    // });
+    it("should resolve without error when delete option is provided", async () => {
+      options.rootOptions.http.adapter = {
+        invoke() {
+          const data: HttpResponseData = {
+            data: Promise.resolve(""),
+            status: 204,
+          };
+          return Promise.resolve(data);
+        }
+      };
+      const actionInstance = client.delete(123);
+      expect(actionInstance).toHaveProperty("execute");
+      const result = await actionInstance.execute().result;
+      expect(result).toBeTruthy();
+    });
   });
 
   describe("extendEntityUrl", () => {

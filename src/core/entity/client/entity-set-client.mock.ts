@@ -9,7 +9,7 @@ import { EntitySingle, EntitySingleImpl } from "../single/entity-single";
 import { EntitySingleWorker } from "../single/entity-single-worker";
 import { EntitySingleWorkerMock } from "../single/entity-single-worker.mock";
 import { EntityKey, EntityPropertyType } from "./builder/entity-set-client-builder";
-import { EntitySetClientFull } from "./entity-set-client";
+import { EntityDeleteAction, EntitySetClientFull } from "./entity-set-client";
 
 export interface EntitySetClientMockOptions {
   rootOptions: MockODataClientOptions;
@@ -114,10 +114,28 @@ export class EntitySetClientMock<TEntity, TKey extends EntityKey<TEntity>> imple
     return new EntitySingleImpl(worker);
   }
 
-  async delete(key: EntityPropertyType<TEntity, TKey>): Promise<void> {
-    if (!this.options.update)
+  delete(key: EntityPropertyType<TEntity, TKey>): EntityDeleteAction {
+    if (!this.options.delete)
       throw new Error("This resource does not support deleting entities");
 
-    //TODO Add this
+    const setOptions = this.options.rootOptions.entitySets[this.options.entitySet];
+    const setData = setOptions.data();
+
+    const id = toIdString(key);
+    return {
+      execute: () => {
+        const response = (async () => {
+          delete setData[id];
+        })();
+
+        return {
+          response: response,
+          result: response.then(
+            () => true,
+            () => false,
+          ),
+        };
+      }
+    };
   }
 }
