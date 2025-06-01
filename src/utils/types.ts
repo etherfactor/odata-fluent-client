@@ -4,9 +4,9 @@
 export type AnyArray = Array<SafeAny>;
 
 /**
- * Extracts the type from an array, otherwise returns the initial type.
+ * Extracts the type from an array, otherwise returns the initial type. Also strips out null and undefined in the case of union types.
  */
-export type SingleType<TValue> = TValue extends (infer UValue)[] ? UValue : TValue;
+export type SingleType<TValue> = Exclude<TValue extends (infer UValue)[] ? UValue : TValue, null | undefined>;
 
 /**
  * Returns the initial type, only if it is an object or array.
