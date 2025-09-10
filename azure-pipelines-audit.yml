@@ -1,0 +1,32 @@
+trigger:
+- main
+- release/*
+- develop
+
+variables:
+  - group: dependency-track
+
+resources:
+  repositories:
+  - repository: sharedTemplates
+    type: git
+    name: 'Projects/PipelineTemplates'
+    ref: 'refs/heads/feature/vuln-test'
+
+stages:
+
+- stage: audit
+  displayName: 'Audit'
+  
+  jobs:
+  
+  # Audit vulnerabilities and publish them
+  - template: node/security/vulnerability.yml@sharedTemplates
+    parameters:
+      name: 'audit'
+      vmImage: 'ubuntu-22.04'
+      nodeVersion: '22.x.x'
+      pathToProject: '$(Build.SourcesDirectory)'
+      dtrackApiUrl: '$(DependencyTrack.ApiUrl)'
+      dtrackApiKey: '$(DependencyTrack.ApiKey)'
+      dtrackProjectId: '25b54050-7a58-49fa-af56-4d0e43583e57'
