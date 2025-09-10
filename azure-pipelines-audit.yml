@@ -1,7 +1,4 @@
-trigger:
-- main
-- release/*
-- develop
+trigger: none
 
 variables:
   - group: dependency-track
