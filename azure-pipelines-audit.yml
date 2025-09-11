@@ -26,4 +26,4 @@ stages:
       pathToProject: '$(Build.SourcesDirectory)'
       dtrackApiUrl: '$(DependencyTrack.ApiUrl)'
       dtrackApiKey: '$(DependencyTrack.ApiKey)'
-      dtrackProjectId: 'f2bb8206-e831-46f3-a9f9-c138c62a61a8'
+      dtrackProjectId: '7a8e1a44-ddc7-46e6-a1e6-035da2cfdbaf'
